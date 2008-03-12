@@ -1,0 +1,11 @@
+====== Pagemove ======
+
+Pomocí tohoto pluginu lze přesunout nebo přejmenovat aktuální stránku. Platí však jistá omezení:
+
+  * Nelze přesouvat titulní stránku.
+  * Musíte mít práva na danou stránku a na všechny, které se na ní odkazují.
+  * Tato stránka a na ni odkazující stránky nesmí být zamčené.
+  * Pro přesun stránky potřebujete práva pro zápis v cílovém místě.
+  * Nelze přesunout stránku někam, kde již existuje stránka stejného jména.
+	
+Všechny odkazy na a ze stránky budou upraveny podle nového umístění stránky.

@@ -1,0 +1,4 @@
+======Előző változatok======
+
+Ezek az előző változatai az aktuális dokmentumnak. Egy előző
+változathoz való visszatéréshez nyomd meg az ''Oldal szerkesztése'' gombot, majd mentsd el.

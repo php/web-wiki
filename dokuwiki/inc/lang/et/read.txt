@@ -1,0 +1,3 @@
+Seda lehte saad ainult lugeda. Saad küll vaadata lehe põhja aga muuta midagi ei saa. Suhtle oma 
+serveri administraatoriga kui Sa millegagi rahul pole.
+

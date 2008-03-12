@@ -1,0 +1,14 @@
+====== Lapas pārvietošana ======
+
+Šis modulis ļauj pārvietot un/vai pārdēvēt tekošo lapu. \\
+Ar nosacījumiem:
+
+  * Nevar pārvietot ievadlapu.
+  * Tev vajag tiesības labot šo lapu un visas lapas, kas uz to norāda.
+  * Šī lapa un lapas, kas uz to norāda, nav bloķētas labošanai.
+  * Lai pārvietotu, tev vajag attiecīgās tiesības mērķa direktorijā.
+  * Nevar pārvietot lapu uz nodaļu, kurā jau ir šāda nosaukuma lapa.
+
+Visas saites uz šo lapu un no tās tiks automātiski nomainītas atbilstoši jaunajam lapas nosaukumam un/vai vietai.
+\\
+\\

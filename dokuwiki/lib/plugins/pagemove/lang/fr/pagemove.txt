@@ -1,0 +1,13 @@
+====== Pagemove ======
+
+Ce plugin permet de déplacer et/ou renommer le document courant, avec les limitations suivantes :
+  * Il est impossible de déplacer la page d'accueil (start)
+  * Il faut avoir les droits d'édition sur le document et sur chaque document qui pointe dessus (backlinks)
+  * Le document et les liens pointant dessus ne peuvent être verrouillés pour l'édition
+  * Pour déplacer une page il faut également disposer du droit de création dans le répertoire de destination
+  * Il est impossible de déplacer le document vers un espace de nommage où un document du même nom existe déjà.
+
+Tous les liens depuis et vers la page seront mis à jour pour refléter le nouvel emplacement et/ou le nouveau nom.
+
+\\
+\\

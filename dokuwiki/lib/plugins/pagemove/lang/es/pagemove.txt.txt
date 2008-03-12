@@ -1,0 +1,13 @@
+====== Pagemove ======
+
+Esta extensión le permite mover y/o renombrar el documento actual respetando las siguientes restricciones.
+
+  * No puede mover la página de Inicio.
+  * Debe tener permisos de edición sobre el documento actual y sobre todos los documentos que enlazan con éste.
+  * El documento actual y los que hacen referencia a éste no pueden ser bloqueados para la edición.
+  * Para mover un documento también necesita permiso de creación sobre el directorio de destino.
+  * No puede mover el documento a un Espacio de Nombres donde ya existe un documento con el mismo nombre.
+
+Todos los enlaces desde y hacia esta página serán actualizados para reflejar la nueva ubicación y/o nombre.
+\\
+\\

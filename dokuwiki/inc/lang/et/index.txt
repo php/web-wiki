@@ -1,0 +1,4 @@
+====== Sisukord ======
+
+See siin on nimekiri kõigist saadaval olevatest lehtedest järjestatud
+[[doku>wiki:namespaces|alajaotuste]] järgi.

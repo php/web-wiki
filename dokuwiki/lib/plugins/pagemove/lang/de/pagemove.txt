@@ -1,0 +1,14 @@
+====== Seite verschieben/umbenennen ======
+
+Mit diesem Plugin kann die aktuelle Seite umbenannt und in andere Namensräme verschoben werden.
+
+Folgende Einschränkungen/Bedingungen gelten:
+
+  * Die Startseite kann nicht verschoben werden.
+  * Man benötigt die Bearbeiten-Rechte für die Seite und für alle Seiten die darauf verweisen (Rückverweise).
+  * Die Seite und deren Rückverweise dürfen nicht gesperrt sein, d.h. sich im Bearbeitungsmodus befinden.
+  * Um eine Seite zu verschieben, benötigt man das Erstellen-Recht im Ziel-Namensraum.
+  * Eine Seite kann nicht in einen Namensraum verschoben werden, in der bereits eine Seite gleichen Namens existiert.
+
+Alle Verknüpfungen von und zu der Seite werden aktualisiert, um dem neuen Namen bzw. dem neuen Namensraum zu entsprechen.
+

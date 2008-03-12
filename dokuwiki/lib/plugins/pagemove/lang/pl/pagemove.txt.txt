@@ -1,0 +1,13 @@
+====== Pagemove ======
+
+Ta wtyczka umożliwia przeniesienie lub zmianę nazwy dokumentu z poniższymi zastrzeżeniami:
+
+  * Nie można przenieść strony start.
+  * Musisz mieć uprawnienia do tego dokumentu i tych które na niego wskazują (linki wsteczne).
+  * Dokument i jego wsteczne linki nie mogą być w trakcie edycji (założona blokada).
+  * Do utworzenia pliku niezbędne jest uprawnienie w docelowym katalogu.
+  * Nie można przesunąć dokumentu do katalogu, w którym już jest dokument o tej samej nazwie.
+
+We wszystkich linkach z i do zmienianej strony będzie użyta nowa lokalizacja.
+\\
+\\

@@ -19,6 +19,17 @@ class auth_phpcvs extends auth_plain {
      */
     function auth_phpcvs() {
       parent::auth_plain();
+      $this->cando['external']    = true;
+    }
+
+  function trustExternal($user,$pass,$sticky=false){
+      $silent = false;
+      if ($user === '' && isset($_COOKIE['MAGIC_COOKIE'])) {
+        list ($user, $pass) = explode(':', base64_decode($_COOKIE['MAGIC_COOKIE']), 2);
+        $sticky = false;
+        $silent = true;
+      }
+      return auth_login($user,$pass,$sticky,$silent);
     }
 
     /**

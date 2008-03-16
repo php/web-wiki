@@ -1,10 +1,15 @@
-You will need either a custom authentification module or a working "users.auth.php" 
+You will need either a custom authentification module or a working "users.auth.php"
 in "dw/conf/users.auth.php". A normal dokuwiki install will generate one using the
 credentials you used during the install.
 
-To use the CVS authtentification module, an environment variable is required, its 
-name is "dokuwikitoken". See the sample lighttpd.conf for an example (or use 
-SetEnv in Apache).
+To use the CVS authtentification module, an environment variable is required, its
+name is "dokuwikitoken". See the sample lighttpd.conf for an example (or use
+SetEnv in Apache). Ask Hannes (bjori@php.net) for the current valid plain text
+token.
+
+Apache users might prefer setting up the mod_rewrite via a .htaccess file. See
+the dokuwiki documentation for a sample .htaccess file:
+http://wiki.splitbrain.org/wiki:rewrite
 
 There is no data in cvs. The data is only available on the server and backup many
 times daily. If you need sample data using the production documents, please contact

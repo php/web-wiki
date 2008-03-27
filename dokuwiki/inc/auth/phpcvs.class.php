@@ -44,7 +44,11 @@ class auth_phpcvs extends auth_plain {
       $this->users[$user]['pass'] = null;
       $this->users[$user]['name'] = $user;
       $this->users[$user]['mail'] = $user.'@php.net';
-      $this->users[$user]['grps'] = array('phpcvs');
+      $grps = array('phpcvs');
+      if (in_array($user, array('lsmith', 'pajoye', 'philip'))) {
+        $grps[] = 'admin';
+      }
+      $this->users[$user]['grps'] = $grps;
     }
 
     /**

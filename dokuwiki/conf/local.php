@@ -17,6 +17,7 @@ $conf['useslash'] = 1;
 $conf['mailfrom'] = 'php-webmaster@php.net';
 $conf['send404'] = 1;
 $conf['plugin']['hcalendar']['locale'] = 'en_US';
+$conf['updatecheck'] = 0;
 
 @include(DOKU_CONF.'local.protected.php');
 

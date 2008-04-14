@@ -75,7 +75,8 @@ if (!defined('DOKU_INC')) die();
 
     <div class="header">
       <div class="pagename">
-        [[<?php tpl_link(wl($ID,'do=backlink'),tpl_pagetitle($ID,true))?>]]
+        [[<a href="/">start</a><?php if(tpl_pagetitle($ID,true) !== 'start') { echo ':';
+tpl_link(wl($ID,'do=backlink'), tpl_pagetitle($ID,true)); } ?>]]
       </div>
       <div class="logo">
         <?php tpl_link(wl(),$conf['title'],'name="dokuwiki__top" id="dokuwiki__top" accesskey="h" title="[ALT+H]"')?>

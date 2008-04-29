@@ -75,9 +75,16 @@ if (!defined('DOKU_INC')) die();
 
     <div class="header">
       <div class="pagename">
-        [[<a href="/">start</a><?php if(tpl_pagetitle($ID,true) !== 'start') { echo ':';
-tpl_link(wl($ID,'do=backlink'), tpl_pagetitle($ID,true)); } ?>]]
-      </div>
+        [[<a href="/">start</a><?php
+if (tpl_pagetitle($ID,true) !== 'start') {
+  $_link = '';
+  $_parts = explode(':', tpl_pagetitle($ID,true));  while ($_part = array_shift($_parts)) {
+    $_link .= '/'.$_part;
+    echo ':<a href="'.$_link.'">'.$_part.'</a>';
+  }
+}
+    ?>]]
+    </div>
       <div class="logo">
         <?php tpl_link(wl(),$conf['title'],'name="dokuwiki__top" id="dokuwiki__top" accesskey="h" title="[ALT+H]"')?>
       </div>

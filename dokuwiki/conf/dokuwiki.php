@@ -24,8 +24,8 @@ $conf['allowdebug']  = 0;                 //allow debug output, enable if needed
 /* Display Options */
 
 $conf['start']       = 'start';           //name of start page
-$conf['title']       = 'DokuWiki';        //what to show in the title
-$conf['template']    = 'default';         //see tpl directory
+$conf['title']       = 'PHP Wiki';        //what to show in the title
+$conf['template']    = 'phpwiki';         //see tpl directory
 $conf['fullpath']    = 0;                 //show full path of the document or relative to datadir only? 0|1
 $conf['recent']      = 20;                //how many entries to show in recent
 $conf['breadcrumbs'] = 10;                //how many recent visited pages to show

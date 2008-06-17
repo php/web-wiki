@@ -13,7 +13,7 @@
 /**
 * Init path constant
 */
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../../').'/');
 
 /**#@+
  * lexer mode constant
@@ -113,6 +113,24 @@ class Doku_LexerParallelRegex {
         }
 
         if (! preg_match($this->_getCompoundedRegex(), $subject, $matches)) {
+            if(function_exists('preg_last_error')){
+                $err = preg_last_error();
+                switch($err){
+                    case PREG_BACKTRACK_LIMIT_ERROR:
+                        msg('A PCRE backtrack error occured. Try to increase the pcre.backtrack_limit in php.ini',-1);
+                        break;
+                    case PREG_RECURSION_LIMIT_ERROR:
+                        msg('A PCRE recursion error occured. Try to increase the pcre.recursion_limit in php.ini',-1);
+                        break;
+                    case PREG_BAD_UTF8_ERROR:
+                        msg('A PCRE UTF-8 error occured. This might be caused by a faulty plugin',-1);
+                        break;
+                    case PREG_INTERNAL_ERROR:
+                        msg('A PCRE internal error occured. This might be caused by a faulty plugin',-1);
+                        break;
+                }
+            }
+
             $split = array($subject, "", "");
             return false;
         }
@@ -138,60 +156,49 @@ class Doku_LexerParallelRegex {
             $cnt = count($this->_patterns);
             for ($i = 0; $i < $cnt; $i++) {
 
-                // Replace lookaheads / lookbehinds with marker
-                $m = "\1\1";
-                $pattern = preg_replace(
-                        array (
-                            '/\(\?(i|m|s|x|U)\)/U',
-                            '/\(\?(\-[i|m|s|x|U])\)/U',
-                            '/\(\?\=(.*)\)/sU',
-                            '/\(\?\!(.*)\)/sU',
-                            '/\(\?\<\=(.*)\)/sU',
-                            '/\(\?\<\!(.*)\)/sU',
-                            '/\(\?\:(.*)\)/sU',
-                        ),
-                        array (
-                            $m.'SO:\\1'.$m,
-                            $m.'SOR:\\1'.$m,
-                            $m.'LA:IS:\\1'.$m,
-                            $m.'LA:NOT:\\1'.$m,
-                            $m.'LB:IS:\\1'.$m,
-                            $m.'LB:NOT:\\1'.$m,
-                            $m.'GRP:\\1'.$m,
-                        ),
-                        $this->_patterns[$i]
-                    );
-                // Quote the rest
-                $pattern = str_replace(
-                    array('/', '(', ')'),
-                    array('\/', '\(', '\)'),
-                    $pattern
-                    );
+                /*
+                 * decompose the input pattern into "(", "(?", ")", 
+                 * "[...]", "[]..]", "[^]..]", "[...[:...:]..]", "\x"... 
+                 * elements.
+                 */ 
+                preg_match_all('/\\\\.|' . 
+                               '\(\?|' .
+                               '[()]|' .
+                               '\[\^?\]?(?:\\\\.|\[:[^]]*:\]|[^]\\\\])*\]|' .
+                               '[^[()\\\\]+/', $this->_patterns[$i], $elts);
 
-                // Restore lookaheads / lookbehinds
-                $pattern = preg_replace(
-                        array (
-                            '/'.$m.'SO:(.{1})'.$m.'/',
-                            '/'.$m.'SOR:(.{2})'.$m.'/',
-                            '/'.$m.'LA:IS:(.*)'.$m.'/sU',
-                            '/'.$m.'LA:NOT:(.*)'.$m.'/sU',
-                            '/'.$m.'LB:IS:(.*)'.$m.'/sU',
-                            '/'.$m.'LB:NOT:(.*)'.$m.'/sU',
-                            '/'.$m.'GRP:(.*)'.$m.'/sU',
-                        ),
-                        array (
-                            '(?\\1)',
-                            '(?\\1)',
-                            '(?=\\1)',
-                            '(?!\\1)',
-                            '(?<=\\1)',
-                            '(?<!\\1)',
-                            '(?:\\1)',
-                        ),
-                        $pattern
-                );
+                $pattern = "";
+                $level = 0;
 
-                $this->_patterns[$i] = '('.$pattern.')';
+                foreach ($elts[0] as $elt) {
+                    /*
+                     * for "(", ")" remember the nesting level, add "\" 
+                     * only to the non-"(?" ones.
+                     */
+
+                    switch($elt) {
+                    case '(':
+                        $pattern .= '\(';
+                        break;
+                    case ')':
+                        if ($level > 0)
+                            $level--; /* closing (? */
+                        else
+                            $pattern .= '\\';
+                        $pattern .= ')';
+                        break;
+                    case '(?':
+                        $level++;
+                        $pattern .= '(?';
+                        break;
+                    default:
+                        if (substr($elt, 0, 1) == '\\')
+                            $pattern .= $elt;
+                        else
+                            $pattern .= str_replace('/', '\/', $elt);
+                    }
+                }
+                $this->_patterns[$i] = "($pattern)";
             }
             $this->_regex = "/" . implode("|", $this->_patterns) . "/" . $this->_getPerlMatchingFlags();
         }
@@ -591,4 +598,4 @@ function Doku_Lexer_Escape($str) {
     return preg_replace($chars, $escaped, $str);
 }
 
-//Setup VIM: ex: et ts=4 enc=utf-8 :
+//Setup VIM: ex: et ts=4 sw=4 enc=utf-8 :

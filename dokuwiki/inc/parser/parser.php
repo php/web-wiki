@@ -1,6 +1,6 @@
 <?php
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../../').'/');
 
 require_once DOKU_INC . 'inc/parser/lexer.php';
 require_once DOKU_INC . 'inc/parser/handler.php';
@@ -34,7 +34,7 @@ $PARSER_MODES = array(
 
     // modes which have a start and end token but inside which
     // no other modes should be applied
-    'protected'    => array('preformatted','code','file','php','html'),
+    'protected'    => array('preformatted','code','file','php','html','htmlblock','phpblock'),
 
     // inside this mode no wiki markup should be applied but lineendings
     // and whitespace isn't preserved
@@ -156,7 +156,7 @@ class Doku_Parser_Mode {
     function postConnect() {}
 
     function accepts($mode) {
-        return in_array($mode, $this->allowedModes );
+        return in_array($mode, (array) $this->allowedModes );
     }
 
 }
@@ -489,10 +489,12 @@ class Doku_Parser_Mode_php extends Doku_Parser_Mode {
 
     function connectTo($mode) {
         $this->Lexer->addEntryPattern('<php>(?=.*</php>)',$mode,'php');
+        $this->Lexer->addEntryPattern('<PHP>(?=.*</PHP>)',$mode,'phpblock');
     }
 
     function postConnect() {
         $this->Lexer->addExitPattern('</php>','php');
+        $this->Lexer->addExitPattern('</PHP>','phpblock');
     }
 
     function getSort() {
@@ -505,10 +507,12 @@ class Doku_Parser_Mode_html extends Doku_Parser_Mode {
 
     function connectTo($mode) {
         $this->Lexer->addEntryPattern('<html>(?=.*</html>)',$mode,'html');
+        $this->Lexer->addEntryPattern('<HTML>(?=.*</HTML>)',$mode,'htmlblock');
     }
 
     function postConnect() {
         $this->Lexer->addExitPattern('</html>','html');
+        $this->Lexer->addExitPattern('</HTML>','htmlblock');
     }
 
     function getSort() {

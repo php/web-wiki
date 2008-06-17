@@ -20,9 +20,12 @@
  *   'onoff'        - checkbox input, setting output  0|1
  *   'multichoice'  - select input (single choice), setting output with quotes, required _choices parameter
  *   'email'        - text input, input must conform to email address format, setting output in quotes
+ *   'richemail'    - text input, input must conform to email address format but accepts variables and
+ *                    emails with a real name prepended (when email address is given in <>)
  *   'password'     - password input, minimal input validation, setting output plain text in quotes
  *   'dirchoice'    - as multichoice, selection choices based on folders found at location specified in _dir
- *                    parameter (required)
+ *                    parameter (required). A pattern can be used to restrict the folders to only those which
+ *                    match the pattern.
  *   'multicheckbox'- a checkbox for each choice plus an "other" string input, config file setting is a comma
  *                    separated list of checked choices
  *   'fieldset'     - used to group configuration settings, but is not itself a setting. To make this clear in
@@ -35,12 +38,13 @@
  *   'authtype'    - as 'setting', input validated against a valid php file at expected location for auth files
  *   'im_convert'  - as 'setting', input must exist and be an im_convert module
  *   'disableactions' - as 'setting'
+ *   'compression' - no additional parameters. checks php installation supports possible compression alternatives
  *
  *  Any setting commented or missing will use 'setting' class - text input, minimal validation, quoted output
  *
  * Defined parameters:
  *   '_pattern'    - string, a preg pattern. input is tested against this pattern before being accepted
- *                   optional all classes, except onoff, multichoice & dirchoice which ignore it
+ *                   optional all classes, except onoff & multichoice which ignore it
  *   '_choices'    - array of choices. used to populate a selection box. choice will be replaced by a localised
  *                   language string, indexed by  <setting name>_o_<choice>, if one exists
  *                   required by 'multichoice' & 'multicheckbox' classes, ignored by others
@@ -79,7 +83,7 @@ $meta['_basic']   = array('fieldset');
 $meta['title']    = array('string');
 $meta['start']    = array('string');
 $meta['lang']     = array('dirchoice','_dir' => DOKU_INC.'inc/lang/');
-$meta['template'] = array('dirchoice','_dir' => DOKU_INC.'lib/tpl/');
+$meta['template'] = array('dirchoice','_dir' => DOKU_INC.'lib/tpl/','_pattern' => '/^[\w-]+$/');
 $meta['savedir']  = array('savedir');
 $meta['basedir']  = array('string');
 $meta['baseurl']  = array('string');
@@ -115,8 +119,8 @@ $meta['manager']     = array('string');
 $meta['profileconfirm'] = array('onoff');
 $meta['registernotify'] = array('email');
 $meta['disableactions'] = array('disableactions',
-                                '_choices' => array('backlink','index','recent','revisions','search','subscription','register','resendpwd','profile','edit','wikicode','check'),
-                                '_combine' => array('subscription' => array('subscribe','unsubscribe'), 'wikicode' => array('source','export_raw')));
+                                '_choices' => array('backlink','index','recent','revisions','search','subscription','nssubscription','register','resendpwd','profile','edit','wikicode','check'),
+                                '_combine' => array('subscription' => array('subscribe','unsubscribe'), 'wikicode' => array('source','export_raw'), 'nssubscription' => array('subscribens','unsubscribens')));
 $meta['sneaky_index'] = array('onoff');
 $meta['auth_security_timeout'] = array('numeric');
 
@@ -129,7 +133,6 @@ $meta['iexssprotect']= array('onoff');
 
 $meta['_editing']    = array('fieldset');
 $meta['usedraft']    = array('onoff');
-$meta['spellchecker']= array('onoff');
 $meta['htmlok']      = array('onoff');
 $meta['phpok']       = array('onoff');
 $meta['notify']      = array('email');
@@ -157,19 +160,23 @@ $meta['useslash']    = array('onoff');
 $meta['sepchar']     = array('sepchar');
 $meta['canonical']   = array('onoff');
 $meta['autoplural']  = array('onoff');
-$meta['mailfrom']    = array('email');
+$meta['mailfrom']    = array('richemail');
 $meta['compress']    = array('onoff');
 $meta['gzip_output'] = array('onoff');
 $meta['hidepages']   = array('string');
 $meta['send404']     = array('onoff');
-$meta['compression'] = array('multichoice','_choices' => array('0','gz','bz2'));
+$meta['compression'] = array('compression');
 $meta['sitemap']     = array('numeric');
-$meta['rss_type']    = array('multichoice','_choices' => array('rss','rss1','rss2','atom'));
+$meta['rss_type']    = array('multichoice','_choices' => array('rss','rss1','rss2','atom','atom1'));
 $meta['rss_linkto']  = array('multichoice','_choices' => array('diff','page','rev','current'));
+$meta['rss_content'] = array('multichoice','_choices' => array('abstract','diff','htmldiff','html'));
 $meta['rss_update']  = array('numeric');
 $meta['recent_days'] = array('numeric');
 $meta['rss_show_summary'] = array('onoff');
 $meta['broken_iua']  = array('onoff');
+$meta['xsendfile']   = array('multichoice','_choices' => array(0,1,2,3));
+$meta['xmlrpc']      = array('onoff');
+$meta['renderer_xhtml'] = array('renderer','_format' => 'xhtml','_choices' => array('xhtml'));
 
 $meta['_network']    = array('fieldset');
 $meta['proxy____host'] = array('string','_pattern' => '#^(|[a-z0-9\-\.+]+)$#i');

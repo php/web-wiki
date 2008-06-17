@@ -31,7 +31,11 @@ function createToolButton(icon,label,key,id){
     }
 
     // create the icon and add it to the button
-    ico.src = DOKU_BASE+'lib/images/toolbar/'+icon;
+    if(icon.substr(0,1) == '/'){
+        ico.src = icon;
+    }else{
+        ico.src = DOKU_BASE+'lib/images/toolbar/'+icon;
+    }
     btn.appendChild(ico);
 
     return btn;
@@ -65,7 +69,11 @@ function createPicker(id,list,icobase,edid){
         // associative array?
         if(isNaN(key)){
             var ico = document.createElement('img');
-            ico.src       = DOKU_BASE+'lib/images/'+icobase+'/'+list[key];
+            if(list[key].substr(0,1) == '/'){
+                ico.src = list[key];
+            }else{
+                ico.src = DOKU_BASE+'lib/images/'+icobase+'/'+list[key];
+            }
             btn.title     = key;
             btn.appendChild(ico);
             eval("btn.onclick = function(){pickerInsert('"+id+"','"+
@@ -135,59 +143,119 @@ function initToolbar(tbid,edid,tb){
     var cnt = tb.length;
     for(var i=0; i<cnt; i++){
         // create new button
-        btn = createToolButton(tb[i]['icon'],
+        var btn = createToolButton(tb[i]['icon'],
                                tb[i]['title'],
                                tb[i]['key']);
 
-        // add button action dependend on type
-        switch(tb[i]['type']){
-            case 'format':
-                var sample = tb[i]['title'];
-                if(tb[i]['sample']){ sample = tb[i]['sample']; }
-
-                eval("btn.onclick = function(){insertTags('"+
-                                        jsEscape(edid)+"','"+
-                                        jsEscape(tb[i]['open'])+"','"+
-                                        jsEscape(tb[i]['close'])+"','"+
-                                        jsEscape(sample)+
-                                    "');return false;}");
+        var actionFunc = 'addBtnAction'+tb[i]['type'].charAt(0).toUpperCase()+tb[i]['type'].substring(1);
+        var exists = eval("typeof("+actionFunc+") == 'function'");
+        if(exists)
+        {
+            if(eval(actionFunc+"(btn, tb[i], edid, i)"))
                 toolbar.appendChild(btn);
-                break;
-            case 'insert':
-                eval("btn.onclick = function(){insertAtCarret('"+
-                                        jsEscape(edid)+"','"+
-                                        jsEscape(tb[i]['insert'])+
-                                    "');return false;}");
-                toolbar.appendChild(btn);
-                break;
-            case 'signature':
-                if(typeof(SIG) != 'undefined' && SIG != ''){
-                    eval("btn.onclick = function(){insertAtCarret('"+
-                                            jsEscape(edid)+"','"+
-                                            jsEscape(SIG)+
-                                        "');return false;}");
-                    toolbar.appendChild(btn);
-                }
-                break;
-            case 'picker':
-                createPicker('picker'+i,
-                             tb[i]['list'],
-                             tb[i]['icobase'],
-                             edid);
-                eval("btn.onclick = function(){showPicker('picker"+i+
-                                    "',this);return false;}");
-                toolbar.appendChild(btn);
-                break;
-            case 'mediapopup':
-                eval("btn.onclick = function(){window.open('"+
-                                        jsEscape(tb[i]['url']+NS)+"','"+
-                                        jsEscape(tb[i]['name'])+"','"+
-                                        jsEscape(tb[i]['options'])+
-                                    "');return false;}");
-                toolbar.appendChild(btn);
-                break;
-        } // end switch
+        }
     } // end for
+}
+
+/**
+ * Add button action for format buttons
+ *
+ * @param  DOMElement btn   Button element to add the action to
+ * @param  array      props Associative array of button properties
+ * @param  string     edid  ID of the editor textarea
+ * @return boolean    If button should be appended
+ * @author Gabriel Birke <birke@d-scribe.de>
+ */
+function addBtnActionFormat(btn, props, edid)
+{
+    var sample = props['title'];
+    if(props['sample']){ sample = props['sample']; }
+    eval("btn.onclick = function(){insertTags('"+
+        jsEscape(edid)+"','"+
+        jsEscape(props['open'])+"','"+
+        jsEscape(props['close'])+"','"+
+        jsEscape(sample)+
+    "');return false;}");
+
+    return true;
+}
+
+/**
+ * Add button action for insert buttons
+ *
+ * @param  DOMElement btn   Button element to add the action to
+ * @param  array      props Associative array of button properties
+ * @param  string     edid  ID of the editor textarea
+ * @return boolean    If button should be appended
+ * @author Gabriel Birke <birke@d-scribe.de>
+ */
+function addBtnActionInsert(btn, props, edid)
+{
+    eval("btn.onclick = function(){insertAtCarret('"+
+        jsEscape(edid)+"','"+
+        jsEscape(props['insert'])+
+    "');return false;}");
+    return true;
+}
+
+/**
+ * Add button action for signature button
+ *
+ * @param  DOMElement btn   Button element to add the action to
+ * @param  array      props Associative array of button properties
+ * @param  string     edid  ID of the editor textarea
+ * @return boolean    If button should be appended
+ * @author Gabriel Birke <birke@d-scribe.de>
+ */
+function addBtnActionSignature(btn, props, edid)
+{
+    if(typeof(SIG) != 'undefined' && SIG != ''){
+        eval("btn.onclick = function(){insertAtCarret('"+
+            jsEscape(edid)+"','"+
+            jsEscape(SIG)+
+        "');return false;}");
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Add button action for picker buttons and create picker element
+ *
+ * @param  DOMElement btn   Button element to add the action to
+ * @param  array      props Associative array of button properties
+ * @param  string     edid  ID of the editor textarea
+ * @param  int        id    Unique number of the picker
+ * @return boolean    If button should be appended
+ * @author Gabriel Birke <birke@d-scribe.de>
+ */
+function addBtnActionPicker(btn, props, edid, id)
+{
+    createPicker('picker'+id,
+         props['list'],
+         props['icobase'],
+         edid);
+    eval("btn.onclick = function(){showPicker('picker"+id+
+                                    "',this);return false;}");
+    return true;
+}
+
+/**
+ * Add button action for the mediapopup button
+ *
+ * @param  DOMElement btn   Button element to add the action to
+ * @param  array      props Associative array of button properties
+ * @return boolean    If button should be appended
+ * @author Gabriel Birke <birke@d-scribe.de>
+ */
+function addBtnActionMediapopup(btn, props)
+{
+    eval("btn.onclick = function(){window.open('"+
+        jsEscape(props['url']+encodeURIComponent(NS))+"','"+
+        jsEscape(props['name'])+"','"+
+        jsEscape(props['options'])+
+    "');return false;}");
+    return true;
 }
 
 /**
@@ -299,6 +367,7 @@ function insertAtCarret(edid,value){
     field.focus();
     sel = document.selection.createRange();
     sel.text = value;
+
   //MOZILLA/NETSCAPE support
   }else if (field.selectionStart || field.selectionStart == '0') {
     var startPos  = field.selectionStart;
@@ -409,6 +478,7 @@ function initChangeCheck(msg){
     var summary = document.getElementById('edit__summary');
     addEvent(summary, 'change', summaryCheck);
     addEvent(summary, 'keyup', summaryCheck);
+    if (textChanged) summaryCheck();
 
     // set focus
     edit_text.focus();

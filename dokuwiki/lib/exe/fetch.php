@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',dirname(__FILE__).'/../../');
   define('DOKU_DISABLE_GZIP_OUTPUT', 1);
   require_once(DOKU_INC.'inc/init.php');
   require_once(DOKU_INC.'inc/common.php');
@@ -104,15 +104,30 @@ function sendFile($file,$mime,$cache){
     header('Cache-Control: must-revalidate, no-transform, post-check=0, pre-check=0');
     header('Pragma: public');
   }
-  header('Accept-Ranges: bytes');
   //send important headers first, script stops here if '304 Not Modified' response
   http_conditionalRequest($fmtime);
-  list($start,$len) = http_rangeRequest(filesize($file));
+
 
   //application mime type is downloadable
   if(substr($mime,0,11) == 'application'){
     header('Content-Disposition: attachment; filename="'.basename($file).'";');
   }
+
+  //use x-sendfile header to pass the delivery to compatible webservers
+  if($conf['xsendfile'] == 1){
+    header("X-LIGHTTPD-send-file: $file");
+    exit;
+  }elseif($conf['xsendfile'] == 2){
+    header("X-Sendfile: $file");
+    exit;
+  }elseif($conf['xsendfile'] == 3){
+    header("X-Accel-Redirect: $file");
+    exit;
+  }
+
+  //support download continueing
+  header('Accept-Ranges: bytes');
+  list($start,$len) = http_rangeRequest(filesize($file));
 
   // send file contents
   $fp = @fopen($file,"rb");
@@ -121,7 +136,7 @@ function sendFile($file,$mime,$cache){
 
     $chunk = ($len > CHUNK_SIZE) ? CHUNK_SIZE : $len;
     while (!feof($fp) && $chunk > 0) {
-      @set_time_limit(); // large files can take a lot of time
+      @set_time_limit(30); // large files can take a lot of time
       print fread($fp, $chunk);
       flush();
       $len -= $chunk;
@@ -193,6 +208,7 @@ function get_resized($file, $ext, $w, $h=0){
   if( $mtime > filemtime($file) ||
       resize_imageIM($ext,$file,$info[0],$info[1],$local,$w,$h) ||
       resize_imageGD($ext,$file,$info[0],$info[1],$local,$w,$h) ){
+    if($conf['fperm']) chmod($local, $conf['fperm']);
     return $local;
   }
   //still here? resizing failed
@@ -312,6 +328,7 @@ function resize_imageIM($ext,$from,$from_w,$from_h,$to,$to_w,$to_h){
  * resize images using PHP's libGD support
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ * @author Sebastian Wienecke <s_wienecke@web.de>
  */
 function resize_imageGD($ext,$from,$from_w,$from_h,$to,$to_w,$to_h){
   global $conf;
@@ -337,7 +354,7 @@ function resize_imageGD($ext,$from,$from_w,$from_h,$to,$to_w,$to_h){
   }
   if(!$image) return false;
 
-  if(($conf['gdlib']>1) && function_exists("imagecreatetruecolor")){
+  if(($conf['gdlib']>1) && function_exists("imagecreatetruecolor") && $ext != 'gif'){
     $newimg = @imagecreatetruecolor ($to_w, $to_h);
   }
   if(!$newimg) $newimg = @imagecreate($to_w, $to_h);
@@ -350,6 +367,25 @@ function resize_imageGD($ext,$from,$from_w,$from_h,$to,$to_w,$to_h){
   if($ext == 'png' && $conf['gdlib']>1 && function_exists('imagesavealpha')){
     imagealphablending($newimg, false);
     imagesavealpha($newimg,true);
+  }
+
+  //keep gif transparent color if possible
+  if($ext == 'gif' && function_exists('imagefill') && function_exists('imagecolorallocate')) {
+    if(function_exists('imagecolorsforindex') && function_exists('imagecolortransparent')) {
+      $transcolorindex = @imagecolortransparent($image);
+      if($transcolorindex >= 0 ) { //transparent color exists
+        $transcolor = @imagecolorsforindex($image, $transcolorindex);
+        $transcolorindex = @imagecolorallocate($newimg, $transcolor['red'], $transcolor['green'], $transcolor['blue']);
+        @imagefill($newimg, 0, 0, $transcolorindex);
+        @imagecolortransparent($newimg, $transcolorindex);
+      }else{ //filling with white
+        $whitecolorindex = @imagecolorallocate($newimg, 255, 255, 255);
+        @imagefill($newimg, 0, 0, $whitecolorindex);
+      }
+    }else{ //filling with white
+      $whitecolorindex = @imagecolorallocate($newimg, 255, 255, 255);
+      @imagefill($newimg, 0, 0, $whitecolorindex);
+    }
   }
 
   //try resampling first
@@ -393,7 +429,7 @@ function resize_imageGD($ext,$from,$from_w,$from_h,$to,$to_w,$to_h){
  * Checks if the given amount of memory is available
  *
  * If the memory_get_usage() function is not available the
- * function just assumes $used bytes of already allocated memory
+ * function just assumes $bytes of already allocated memory
  *
  * @param  int $mem  Size of memory you want to allocate in bytes
  * @param  int $used already allocated memory (see above)
@@ -405,27 +441,12 @@ function is_mem_available($mem,$bytes=1048576){
   if(empty($limit)) return true; // no limit set!
 
   // parse limit to bytes
-  $unit = strtolower(substr($limit,-1));
-  switch($unit){
-    case 'g':
-      $limit = substr($limit,0,-1);
-      $limit *= 1024*1024*1024;
-      break;
-    case 'm':
-      $limit = substr($limit,0,-1);
-      $limit *= 1024*1024;
-      break;
-    case 'k':
-      $limit = substr($limit,0,-1);
-      $limit *= 1024;
-      break;
-  }
+  $limit = php_to_byte($limit);
 
   // get used memory if possible
   if(function_exists('memory_get_usage')){
     $used = memory_get_usage();
   }
-
 
   if($used+$mem > $limit){
     return false;

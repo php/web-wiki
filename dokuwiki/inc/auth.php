@@ -9,7 +9,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
   require_once(DOKU_INC.'inc/common.php');
   require_once(DOKU_INC.'inc/io.php');
 
@@ -157,6 +157,7 @@ function auth_login($user,$pass,$sticky=false,$silent=false){
     if($user && $pass){
       // we got a cookie - see if we can trust it
       if(isset($session) &&
+        $auth->useSessionCache($user) &&
         ($session['time'] >= time()-$conf['auth_security_timeout']) &&
         ($session['user'] == $user) &&
         ($session['pass'] == $pass) &&  //still crypted
@@ -268,26 +269,46 @@ function auth_ismanager($user=null,$groups=null,$adminonly=false){
 
   if(!$conf['useacl']) return false;
   if(is_null($user))   $user   = $_SERVER['REMOTE_USER'];
-  if(is_null($groups)) $groups = $USERINFO['grps'];
+  if(is_null($groups)) $groups = (array) $USERINFO['grps'];
   $user   = auth_nameencode($user);
 
   // check username against superuser and manager
-  if(auth_nameencode($conf['superuser']) == $user) return true;
+  $superusers = explode(',', $conf['superuser']);
+  $superusers = array_unique($superusers);
+  $superusers = array_map('trim', $superusers);
+  // prepare an array containing only true values for array_map call
+  $alltrue = array_fill(0, count($superusers), true);
+  $superusers = array_map('auth_nameencode', $superusers, $alltrue);
+  if(in_array($user, $superusers)) return true;
+
   if(!$adminonly){
-    if(auth_nameencode($conf['manager']) == $user) return true;
+    $managers = explode(',', $conf['manager']);
+    $managers = array_unique($managers);
+    $managers = array_map('trim', $managers);
+    // prepare an array containing only true values for array_map call
+    $alltrue = array_fill(0, count($managers), true);
+    $managers = array_map('auth_nameencode', $managers, $alltrue);
+    if(in_array($user, $managers)) return true;
   }
 
-  //prepend groups with @ and nameencode
-  $cnt = count($groups);
-  for($i=0; $i<$cnt; $i++){
-    $groups[$i] = '@'.auth_nameencode($groups[$i]);
+  // check user's groups against superuser and manager
+  if (!empty($groups)) {
+
+    //prepend groups with @ and nameencode
+    $cnt = count($groups);
+    for($i=0; $i<$cnt; $i++){
+      $groups[$i] = '@'.auth_nameencode($groups[$i]);
+    }
+
+    // check groups against superuser and manager
+    foreach($superusers as $supu)
+      if(in_array($supu, $groups)) return true;
+    if(!$adminonly){
+      foreach($managers as $mana)
+        if(in_array($mana, $groups)) return true;
+    }
   }
 
-  // check groups against superuser and manager
-  if(in_array(auth_nameencode($conf['superuser'],true), $groups)) return true;
-  if(!$adminonly){
-    if(in_array(auth_nameencode($conf['manager'],true), $groups)) return true;
-  }
   return false;
 }
 
@@ -338,24 +359,22 @@ function auth_aclcheck($id,$user,$groups){
   global $conf;
   global $AUTH_ACL;
 
-  # if no ACL is used always return upload rights
+  // if no ACL is used always return upload rights
   if(!$conf['useacl']) return AUTH_UPLOAD;
-
-  $user = auth_nameencode($user);
-
-  //if user is superuser return 255 (acl_admin)
-  if(auth_nameencode($conf['superuser']) == $user) { return AUTH_ADMIN; }
 
   //make sure groups is an array
   if(!is_array($groups)) $groups = array();
+
+  //if user is superuser or in superusergroup return 255 (acl_admin)
+  if(auth_isadmin($user,$groups)) { return AUTH_ADMIN; }
+
+  $user = auth_nameencode($user);
 
   //prepend groups with @ and nameencode
   $cnt = count($groups);
   for($i=0; $i<$cnt; $i++){
     $groups[$i] = '@'.auth_nameencode($groups[$i]);
   }
-  //if user is in superuser group return 255 (acl_admin)
-  if(in_array(auth_nameencode($conf['superuser'],true), $groups)) { return AUTH_ADMIN; }
 
   $ns    = getNS($id);
   $perm  = -1;
@@ -450,10 +469,10 @@ function auth_nameencode($name,$skip_group=false){
   if (!isset($cache[$name][$skip_group])) {
     if($skip_group && $name{0} =='@'){
       $cache[$name][$skip_group] = '@'.preg_replace('/([\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])/e',
-                                                    "'%'.dechex(ord('\\1'))",substr($name,1));
+                                                    "'%'.dechex(ord(substr('\\1',-1)))",substr($name,1));
     }else{
       $cache[$name][$skip_group] = preg_replace('/([\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])/e',
-                                                "'%'.dechex(ord('\\1'))",$name);
+                                                "'%'.dechex(ord(substr('\\1',-1)))",$name);
     }
   }
 
@@ -608,6 +627,7 @@ function updateprofile() {
   global $auth;
 
   if(empty($_POST['save'])) return false;
+  if(!checkSecurityToken()) return false;
 
   // should not be able to get here without Profile being possible...
   if(!$auth->canDo('Profile')) {
@@ -634,9 +654,10 @@ function updateprofile() {
     return false;
   }
 
-  if ($_POST['fullname'] != $INFO['userinfo']['name']) $changes['name'] = $_POST['fullname'];
-  if ($_POST['email']    != $INFO['userinfo']['mail']) $changes['mail'] = $_POST['email'];
-  if (!empty($_POST['newpass']))  $changes['pass'] = $_POST['newpass'];
+  if ($_POST['fullname'] != $INFO['userinfo']['name'] && $auth->canDo('modName')) $changes['name'] = $_POST['fullname'];
+  if ($_POST['email'] != $INFO['userinfo']['mail'] && $auth->canDo('modMail')) $changes['mail'] = $_POST['email'];
+  if (!empty($_POST['newpass']) && $auth->canDo('modPass')) $changes['pass'] = $_POST['newpass'];
+
 
   if (!count($changes)) {
     msg($lang['profnochange'], -1);
@@ -644,7 +665,7 @@ function updateprofile() {
   }
 
   if ($conf['profileconfirm']) {
-      if (!auth_verifyPassword($_POST['oldpass'],$INFO['userinfo']['pass'])) {
+    if (!$auth->checkPass($_SERVER['REMOTE_USER'], $_POST['oldpass'])) {
       msg($lang['badlogin'],-1);
       return false;
     }

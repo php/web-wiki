@@ -33,7 +33,7 @@ $conf['youarehere']  = 0;                 //show "You are here" navigation? 0|1
 $conf['typography']  = 1;                 //smartquote conversion 0=off, 1=doublequotes, 2=all quotes
 $conf['htmlok']      = 0;                 //may raw HTML be embedded? This may break layout and XHTML validity 0|1
 $conf['phpok']       = 0;                 //may PHP code be embedded? Never do this on the internet! 0|1
-$conf['dformat']     = 'Y/m/d H:i';       //dateformat accepted by PHPs date() function
+$conf['dformat']     = '%Y/%m/%d %H:%M';  //dateformat accepted by PHPs strftime() function
 $conf['signature']   = ' --- //[[@MAIL@|@NAME@]] @DATE@//'; //signature see wiki:config for details
 $conf['toptoclevel'] = 1;                 //Level starting with and below to include in AutoTOC (max. 5)
 $conf['maxtoclevel'] = 3;                 //Up to which level include into AutoTOC (max. 5)
@@ -63,8 +63,8 @@ $conf['autopasswd']  = 1;                //autogenerate passwords and email them
 $conf['authtype']    = 'phpcvs';          //which authentication backend should be used
 $conf['passcrypt']   = 'smd5';           //Used crypt method (smd5,md5,sha1,ssha,crypt,mysql,my411)
 $conf['defaultgroup']= 'user';           //Default groups new Users are added to
-$conf['superuser']   = '!!not set!!';    //The admin can be user or @group
-$conf['manager']     = '!!not set!!';    //The manager can be user or @group
+$conf['superuser']   = '!!not set!!';    //The admin can be user or @group or comma separated list user1,@group1,user2
+$conf['manager']     = '!!not set!!';    //The manager can be user or @group or comma separated list user1,@group1,user2
 $conf['profileconfirm'] = '1';           //Require current password to confirm changes to user profile
 $conf['disableactions'] = '';            //comma separated list of actions to disable
 $conf['sneaky_index']   = 0;             //check for namespace read permission in index view (0|1) (1 might cause unexpected behavior)
@@ -92,7 +92,6 @@ $conf['gzip_output'] = 0;                //use gzip content encodeing for the ou
 $conf['gdlib']       = 2;                //the GDlib version (0, 1 or 2) 2 tries to autodetect
 $conf['im_convert']  = '';               //path to ImageMagicks convert (will be used instead of GD)
 $conf['jpg_quality'] = '70';             //quality of compression when scaling jpg images (0-100)
-$conf['spellchecker']= 0;                //enable Spellchecker (needs PHP >= 4.3.0 and aspell installed)
 $conf['subscribers'] = 0;                //enable change notice subscription support
 $conf['compress']    = 1;                //Strip whitespaces and comments from Styles and JavaScript? 1|0
 $conf['hidepages']   = '';               //Regexp for pages to be skipped from RSS, Search and Recent Changes
@@ -103,15 +102,24 @@ $conf['rss_type']    = 'rss1';           //type of RSS feed to provide, by defau
                                          //  'rss1' - RSS 1.0
                                          //  'rss2' - RSS 2.0
                                          //  'atom' - Atom 0.3
+                                         //  'atom1' - Atom 1.0
 $conf['rss_linkto'] = 'diff';            //what page RSS entries link to:
                                          //  'diff'    - page showing revision differences
                                          //  'page'    - the revised page itself
                                          //  'rev'     - page showing all revisions
                                          //  'current' - most recent revision of page
+$conf['rss_content'] = 'abstract';       // what to put in the items by deafult?
+                                         //  'abstract' - plain text, first paragraph or so
+                                         //  'diff'     - plain text unified diff wrapped in <pre> tags
+                                         //  'htmldiff' - diff as HTML table
+                                         //  'html'     - the full page rendered in XHTML
 $conf['rss_update'] = 5*60;              //Update the RSS feed every n minutes (defaults to 5 minutes)
 $conf['recent_days'] = 7;                //How many days of recent changes to keep. (days)
 $conf['rss_show_summary'] = 1;           //Add revision summary to title? 0|1
 $conf['broken_iua']  = 0;                //Platform with broken ignore_user_abort (IIS+CGI) 0|1
+$conf['xsendfile']   = 0;                //Use X-Sendfile (1 = lighttpd, 2 = standard)
+$conf['xmlrpc'] = 0;                     //Enable/disable XML-RPC interface
+$conf['renderer_xhtml'] = 'xhtml';       //renderer to use for main page generation
 
 //Set target to use when creating links - leave empty for same window
 $conf['target']['wiki']      = '';
@@ -135,4 +143,3 @@ $conf['ftp']['port'] = '21';
 $conf['ftp']['user'] = 'user';
 $conf['ftp']['pass'] = 'password';
 $conf['ftp']['root'] = '/home/user/htdocs';
-

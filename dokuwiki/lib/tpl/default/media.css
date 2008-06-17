@@ -49,6 +49,7 @@
     list-style-type: none;
     list-style-image: none;
 }
+*+html #media__tree li,
 * html #media__tree li {
     border: 1px solid __background__;
 }/* I don't understand this, but this fixes a style bug in IE;
@@ -65,6 +66,7 @@ it's dirty, so any "real" fixes are welcome */
     float: left;
     position: absolute;
 }
+*+html #media__opts input,
 * html #media__opts input {
     position: static;
 }
@@ -74,6 +76,7 @@ it's dirty, so any "real" fixes are welcome */
     float: left;
     margin-left: 30px;
 }
+*+html #media__opts label,
 * html #media__opts label {
     margin-left: 10px;
 }
@@ -134,34 +137,27 @@ it's dirty, so any "real" fixes are welcome */
     padding: 0 0.5em 0.5em 0.5em;
 }
 
-#media__content form.upload {
+#media__content form#dw__upload {
     display: block;
     border-bottom: solid 1px __border__;
     padding: 0 0.5em 1em 0.5em;
 }
-#media__content form.upload fieldset {
+#media__content form#dw__upload fieldset {
     padding: 0;
     margin: 0;
     border: none;
     width: auto;
 }
-#media__content form.upload p {
-    clear: left;
+#media__content form#dw__upload p {
     text-align: left;
     padding: 0.25em 0;
     margin: 0;
     line-height: 1.0em;
 }
-#media__content form.upload label {
-    float: left;
-    width: 30%;
-}
-#media__content form.upload label.check {
+#media__content form#dw__upload label.check {
     float: none;
     width: auto;
-}
-#media__content form.upload input.check {
-    margin-left: 30%;
+    margin-left: 11.5em;
 }
 
 /* --- meta edit form --- */

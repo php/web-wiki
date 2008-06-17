@@ -802,7 +802,7 @@ class RSSCreator10 extends FeedCreator {
         $feed.= "    </channel>\n";
         if ($this->image!=null) {
             $feed.= "    <image rdf:about=\"".$this->image->url."\">\n";
-            $feed.= "        <title>".$this->image->title."</title>\n";
+            $feed.= "        <title>".htmlspecialchars($this->image->title)."</title>\n";
             $feed.= "        <link>".$this->image->link."</link>\n";
             $feed.= "        <url>".$this->image->url."</url>\n";
             $feed.= "    </image>\n";
@@ -916,7 +916,12 @@ class RSSCreator091 extends FeedCreator {
             $feed.= "        <pubDate>".htmlspecialchars($pubDate->rfc822())."</pubDate>\n";
         }
         if ($this->category!="") {
-            $feed.= "        <category>".htmlspecialchars($this->category)."</category>\n";
+            // Changed for DokuWiki: multiple categories are possible
+            if(is_array($this->category)) foreach($this->category as $cat){
+                $feed.= "        <category>".htmlspecialchars($cat)."</category>\n";
+            }else{
+                $feed.= "        <category>".htmlspecialchars($this->category)."</category>\n";
+            }
         }
         if ($this->docs!="") {
             $feed.= "        <docs>".FeedCreator::iTrunc(htmlspecialchars($this->docs),500)."</docs>\n";
@@ -951,8 +956,14 @@ class RSSCreator091 extends FeedCreator {
             }
             */
             if ($this->items[$i]->category!="") {
-                $feed.= "            <category>".htmlspecialchars($this->items[$i]->category)."</category>\n";
+                // Changed for DokuWiki: multiple categories are possible
+                if(is_array($this->items[$i]->category)) foreach($this->items[$i]->category as $cat){
+                    $feed.= "        <category>".htmlspecialchars($cat)."</category>\n";
+                }else{
+                    $feed.= "        <category>".htmlspecialchars($this->items[$i]->category)."</category>\n";
+                }
             }
+
             if ($this->items[$i]->comments!="") {
                 $feed.= "            <comments>".htmlspecialchars($this->items[$i]->comments)."</comments>\n";
             }

@@ -1,5 +1,5 @@
 <?php
-    if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+    if(!defined('DOKU_INC')) define('DOKU_INC',dirname(__FILE__).'/../../');
     define('DOKU_MEDIAMANAGER',1);
     require_once(DOKU_INC.'inc/init.php');
     require_once(DOKU_INC.'inc/lang/en/lang.php');
@@ -11,10 +11,14 @@
     require_once(DOKU_INC.'inc/auth.php');
     session_write_close();  //close session
 
+    // handle passed message
+    if($_REQUEST['msg1']) msg(hsc($_REQUEST['msg1']),1);
+
 
     // get namespace to display (either direct or from deletion order)
     if($_REQUEST['delete']){
         $DEL = cleanID($_REQUEST['delete']);
+        $IMG = $DEL;
         $NS  = getNS($DEL);
     }elseif($_REQUEST['edit']){
         $IMG = cleanID($_REQUEST['edit']);

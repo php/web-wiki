@@ -1196,7 +1196,7 @@ class JpegMeta
         if (file_exists($this->_fileName)) {
             $this->_info['file'] = array();
             $this->_info['file']['Name'] = basename($this->_fileName);
-            $this->_info['file']['Path'] = realpath($this->_fileName);
+            $this->_info['file']['Path'] = fullpath($this->_fileName);
             $this->_info['file']['Size'] = filesize($this->_fileName);
             if ($this->_info['file']['Size'] < 1024) {
                 $this->_info['file']['NiceSize'] = $this->_info['file']['Size'] . 'B';
@@ -1205,7 +1205,7 @@ class JpegMeta
                 $this->_info['file']['NiceSize'] = round($this->_info['file']['Size'] / 1024) . 'KB';
             }
             elseif ($this->_info['file']['Size'] < (1024 * 1024 * 1024)) {
-                $this->_info['file']['NiceSize'] = round($this->_info['file']['Size'] / 1024) . 'MB';
+                $this->_info['file']['NiceSize'] = round($this->_info['file']['Size'] / (1024*1024)) . 'MB';
             }
             else {
                 $this->_info['file']['NiceSize'] = $this->_info['file']['Size'] . 'B';

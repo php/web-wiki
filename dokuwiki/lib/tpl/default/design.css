@@ -10,13 +10,9 @@
 * { padding: 0; margin: 0; }
 
 body {
-  font: "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+  font: 80% "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
   background-color: __background__;
   color: __text__;
-}
-
-div.dokuwiki {
-  font-size:80%;
 }
 
 /* the document */
@@ -617,14 +613,7 @@ div.dokuwiki div.fn {
   font-size: 90%;
 }
 
-div.dokuwiki a.fn_top {
-  vertical-align: super;
-  font-size: 80%;
-}
-
 div.dokuwiki a.fn_bot {
-  vertical-align: super;
-  font-size: 80%;
   font-weight: bold;
 }
 
@@ -749,38 +738,6 @@ button.pickerbutton {
   cursor: pointer;
 }
 
-/* ---------- Spellchecking ------------- */
-
-div.dokuwiki a.spell_error {
-  color: #f00;
-  text-decoration: underline;
-}
-
-div.dokuwiki div#spell__suggest {
-  background-color: __background__;
-  padding: 2px;
-  border: 1px solid __text__;
-  font-size: 80%;
-  display: none;
-}
-
-div.dokuwiki div#spell__result {
-  border: 1px solid __border__;
-  color: __text__;
-  font-size: 14px;
-  padding: 3px;
-  background-color: __background_other__;
-  display: none;
-}
-
-div.dokuwiki span.spell_noerr {
-  color: #093;
-}
-
-div.dokuwiki span.spell_wait {
-  color: #06c;
-}
-
 /* ---------------  Image Details  ----------------- */
 
 div.dokuwiki div.img_big {
@@ -806,7 +763,3 @@ div.dokuwiki div.imagemeta img.thumb {
   float:left;
   margin-right: 0.1em;
 }
-
-/* More Custom */
-
-div.dokuwiki ul.toc li { font-size:inherit; }

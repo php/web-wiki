@@ -64,7 +64,7 @@ $lang['youarehere']  = 'Hierarchical breadcrumbs';
 $lang['typography']  = 'Do typographical replacements';
 $lang['htmlok']      = 'Allow embedded HTML';
 $lang['phpok']       = 'Allow embedded PHP';
-$lang['dformat']     = 'Date format (see PHP\'s <a href="http://www.php.net/date">date</a> function)';
+$lang['dformat']     = 'Date format (see PHP\'s <a href="http://www.php.net/strftime">strftime</a> function)';
 $lang['signature']   = 'Signature';
 $lang['toptoclevel'] = 'Top level for table of contents';
 $lang['maxtoclevel'] = 'Maximum level for table of contents';
@@ -88,12 +88,13 @@ $lang['autopasswd']  = 'Autogenerate passwords';
 $lang['authtype']    = 'Authentication backend';
 $lang['passcrypt']   = 'Password encryption method';
 $lang['defaultgroup']= 'Default group';
-$lang['superuser']   = 'Superuser - a group or user with full access to all pages and functions regardless of the ACL settings';
-$lang['manager']     = 'Manager - a group or user with access to certain management functions';
+$lang['superuser']   = 'Superuser - group, user or comma separated list user1,@group1,user2 with full access to all pages and functions regardless of the ACL settings';
+$lang['manager']     = 'Manager - group, user or comma separated list user1,@group1,user2 with access to certain management functions';
 $lang['profileconfirm'] = 'Confirm profile changes with password';
 $lang['disableactions'] = 'Disable DokuWiki actions';
 $lang['disableactions_check'] = 'Check';
 $lang['disableactions_subscription'] = 'Subscribe/Unsubscribe';
+$lang['disableactions_nssubscription'] = 'Namespace Subscribe /Unsubscribe';
 $lang['disableactions_wikicode'] = 'View source/Export Raw';
 $lang['disableactions_other'] = 'Other actions (comma separated)';
 $lang['sneaky_index'] = 'By default, DokuWiki will show all namespaces in the index view. Enabling this option will hide those where the user doesn\'t have read permissions. This might result in hiding of accessable subnamespaces. This may make the index unusable with certain ACL setups.';
@@ -118,16 +119,21 @@ $lang['gzip_output'] = 'Use gzip Content-Encoding for xhtml';
 $lang['gdlib']       = 'GD Lib version';
 $lang['im_convert']  = 'Path to ImageMagick\'s convert tool';
 $lang['jpg_quality'] = 'JPG compression quality (0-100)';
-$lang['spellchecker']= 'Enable spellchecker';
 $lang['subscribers'] = 'Enable page subscription support';
 $lang['compress']    = 'Compact CSS and javascript output';
 $lang['hidepages']   = 'Hide matching pages (regular expressions)';
 $lang['send404']     = 'Send "HTTP 404/Page Not Found" for non existing pages';
 $lang['sitemap']     = 'Generate Google sitemap (days)';
 $lang['broken_iua']  = 'Is the ignore_user_abort function broken on your system? This could cause a non working search index. IIS+PHP/CGI is known to be broken. See <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a> for more info.';
+$lang['xsendfile']   = 'Use the X-Sendfile header to let the webserver deliver static files? Your webserver needs to support this.';
+$lang['xmlrpc']      = 'Enable/disable XML-RPC interface.';
+$lang['renderer_xhtml']   = 'Renderer to use for main (xhtml) wiki output';
+$lang['renderer__core']   = '%s (dokuwiki core)';
+$lang['renderer__plugin'] = '%s (plugin)';
 
 $lang['rss_type']    = 'XML feed type';
 $lang['rss_linkto']  = 'XML feed links to';
+$lang['rss_content'] = 'What to display in the XML feed items?';
 $lang['rss_update']  = 'XML feed update interval (sec)';
 $lang['recent_days'] = 'How many recent changes to keep (days)';
 $lang['rss_show_summary'] = 'XML feed show summary in title';
@@ -175,10 +181,17 @@ $lang['gdlib_o_1'] = 'Version 1.x';
 $lang['gdlib_o_2'] = 'Autodetection';
 
 /* rss_type options */
-$lang['rss_type_o_rss']  = 'RSS 0.91';
-$lang['rss_type_o_rss1'] = 'RSS 1.0';
-$lang['rss_type_o_rss2'] = 'RSS 2.0';
-$lang['rss_type_o_atom'] = 'Atom 0.3';
+$lang['rss_type_o_rss']   = 'RSS 0.91';
+$lang['rss_type_o_rss1']  = 'RSS 1.0';
+$lang['rss_type_o_rss2']  = 'RSS 2.0';
+$lang['rss_type_o_atom']  = 'Atom 0.3';
+$lang['rss_type_o_atom1'] = 'Atom 1.0';
+
+/* rss_content options */
+$lang['rss_content_o_abstract'] = 'Abstract';
+$lang['rss_content_o_diff']     = 'Unified Diff';
+$lang['rss_content_o_htmldiff'] = 'HTML formatted diff table';
+$lang['rss_content_o_html']     = 'Full HTML page content';
 
 /* rss_linkto options */
 $lang['rss_linkto_o_diff']    = 'difference view';
@@ -191,3 +204,8 @@ $lang['compression_o_0']   = 'none';
 $lang['compression_o_gz']  = 'gzip';
 $lang['compression_o_bz2'] = 'bz2';
 
+/* xsendfile header */
+$lang['xsendfile_o_0'] = "don't use";
+$lang['xsendfile_o_1'] = 'Proprietary lighttpd header (before release 1.5)';
+$lang['xsendfile_o_2'] = 'Standard X-Sendfile header';
+$lang['xsendfile_o_3'] = 'Proprietary Nginx X-Accel-Redirect header';

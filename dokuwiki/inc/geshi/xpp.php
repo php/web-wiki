@@ -4,10 +4,8 @@
  * -------
  * Author: Simon Butcher (simon@butcher.name)
  * Copyright: (c) 2007 Simon Butcher (http://simon.butcher.name/)
- * Release Version: 1.0.7.19
- * CVS Revision Version: $Revision$
+ * Release Version: 1.0.7.21
  * Date Started: 2007/02/27
- * Last Modified: $Date$
  *
  * Axapta/Dynamics Ax X++ language file for GeSHi.
  * For details, see <http://msdn.microsoft.com/en-us/library/aa867122.aspx>

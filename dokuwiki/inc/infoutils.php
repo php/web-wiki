@@ -5,7 +5,7 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 if(!defined('DOKU_MESSAGEURL')) define('DOKU_MESSAGEURL','http://update.dokuwiki.org/check/');
 require_once(DOKU_INC.'inc/HTTPClient.php');
 
@@ -89,6 +89,20 @@ function check(){
     msg('PHP version '.phpversion(),1);
   }
 
+  $mem = (int) php_to_byte(ini_get('memory_limit'));
+  if($mem){
+    if($mem < 16777216){
+        msg('PHP is limited to less than 16MB RAM ('.$mem.' bytes). Increase memory_limit in php.ini',-1);
+    }elseif($mem < 20971520){
+        msg('PHP is limited to less than 20MB RAM ('.$mem.' bytes), you might encounter problems with bigger pages. Increase memory_limit in php.ini',-1);
+    }elseif($mem < 33554432){
+        msg('PHP is limited to less than 32MB RAM ('.$mem.' bytes), but that should be enough in most cases. If not, increase memory_limit in php.ini',0);
+    }else{
+        msg('More than 32MB RAM ('.$mem.' bytes) available.',1);
+    }
+  }
+
+
   if(is_writable($conf['changelog'])){
     msg('Changelog is writable',1);
   }else{
@@ -142,10 +156,12 @@ function check(){
     msg('Lockdir is not writable',-1);
   }
 
-  if(is_writable(DOKU_CONF.'users.auth.php')){
-    msg('conf/users.auth.php is writable',1);
-  }else{
-    msg('conf/users.auth.php is not writable',0);
+  if($conf['authtype'] == 'plain'){
+    if(is_writable(DOKU_CONF.'users.auth.php')){
+      msg('conf/users.auth.php is writable',1);
+    }else{
+      msg('conf/users.auth.php is not writable',0);
+    }
   }
 
   if(function_exists('mb_strpos')){
@@ -165,11 +181,8 @@ function check(){
   }
 
   if($INFO['userinfo']['name']){
-    global $auth;
-    msg('You are currently logged in as '.$_SESSION[DOKU_COOKIE]['auth']['user'].' ('.$INFO['userinfo']['name'].')',0);
-
-    $info = $auth->getUserData($_SESSION[DOKU_COOKIE]['auth']['user']);
-    msg('You are part of the groups '.implode($info['grps'],', '),0);
+    msg('You are currently logged in as '.$_SERVER['REMOTE_USER'].' ('.$INFO['userinfo']['name'].')',0);
+    msg('You are part of the groups '.join($INFO['userinfo']['grps'],', '),0);
   }else{
     msg('You are currently not logged in',0);
   }

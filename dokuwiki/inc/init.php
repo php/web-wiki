@@ -11,7 +11,7 @@
   define('DOKU_START_TIME', delta_time());
 
   // define the include path
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 
   // define config path (packagers may want to change this to /etc/dokuwiki/)
   if(!defined('DOKU_CONF')) define('DOKU_CONF',DOKU_INC.'conf/');
@@ -63,9 +63,12 @@
     }
   }
 
+  // define whitespace
+  if(!defined('DOKU_LF')) define ('DOKU_LF',"\n");
+  if(!defined('DOKU_TAB')) define ('DOKU_TAB',"\t");
 
   // define cookie and session id
-  if (!defined('DOKU_COOKIE')) define('DOKU_COOKIE', 'DW'.md5(DOKU_URL));
+  if (!defined('DOKU_COOKIE')) define('DOKU_COOKIE', 'DW'.md5(DOKU_REL));
 
   // define Plugin dir
   if(!defined('DOKU_PLUGIN'))  define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
@@ -86,6 +89,9 @@
 
   // make sure global zlib does not interfere FS#1132
   @ini_set('zlib.output_compression', 'off');
+
+  // increase PCRE backtrack limit
+  @ini_set('pcre.backtrack_limit', '20971520');
 
   // enable gzip compression
   if ($conf['gzip_output'] &&
@@ -125,6 +131,11 @@
     $conf['compression'] = 0;
   }
 
+  // fix dateformat for upgraders
+  if(strpos($conf['dformat'],'%') === false){
+    $conf['dformat'] = '%Y/%m/%d %H:%M';
+  }
+
   // precalculate file creation modes
   init_creationmodes();
 
@@ -149,7 +160,8 @@ function init_paths(){
                  'metadir'   => 'meta',
                  'cachedir'  => 'cache',
                  'indexdir'  => 'index',
-                 'lockdir'   => 'locks');
+                 'lockdir'   => 'locks',
+                 'tmpdir'    => 'tmp');
 
   foreach($paths as $c => $p){
     if(empty($conf[$c]))  $conf[$c] = $conf['savedir'].'/'.$p;
@@ -198,9 +210,9 @@ function init_files(){
  */
 function init_path($path){
   // check existance
-  $p = realpath($path);
+  $p = fullpath($path);
   if(!@file_exists($p)){
-    $p = realpath(DOKU_INC.$path);
+    $p = fullpath(DOKU_INC.$path);
     if(!@file_exists($p)){
       return '';
     }
@@ -257,11 +269,20 @@ function init_creationmodes(){
  */
 function remove_magic_quotes(&$array) {
   foreach (array_keys($array) as $key) {
-    if (is_array($array[$key])) {
-      remove_magic_quotes($array[$key]);
-    }else {
-      $array[$key] = stripslashes($array[$key]);
-    }
+      // handle magic quotes in keynames (breaks order)
+      $sk = stripslashes($key);
+      if($sk != $key){
+          $array[$sk] = $array[$key];
+          unset($array[$key]);
+          $key = $sk;
+      }
+
+      // do recursion if needed
+      if (is_array($array[$key])) {
+          remove_magic_quotes($array[$key]);
+      }else {
+          $array[$key] = stripslashes($array[$key]);
+      }
   }
 }
 
@@ -277,21 +298,21 @@ function getBaseURL($abs=null){
   if(is_null($abs)) $abs = $conf['canonical'];
 
   if($conf['basedir']){
-    $dir = $conf['basedir'].'/';
+    $dir = $conf['basedir'];
   }elseif(substr($_SERVER['SCRIPT_NAME'],-4) == '.php'){
-    $dir = dirname($_SERVER['SCRIPT_NAME']).'/';
+    $dir = dirname($_SERVER['SCRIPT_NAME']);
   }elseif(substr($_SERVER['PHP_SELF'],-4) == '.php'){
-    $dir = dirname($_SERVER['PHP_SELF']).'/';
+    $dir = dirname($_SERVER['PHP_SELF']);
   }elseif($_SERVER['DOCUMENT_ROOT'] && $_SERVER['SCRIPT_FILENAME']){
     $dir = preg_replace ('/^'.preg_quote($_SERVER['DOCUMENT_ROOT'],'/').'/','',
                          $_SERVER['SCRIPT_FILENAME']);
-    $dir = dirname('/'.$dir).'/';
+    $dir = dirname('/'.$dir);
   }else{
-    $dir = './'; //probably wrong
+    $dir = '.'; //probably wrong
   }
 
-  $dir = str_replace('\\','/',$dir); #bugfix for weird WIN behaviour
-  $dir = preg_replace('#//+#','/',$dir);
+  $dir = str_replace('\\','/',$dir);             // bugfix for weird WIN behaviour
+  $dir = preg_replace('#//+#','/',"/$dir/");     // ensure leading and trailing slashes
 
   //handle script in lib/exe dir
   $dir = preg_replace('!lib/exe/$!','',$dir);
@@ -302,8 +323,8 @@ function getBaseURL($abs=null){
   //finish here for relative URLs
   if(!$abs) return $dir;
 
-  //use config option if available
-  if($conf['baseurl']) return $conf['baseurl'].$dir;
+  //use config option if available, trim any slash from end of baseurl to avoid multiple consecutive slashes in the path
+  if($conf['baseurl']) return rtrim($conf['baseurl'],'/').$dir;
 
   //split hostheader into host and port
   list($host,$port) = explode(':',$_SERVER['HTTP_HOST']);
@@ -386,6 +407,50 @@ function nice_die($msg){
 EOT;
   exit;
 }
+
+
+/**
+ * A realpath() replacement
+ *
+ * This function behaves similar to PHP's realpath() but does not resolve
+ * symlinks or accesses upper directories
+ *
+ * @author <richpageau at yahoo dot co dot uk>
+ * @link   http://de3.php.net/manual/en/function.realpath.php#75992
+ */
+function fullpath($path){
+    $iswin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+    if($iswin) $path = str_replace('\\','/',$path); // windows compatibility
+
+    // check if path begins with "/" or "c:" ie. is absolute
+    // if it isnt concat with script path
+    if ((!$iswin && $path{0} !== '/') ||
+        ($iswin && $path{1} !== ':')) {
+        $base=dirname($_SERVER['SCRIPT_FILENAME']);
+        $path=$base."/".$path;
+    }
+
+    // canonicalize
+    $path=explode('/', $path);
+    $newpath=array();
+    foreach($path as $p) {
+        if ($p === '' || $p === '.') continue;
+           if ($p==='..') {
+              array_pop($newpath);
+              continue;
+        }
+        array_push($newpath, $p);
+    }
+    $finalpath = implode('/', $newpath);
+    if(!$iswin) $finalpath = '/'.$finalpath;
+
+    // check then return valid path or filename
+    if (file_exists($finalpath)) {
+        return ($finalpath);
+    }
+    else return false;
+}
+
 
 
 //Setup VIM: ex: et ts=2 enc=utf-8 :

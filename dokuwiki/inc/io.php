@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
   require_once(DOKU_INC.'inc/common.php');
   require_once(DOKU_INC.'inc/HTTPClient.php');
   require_once(DOKU_INC.'inc/events.php');
@@ -21,6 +21,9 @@
  * $data[1]    ns_type: 'pages' or 'media' namespace tree.
  *
  * @todo use safemode hack
+ * @param string $id      - a pageid, the namespace of that id will be tried to deleted
+ * @param string $basadir - the config name of the type to delete (datadir or mediadir usally)
+ * @returns bool - true if at least one namespace was deleted
  * @author  Andreas Gohr <andi@splitbrain.org>
  * @author Ben Coburn <btcoburn@silicodon.net>
  */
@@ -28,6 +31,8 @@ function io_sweepNS($id,$basedir='datadir'){
   global $conf;
   $types = array ('datadir'=>'pages', 'mediadir'=>'media');
   $ns_type = (isset($types[$basedir])?$types[$basedir]:false);
+
+  $delone = false;
 
   //scan all namespaces
   while(($id = getNS($id)) !== false){
@@ -37,10 +42,12 @@ function io_sweepNS($id,$basedir='datadir'){
     if(@rmdir($dir)) {
       if ($ns_type!==false) {
         $data = array($id, $ns_type);
+        $delone = true; // we deleted at least one dir
         trigger_event('IO_NAMESPACE_DELETED', $data);
       }
-    } else { return; }
+    } else { return $delone; }
   }
+  return $delone;
 }
 
 /**
@@ -94,7 +101,7 @@ function io_readFile($file,$clean=true){
     }else if(substr($file,-4) == '.bz2'){
       $ret = bzfile($file);
     }else{
-      $ret = join('',file($file));
+      $ret = file_get_contents($file);
     }
   }
   if($clean){
@@ -112,7 +119,7 @@ function bzfile($file){
   $bz = bzopen($file,"r");
   while (!feof($bz)){
     //8192 seems to be the maximum buffersize?
-	  $str = $str . bzread($bz,8192);
+    $str = $str . bzread($bz,8192);
   }
   bzclose($bz);
   return $str;
@@ -183,7 +190,7 @@ function io_saveFile($file,$content,$append=false){
     gzwrite($fh, $content);
     gzclose($fh);
   }else if(substr($file,-4) == '.bz2'){
-    $fh = @bzopen($file,$mode);
+    $fh = @bzopen($file,$mode{0});
     if(!$fh){
       msg("Writing $file failed", -1);
       io_unlock($file);
@@ -385,7 +392,7 @@ function io_mkdir_p($target){
   //recursion
   if (io_mkdir_p(substr($target,0,strrpos($target,'/')))){
     if($conf['safemodehack']){
-      $dir = preg_replace('/^'.preg_quote(realpath($conf['ftp']['root']),'/').'/','', $target);
+      $dir = preg_replace('/^'.preg_quote(fullpath($conf['ftp']['root']),'/').'/','', $target);
       return io_mkdir_ftp($dir);
     }else{
       $ret = @mkdir($target,$conf['dmode']); // crawl back up & create dir tree
@@ -429,6 +436,26 @@ function io_mkdir_ftp($dir){
 
   @ftp_close($conn);
   return $ok;
+}
+
+/**
+ * Creates a unique temporary directory and returns
+ * its path.
+ *
+ * @author Michael Klier <chi@chimeric.de>
+ */
+function io_mktmpdir() {
+    global $conf;
+
+    $base = $conf['tmpdir'];
+    $dir  = md5(uniqid(mt_rand(), true));
+    $tmpdir = $base.$dir;
+
+    if(io_mkdir_p($tmpdir)) {
+        return($tmpdir);
+    } else {
+        return false;
+    }
 }
 
 /**

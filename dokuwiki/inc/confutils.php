@@ -6,7 +6,7 @@
  * @author     Harry Fuecks <hfuecks@gmail.com>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 
 /**
  * Returns the (known) extension and mimetype of a given filename
@@ -147,8 +147,9 @@ function confToHash($file,$lower=false) {
   if ( !$lines ) return $conf;
 
   foreach ( $lines as $line ) {
-    //ignore comments
-    $line = preg_replace('/(?<!&)#.*$/','',$line);
+    //ignore comments (except escaped ones)
+    $line = preg_replace('/(?<![&\\\\])#.*$/','',$line);
+    $line = str_replace('\\#','#',$line);
     $line = trim($line);
     if(empty($line)) continue;
     $line = preg_split('/\s+/',$line,2);
@@ -179,6 +180,10 @@ function actionOK($action){
     $disabled = array_map('trim',$disabled);
     if(isset($conf['openregister']) && !$conf['openregister']) $disabled[] = 'register';
     if(isset($conf['resendpasswd']) && !$conf['resendpasswd']) $disabled[] = 'resendpwd';
+    if(isset($conf['subscribers']) && !$conf['subscribers']) {
+        $disabled[] = 'subscribe';
+        $disabled[] = 'subscribens';
+    }
     $disabled = array_unique($disabled);
   }
 

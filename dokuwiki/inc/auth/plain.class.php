@@ -92,7 +92,7 @@ class auth_plain extends auth_basic {
      * Create a new User
      *
      * Returns false if the user already exists, null when an error
-     * occured and true if everything went well.
+     * occurred and true if everything went well.
      *
      * The new user will be added to the default group by this
      * function if grps are not specified (default behaviour).
@@ -310,8 +310,8 @@ class auth_plain extends auth_basic {
     function _constructPattern($filter) {
       $this->_pattern = array();
       foreach ($filter as $item => $pattern) {
-//        $this->_pattern[$item] = '/'.preg_quote($pattern,"/").'/';          // don't allow regex characters
-        $this->_pattern[$item] = '/'.str_replace('/','\/',$pattern).'/';    // allow regex characters
+//        $this->_pattern[$item] = '/'.preg_quote($pattern,"/").'/i';          // don't allow regex characters
+        $this->_pattern[$item] = '/'.str_replace('/','\/',$pattern).'/i';    // allow regex characters
       }
     }
 }

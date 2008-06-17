@@ -1,5 +1,7 @@
 <?php
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../../').'/');
+
+if (!defined('DOKU_PARSER_EOL')) define('DOKU_PARSER_EOL',"\n");   // add this to make handling test cases simpler
 
 class Doku_Handler {
 
@@ -268,11 +270,15 @@ class Doku_Handler {
     function php($match, $state, $pos) {
         global $conf;
         if ( $state == DOKU_LEXER_UNMATCHED ) {
-            if ($conf['phpok']) {
-                $this->_addCall('php',array($match), $pos);
-            } else {
-                $this->_addCall('file',array($match), $pos);
-            }
+            $this->_addCall('php',array($match), $pos);
+        }
+        return true;
+    }
+
+    function phpblock($match, $state, $pos) {
+        global $conf;
+        if ( $state == DOKU_LEXER_UNMATCHED ) {
+            $this->_addCall('phpblock',array($match), $pos);
         }
         return true;
     }
@@ -280,11 +286,15 @@ class Doku_Handler {
     function html($match, $state, $pos) {
         global $conf;
         if ( $state == DOKU_LEXER_UNMATCHED ) {
-            if($conf['htmlok']){
-                $this->_addCall('html',array($match), $pos);
-            } else {
-                $this->_addCall('file',array($match), $pos);
-            }
+            $this->_addCall('html',array($match), $pos);
+        }
+        return true;
+    }
+
+    function htmlblock($match, $state, $pos) {
+        global $conf;
+        if ( $state == DOKU_LEXER_UNMATCHED ) {
+            $this->_addCall('htmlblock',array($match), $pos);
         }
         return true;
     }
@@ -445,7 +455,7 @@ class Doku_Handler {
 
         //decide which kind of link it is
 
-        if ( preg_match('/^[a-zA-Z\.]+>{1}.*$/u',$link[0]) ) {
+        if ( preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$link[0]) ) {
         // Interwiki
             $interwiki = preg_split('/>/u',$link[0]);
             $this->_addCall(
@@ -678,6 +688,8 @@ function Doku_Handler_Parse_Media($match) {
         $linking = 'nolink';
     }else if(preg_match('/direct/i',$param)){
         $linking = 'direct';
+    }else if(preg_match('/linkonly/i',$param)){
+        $linking = 'linkonly';
     }else{
         $linking = 'details';
     }
@@ -777,8 +789,23 @@ class Doku_Handler_Nest {
     }
 
     function process() {
+        // merge consecutive cdata
+        $unmerged_calls = $this->calls;
+        $this->calls = array();
+
+        foreach ($unmerged_calls as $call) $this->addCall($call);
+
         $first_call = reset($this->calls);
         $this->CallWriter->writeCall(array("nest", array($this->calls), $first_call[2]));
+    }
+
+    function addCall($call) {
+        $key = count($this->calls);
+        if ($key and ($call[0] == 'cdata') and ($this->calls[$key-1][0] == 'cdata')) {
+            $this->calls[$key-1][1][0] .= $call[1][0];
+        } else {
+            $this->calls[] = $call;
+        }
     }
 }
 
@@ -1020,7 +1047,9 @@ class Doku_Handler_Preformatted {
                     $this->text .= $call[1][0];
                 break;
                 case 'preformatted_end':
-                    $this->CallWriter->writeCall(array('preformatted',array($this->text),$this->pos));
+                    if (trim($this->text)) {
+                      $this->CallWriter->writeCall(array('preformatted',array($this->text),$this->pos));
+                    }
                 break;
             }
         }
@@ -1048,7 +1077,6 @@ class Doku_Handler_Quote {
     // Probably not needed but just in case...
     function writeCalls($calls) {
         $this->calls = array_merge($this->calls, $calls);
-#        $this->CallWriter->writeCalls($this->calls);
     }
 
     function finalise() {
@@ -1144,7 +1172,6 @@ class Doku_Handler_Table {
     // Probably not needed but just in case...
     function writeCalls($calls) {
         $this->calls = array_merge($this->calls, $calls);
-#        $this->CallWriter->writeCalls($this->calls);
     }
 
     function finalise() {
@@ -1416,6 +1443,7 @@ class Doku_Handler_Block {
             'quote_open',
             'section_open', // Needed to prevent p_open between header and section_open
             'code','file','hr','preformatted','rss',
+            'htmlblock','phpblock',
         );
 
     var $blockClose = array(
@@ -1425,6 +1453,7 @@ class Doku_Handler_Block {
             'quote_close',
             'section_close', // Needed to prevent p_close after section_close
             'code','file','hr','preformatted','rss',
+            'htmlblock','phpblock',
         );
 
     // Stacks can contain paragraphs
@@ -1563,7 +1592,7 @@ class Doku_Handler_Block {
 
                         }else{
                             //if this is just a single eol make a space from it
-                            $this->calls[] = array('cdata',array(" "), $call[2]);
+                            $this->addCall(array('cdata',array(DOKU_PARSER_EOL), $call[2]));
                         }
                     }
 
@@ -1609,7 +1638,7 @@ class Doku_Handler_Block {
                     }
 
                     if ( $storeCall ) {
-                        $this->calls[] = $call;
+                        $this->addCall($call);
                     }
 
                 }
@@ -1626,7 +1655,7 @@ class Doku_Handler_Block {
                     $this->atStart = false;
                     $this->inParagraph = true;
                 } else {
-                    $this->calls[] = $call;
+                    $this->addCall($call);
                     $this->atStart = false;
                 }
 
@@ -1662,6 +1691,15 @@ class Doku_Handler_Block {
         $state = array_pop($this->blockStack);
         $this->atStart = $state[0];
         $this->inParagraph = $state[1];
+    }
+
+    function addCall($call) {
+        $key = count($this->calls);
+        if ($key and ($call[0] == 'cdata') and ($this->calls[$key-1][0] == 'cdata')) {
+            $this->calls[$key-1][1][0] .= $call[1][0];
+        } else {
+            $this->calls[] = $call;
+        }
     }
 }
 

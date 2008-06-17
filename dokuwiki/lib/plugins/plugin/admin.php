@@ -23,7 +23,7 @@ require_once(DOKU_PLUGIN.'admin.php');
 
     // plugins that are an integral part of dokuwiki, they shouldn't be disabled or deleted
     global $plugin_protected;
-    $plugin_protected = array('acl','plugin','config','info','usermanager');
+    $plugin_protected = array('acl','plugin','config','info','usermanager','revert');
 
 /**
  * All DokuWiki plugins to extend the admin function
@@ -60,7 +60,7 @@ class admin_plugin_plugin extends DokuWiki_Admin_Plugin {
         'date'   => '2005-08-10',
         'name'   => 'Plugin Manager',
         'desc'   => "Manage Plugins, including automated plugin installer $disabled",
-        'url'    => 'http://wiki.splitbrain.org/plugin:adminplugin',
+        'url'    => 'http://wiki.splitbrain.org/plugin:plugin',
       );
     }
 
@@ -112,6 +112,11 @@ class admin_plugin_plugin extends DokuWiki_Admin_Plugin {
       if (in_array($this->cmd, $this->commands)) {
         $this->plugin = '';
       } else if (!in_array($this->cmd, $this->functions) || !in_array($this->plugin, $this->plugin_list)) {
+        $this->cmd = 'manage';
+        $this->plugin = '';
+      }
+
+      if(($this->cmd != 'manage' || $this->plugin != '') && !checkSecurityToken()){
         $this->cmd = 'manage';
         $this->plugin = '';
       }
@@ -181,6 +186,7 @@ class ap_manage {
           ptln('    <fieldset class="hidden">',4);
           ptln('      <input type="hidden" name="do"   value="admin" />');
           ptln('      <input type="hidden" name="page" value="plugin" />');
+          formSecurityToken();
           ptln('    </fieldset>');
           ptln('    <fieldset>');
           ptln('      <legend>'.$this->lang['download'].'</legend>');
@@ -199,6 +205,7 @@ class ap_manage {
             ptln('  <fieldset class="hidden">');
             ptln('    <input type="hidden" name="do"     value="admin" />');
             ptln('    <input type="hidden" name="page"   value="plugin" />');
+            formSecurityToken();
             ptln('  </fieldset>');
 
             $this->html_pluginlist();
@@ -282,11 +289,9 @@ class ap_manage {
           }
 
           $file = $matches[0];
-          $folder = "p".md5($file.date('r'));     // tmp folder name - will be empty (should really make sure it doesn't already exist)
-          $tmp = DOKU_PLUGIN."tmp/$folder";
 
-          if (!ap_mkdir($tmp)) {
-            $this->manager->error = $this->lang['error_dir_create']."\n";
+          if (!($tmp = io_mktmpdir())) {
+            $this->manager->error = $this->lang['error_dircreate']."\n";
             return false;
           }
 
@@ -298,8 +303,8 @@ class ap_manage {
             $this->manager->error = sprintf($this->lang['error_decompress'],$file)."\n";
           }
 
-          // search tmp/$folder for the folder(s) that has been created
-          // move that folder(s) to lib/plugins/
+          // search $tmp for the folder(s) that has been created
+          // move the folder(s) to lib/plugins/
           if (!$this->manager->error) {
             if ($dh = @opendir("$tmp/")) {
               while (false !== ($f = readdir($dh))) {
@@ -307,18 +312,18 @@ class ap_manage {
                 if (!is_dir("$tmp/$f")) continue;
 
                 // check to make sure we aren't overwriting anything
-                if (!$overwrite && @file_exists(DOKU_PLUGIN."/$f")) {
+                if (!$overwrite && @file_exists(DOKU_PLUGIN.$f)) {
                    // remember our settings, ask the user to confirm overwrite, FIXME
                    continue;
                 }
 
-                $instruction = @file_exists(DOKU_PLUGIN."/$f") ? 'update' : 'install';
+                $instruction = @file_exists(DOKU_PLUGIN.$f) ? 'update' : 'install';
 
                 if (ap_copy("$tmp/$f", DOKU_PLUGIN.$f)) {
                   $this->downloaded[] = $f;
                   $this->plugin_writelog($f, $instruction, array($url));
                 } else {
-                  $this->manager->error .= sprintf($lang['error_copy']."\n", $f);
+                  $this->manager->error .= sprintf($this->lang['error_copy']."\n", $f);
                 }
               }
               closedir($dh);
@@ -328,7 +333,7 @@ class ap_manage {
           }
 
           // cleanup
-          if ($folder && is_dir(DOKU_PLUGIN."tmp/$folder")) ap_delete(DOKU_PLUGIN."tmp/$folder");
+          if ($tmp) ap_delete($tmp);
 
           if (!$this->manager->error) {
               $this->refresh();
@@ -535,7 +540,7 @@ class ap_manage {
 
         // simple output filter, make html entities safe and convert new lines to <br />
         function out($text) {
-            return str_replace("\n",'<br />',htmlentities($text));
+            return str_replace("\n",'<br />',htmlspecialchars($text));
         }
 
     }
@@ -659,14 +664,6 @@ class ap_manage {
         return false;
     }
 
-    // possibly should use io_MakeFileDir, not sure about using its method of error handling
-    function ap_mkdir($d) {
-        global $conf;
-
-        $ok = io_mkdir_p($d);
-        return $ok;
-    }
-
     // copy with recursive sub-directory support
     function ap_copy($src, $dst) {
         global $conf;
@@ -674,7 +671,7 @@ class ap_manage {
         if (is_dir($src)) {
           if (!$dh = @opendir($src)) return false;
 
-          if ($ok = ap_mkdir($dst)) {
+          if ($ok = io_mkdir_p($dst)) {
             while ($ok && (false !== ($f = readdir($dh)))) {
               if ($f == '..' || $f == '.') continue;
               $ok = ap_copy("$src/$f", "$dst/$f");

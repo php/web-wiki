@@ -1,5 +1,5 @@
 /**
- *  $Id: helpers.js,v 1.1 2008-03-12 22:57:57 pajoye Exp $
+ *  $Id: helpers.js,v 1.2 2008-06-17 11:51:04 lsmith Exp $
  *  $HeadURL: https://svn.debugger.ru/repos/jslibs/BrowserExtensions/trunk/helpers.js $
  *
  *  File contains differrent helper functions

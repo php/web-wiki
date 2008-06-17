@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 
 require_once(DOKU_INC.'inc/JSON.php');
 
@@ -24,10 +24,10 @@ function toolbar_JSdefines($varname){
     global $lang;
 
     $menu = array();
-    
+
     $evt = new Doku_Event('TOOLBAR_DEFINE', $menu);
     if ($evt->advise_before()){
-    
+
         // build button array
         $menu = array_merge($menu, array(
            array(
@@ -190,13 +190,14 @@ function toolbar_JSdefines($varname){
  */
 function toolbar_signature(){
   global $conf;
+  global $INFO;
 
   $sig = $conf['signature'];
   $sig = strftime($sig);
   $sig = str_replace('@USER@',$_SERVER['REMOTE_USER'],$sig);
-  $sig = str_replace('@NAME@',$_SESSION[DOKU_COOKIE]['auth']['info']['name'],$sig);
-  $sig = str_replace('@MAIL@',$_SESSION[DOKU_COOKIE]['auth']['info']['mail'],$sig);
-  $sig = str_replace('@DATE@',date($conf['dformat']),$sig);
+  $sig = str_replace('@NAME@',$INFO['userinfo']['name'],$sig);
+  $sig = str_replace('@MAIL@',$INFO['userinfo']['mail'],$sig);
+  $sig = str_replace('@DATE@',strftime($conf['dformat']),$sig);
   $sig = str_replace('\\\\n','\\n',addslashes($sig));
   return $sig;
 }

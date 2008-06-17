@@ -470,83 +470,44 @@ EOD;
     }
 }
 
-# FIXME use DokuHTTPClient here
-class IXR_Client {
-    var $server;
-    var $port;
-    var $path;
-    var $useragent;
-    var $response;
+/**
+ * Changed for DokuWiki to use DokuHTTPClient
+ *
+ * This should be compatible to the original class, but uses DokuWiki's
+ * HTTP client library which will respect proxy settings
+ *
+ * Because the XMLRPC client is not used in DokuWiki currently this is completely
+ * untested
+ */
+class IXR_Client extends DokuHTTPClient {
+    var $posturl = '';
     var $message = false;
-    var $debug = false;
-    // Storage place for an error message
-    var $error = false;
+    var $xmlerror = false;
+
     function IXR_Client($server, $path = false, $port = 80) {
+        $this->DokuHTTPClient();
         if (!$path) {
             // Assume we have been given a URL instead
-            $bits = parse_url($server);
-            $this->server = $bits['host'];
-            $this->port = isset($bits['port']) ? $bits['port'] : 80;
-            $this->path = isset($bits['path']) ? $bits['path'] : '/';
-            // Make absolutely sure we have a path
-            if (!$this->path) {
-                $this->path = '/';
-            }
-        } else {
-            $this->server = $server;
-            $this->path = $path;
-            $this->port = $port;
+            $this->posturl = $server;
+        }else{
+            $this->posturl = 'http://'.$server.':'.$port.$path;
         }
-        $this->useragent = 'The Incutio XML-RPC PHP Library';
     }
+
     function query() {
         $args = func_get_args();
         $method = array_shift($args);
         $request = new IXR_Request($method, $args);
-        $length = $request->getLength();
         $xml = $request->getXml();
-        $r = "\r\n";
-        $request  = "POST {$this->path} HTTP/1.0$r";
-        $request .= "Host: {$this->server}$r";
-        $request .= "Content-Type: text/xml$r";
-        $request .= "User-Agent: {$this->useragent}$r";
-        $request .= "Content-length: {$length}$r$r";
-        $request .= $xml;
-        // Now send the request
-        if ($this->debug) {
-            echo '<pre>'.htmlspecialchars($request)."\n</pre>\n\n";
-        }
-        $fp = @fsockopen($this->server, $this->port);
-        if (!$fp) {
-            $this->error = new IXR_Error(-32300, 'transport error - could not open socket');
+
+        $this->headers['Content-Type'] = 'text/xml';
+        if(!$this->sendRequest($this->posturl,$xml,'POST')){
+            $this->xmlerror = new IXR_Error(-32300, 'transport error - '.$this->error);
             return false;
         }
-        fputs($fp, $request);
-        $contents = '';
-        $gotFirstLine = false;
-        $gettingHeaders = true;
-        while (!feof($fp)) {
-            $line = fgets($fp, 4096);
-            if (!$gotFirstLine) {
-                // Check line for '200'
-                if (strstr($line, '200') === false) {
-                    $this->error = new IXR_Error(-32300, 'transport error - HTTP status code was not 200');
-                    return false;
-                }
-                $gotFirstLine = true;
-            }
-            if (trim($line) == '') {
-                $gettingHeaders = false;
-            }
-            if (!$gettingHeaders) {
-                $contents .= trim($line)."\n";
-            }
-        }
-        if ($this->debug) {
-            echo '<pre>'.htmlspecialchars($contents)."\n</pre>\n\n";
-        }
+
         // Now parse what we've got back
-        $this->message = new IXR_Message($contents);
+        $this->message = new IXR_Message($this->resp_body);
         if (!$this->message->parse()) {
             // XML error
             $this->error = new IXR_Error(-32700, 'parse error. not well formed');
@@ -565,13 +526,13 @@ class IXR_Client {
         return $this->message->params[0];
     }
     function isError() {
-        return (is_object($this->error));
+        return (is_object($this->xmlerror));
     }
     function getErrorCode() {
-        return $this->error->code;
+        return $this->xmlerror->code;
     }
     function getErrorMessage() {
-        return $this->error->message;
+        return $this->xmlerror->message;
     }
 }
 
@@ -625,8 +586,8 @@ class IXR_Date {
     }
     function parseTimestamp($timestamp) {
         $this->year = date('Y', $timestamp);
-        $this->month = date('Y', $timestamp);
-        $this->day = date('Y', $timestamp);
+        $this->month = date('m', $timestamp);
+        $this->day = date('d', $timestamp);
         $this->hour = date('H', $timestamp);
         $this->minute = date('i', $timestamp);
         $this->second = date('s', $timestamp);
@@ -640,7 +601,7 @@ class IXR_Date {
         $this->second = substr($iso, 15, 2);
     }
     function getIso() {
-        return $this->year.$this->month.$this->day.'T'.$this->hour.':'.$this->minute.':'.$this->second;
+        return $this->year.'-'.$this->month.'-'.$this->day.'T'.$this->hour.':'.$this->minute.':'.$this->second;
     }
     function getXml() {
         return '<dateTime.iso8601>'.$this->getIso().'</dateTime.iso8601>';
@@ -714,8 +675,9 @@ class IXR_IntrospectionServer extends IXR_Server {
         $method = $this->callbacks[$methodname];
         $signature = $this->signatures[$methodname];
         $returnType = array_shift($signature);
-        // Check the number of arguments
-        if (count($args) != count($signature)) {
+        // Check the number of arguments. Check only, if the minimum count of parameters is specified. More parameters are possible.
+        // This is a hack to allow optional parameters...
+        if (count($args) < count($signature)) {
             // print 'Num of args: '.count($args).' Num in signature: '.count($signature);
             return new IXR_Error(-32602, 'server error. wrong number of method parameters');
         }
@@ -811,7 +773,7 @@ class IXR_ClientMulticall extends IXR_Client {
     var $calls = array();
     function IXR_ClientMulticall($server, $path = false, $port = 80) {
         parent::IXR_Client($server, $path, $port);
-        $this->useragent = 'The Incutio XML-RPC PHP Library (multicall client)';
+        //$this->useragent = 'The Incutio XML-RPC PHP Library (multicall client)';
     }
     function addCall() {
         $args = func_get_args();

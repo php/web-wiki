@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
   require_once(DOKU_INC.'inc/template.php');
 
 
@@ -39,12 +39,17 @@ function act_dispatch(){
     }
 
     //login stuff
-    if(in_array($ACT,array('login','logout')))
-      $ACT = act_auth($ACT);
+    if(in_array($ACT,array('login','logout'))){
+        $ACT = act_auth($ACT);
+    }
 
     //check if user is asking to (un)subscribe a page
     if($ACT == 'subscribe' || $ACT == 'unsubscribe')
       $ACT = act_subscription($ACT);
+
+    //check if user is asking to (un)subscribe a namespace
+    if($ACT == 'subscribens' || $ACT == 'unsubscribens')
+      $ACT = act_subscriptionns($ACT);
 
     //check permissions
     $ACT = act_permcheck($ACT);
@@ -66,8 +71,13 @@ function act_dispatch(){
     }
 
     //save
-    if($ACT == 'save')
-      $ACT = act_save($ACT);
+    if($ACT == 'save'){
+      if(checkSecurityToken()){
+        $ACT = act_save($ACT);
+      }else{
+        $ACT = 'show';
+      }
+    }
 
     //cancel conflicting edit
     if($ACT == 'cancel')
@@ -163,7 +173,7 @@ function act_clean($act){
   //disable all acl related commands if ACL is disabled
   if(!$conf['useacl'] && in_array($act,array('login','logout','register','admin',
                                              'subscribe','unsubscribe','profile',
-                                             'resendpwd',))){
+                                             'resendpwd','subscribens','unsubscribens',))){
     msg('Command unavailable: '.htmlspecialchars($act),-1);
     return 'show';
   }
@@ -172,7 +182,7 @@ function act_clean($act){
                           'preview','search','show','check','index','revisions',
                           'diff','recent','backlink','admin','subscribe',
                           'unsubscribe','profile','resendpwd','recover','wordblock',
-                          'draftdel',)) && substr($act,0,7) != 'export_' ) {
+                          'draftdel','subscribens','unsubscribens',)) && substr($act,0,7) != 'export_' ) {
     msg('Command unknown: '.htmlspecialchars($act),-1);
     return 'show';
   }
@@ -356,6 +366,9 @@ function act_export($act){
   global $ID;
   global $REV;
 
+  // search engines: never cache exported docs! (Google only currently)
+  header('X-Robots-Tag: noindex');
+
   // no renderer for this
   if($act == 'export_raw'){
     header('Content-Type: text/plain; charset=utf-8');
@@ -379,7 +392,9 @@ function act_export($act){
     ptln('</head>');
     ptln('<body>');
     ptln('<div class="dokuwiki export">');
-    print p_wiki_xhtml($ID,$REV,false);
+    $html = p_wiki_xhtml($ID,$REV,false);
+    tpl_toc();
+    echo $html;
     ptln('</div>');
     ptln('</body>');
     ptln('</html>');
@@ -388,14 +403,20 @@ function act_export($act){
 
   // html body only
   if($act == 'export_xhtmlbody'){
-    print p_wiki_xhtml($ID,$REV,false);
+    $html = p_wiki_xhtml($ID,$REV,false);
+    tpl_toc();
+    echo $html;
     exit;
   }
 
   // try to run renderer
   $mode = substr($act,7);
   $text = p_cached_output(wikiFN($ID,$REV), $mode);
+  $headers = p_get_metadata($ID,"format $mode");
   if(!is_null($text)){
+    if(is_array($headers)) foreach($headers as $key => $val){
+        header("$key: $val");
+    }
     print $text;
     exit;
   }
@@ -404,7 +425,7 @@ function act_export($act){
 }
 
 /**
- * Handle 'subscribe', 'unsubscribe'
+ * Handle page 'subscribe', 'unsubscribe'
  *
  * @author Steven Danz <steven-danz@kc.rr.com>
  * @todo   localize
@@ -432,6 +453,49 @@ function act_subscription($act){
       msg(sprintf($lang[$act.'_success'], $INFO['userinfo']['name'], $ID),1);
     } else {
       msg(sprintf($lang[$act.'_error'], $INFO['userinfo']['name'], $ID),1);
+    }
+  }
+
+  return 'show';
+}
+
+/**
+ * Handle namespace 'subscribe', 'unsubscribe'
+ *
+ */
+function act_subscriptionns($act){
+  global $ID;
+  global $INFO;
+  global $lang;
+
+  if(!getNS($ID)) {
+    $file = metaFN(getNS($ID),'.mlist');
+    $ns = "root";
+  } else {
+    $file = metaFN(getNS($ID),'/.mlist');
+    $ns = getNS($ID);
+  }
+
+  // reuse strings used to display the status of the subscribe action
+  $act_msg = rtrim($act, 'ns');
+
+  if ($act=='subscribens' && !$INFO['subscribedns']){
+    if ($INFO['userinfo']['mail']){
+      if (io_saveFile($file,$_SERVER['REMOTE_USER']."\n",true)) {
+        $INFO['subscribedns'] = true;
+        msg(sprintf($lang[$act_msg.'_success'], $INFO['userinfo']['name'], $ns),1);
+      } else {
+        msg(sprintf($lang[$act_msg.'_error'], $INFO['userinfo']['name'], $ns),1);
+      }
+    } else {
+      msg($lang['subscribe_noaddress']);
+    }
+  } elseif ($act=='unsubscribens' && $INFO['subscribedns']){
+    if (io_deleteFromFile($file,$_SERVER['REMOTE_USER']."\n")) {
+      $INFO['subscribedns'] = false;
+      msg(sprintf($lang[$act_msg.'_success'], $INFO['userinfo']['name'], $ns),1);
+    } else {
+      msg(sprintf($lang[$act_msg.'_error'], $INFO['userinfo']['name'], $ns),1);
     }
   }
 

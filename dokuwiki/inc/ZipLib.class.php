@@ -53,6 +53,34 @@ class ZipLib
   return $ret;
  }
 
+ /**
+  * Zips recursively the $folder directory, from the $basedir directory
+  */
+ function Compress($folder, $basedir=null, $parent=null)
+ {
+  $full_path = $basedir."/".$parent.$folder;
+  $zip_path = $parent.$folder;
+  if ($zip_path) {
+   $zip_path .= "/";
+   $this->add_dir($zip_path);
+  }
+  $dir = new DirectoryIterator($full_path);
+  foreach($dir as $file) {
+   if(!$file->isDot()) {
+    $filename = $file->getFilename();
+    if($file->isDir()) {
+     $this->Compress($filename, $basedir, $zip_path);
+    } else {
+     $content = join('', file($full_path.'/'.$filename));
+     $this->add_File($content, $zip_path.$filename);
+    }
+   }
+  }
+ }
+
+ /**
+  * Returns the Zip file
+  */
  function get_file()
  {
    $data = implode('', $this -> datasec);
@@ -85,6 +113,9 @@ class ZipLib
    $this -> dirs[] = $name;
  }
 
+ /**
+  * Add a file named $name from a string $data
+  */
  function add_File($data, $name, $compact = 1)
  {
    $name     = str_replace('\\', '/', $name);
@@ -138,16 +169,19 @@ class ZipLib
     ($timearray['minutes'] << 5) | ($timearray['seconds'] >> 1);
  }
 
+ /**
+  * Extract a zip file $zn to the $to directory
+  */
  function Extract ( $zn, $to, $index = Array(-1) )
  {
-   if(!@is_dir($to)) @mkdir($to,0777);
+   if(!@is_dir($to)) $this->_mkdir($to);
    $ok = 0; $zip = @fopen($zn,'rb');
    if(!$zip) return(-1);
    $cdir = $this->ReadCentralDir($zip,$zn);
    $pos_entry = $cdir['offset'];
 
    if(!is_array($index)){ $index = array($index);  }
-   for($i=0; $index[$i];$i++){
+   for($i=0; isset($index[$i]);$i++){
      if(intval($index[$i])!=$index[$i]||$index[$i]>$cdir['entries'])
       return(-1);
    }
@@ -166,7 +200,7 @@ class ZipLib
    return $stat;
  }
 
-  function ReadFileHeader($zip)
+  function ReadFileHeader($zip, $header)
   {
     $binary_data = fread($zip, 30);
     $data = unpack('vchk/vid/vversion/vflag/vcompression/vmtime/vmdate/Vcrc/Vcompressed_size/Vsize/vfilename_len/vextra_len', $binary_data);
@@ -176,9 +210,11 @@ class ZipLib
       $header['extra'] = fread($zip, $data['extra_len']);
     } else { $header['extra'] = ''; }
 
-    $header['compression'] = $data['compression'];$header['size'] = $data['size'];
-    $header['compressed_size'] = $data['compressed_size'];
-    $header['crc'] = $data['crc']; $header['flag'] = $data['flag'];
+    $header['compression'] = $data['compression'];
+    foreach (array('size','compressed_size','crc') as $hd) { // On ODT files, these headers are 0. Keep the previous value.
+        if ($data[$hd] != 0) $header[$hd] = $data[$hd];
+    }
+    $header['flag'] = $data['flag'];
     $header['mdate'] = $data['mdate'];$header['mtime'] = $data['mtime'];
 
     if ($header['mdate'] && $header['mtime']){
@@ -258,7 +294,7 @@ class ZipLib
 
  function ExtractFile($header,$to,$zip)
  {
-   $header = $this->readfileheader($zip);
+   $header = $this->readfileheader($zip, $header);
 
    if(substr($to,-1)!="/") $to.="/";
    if(substr($header['filename'],-1)=="/")
@@ -276,7 +312,7 @@ class ZipLib
 //   }
   if (!$this->_mkdir($to.dirname($header['filename']))) return (-1);   //--CS
 
-  if (!($header['external']==0x41FF0010)&&!($header['external']==16))
+  if (!array_key_exists("external", $header) || (!($header['external']==0x41FF0010)&&!($header['external']==16)))
   {
    if ($header['compression']==0)
    {
@@ -346,8 +382,94 @@ class ZipLib
  //--CS start
  // centralize mkdir calls and use dokuwiki io functions  
  function _mkdir($d) {
-    return ap_mkdir($d);  
+    return io_mkdir_p($d);  
  }
  //--CS end
+
+
+ function ExtractStr($zn, $name) {
+   $ok = 0; 
+   $zip = @fopen($zn,'rb');
+   if(!$zip) return(NULL);
+   $cdir = $this->ReadCentralDir($zip,$zn);
+   $pos_entry = $cdir['offset'];
+
+   for ($i=0; $i<$cdir['entries']; $i++)
+   {
+     @fseek($zip, $pos_entry);
+     $header = $this->ReadCentralFileHeaders($zip);
+     $header['index'] = $i; 
+     $pos_entry = ftell($zip);
+     @rewind($zip); 
+     fseek($zip, $header['offset']);
+     if ($name == $header['stored_filename'] || $name == $header['filename']) {
+       $str = $this->ExtractStrFile($header, $zip);
+       fclose($zip);
+       return $str;
+     }
+      
+   }
+   fclose($zip);
+   return null;
+ }
+  
+  function ExtractStrFile($header,$zip) {
+    $hdr = $this->readfileheader($zip);
+    $binary_data = '';
+    if (!($header['external']==0x41FF0010) && !($header['external']==16))
+      {
+	if ($header['compression']==0)
+	  { 
+	    while ($size != 0)
+	      {
+		$read_size = ($size < 2048 ? $size : 2048);
+		$buffer = fread($zip, $read_size);
+		$binary_data .= pack('a'.$read_size, $buffer);
+		$size -= $read_size;
+	      }
+	    return $binary_data;
+	  } else {
+	    $size = $header['compressed_size'];
+	    if ($size == 0) {
+	      return '';
+	    }
+	    //Just in case
+	    if ($size > ($this->_ret_bytes(ini_get('memory_limit'))/2)) {
+	      die("Compressed file is to huge to be uncompress in memory.");
+	    }
+	    while ($size != 0)
+	      {
+		$read_size = ($size < 2048 ? $size : 2048);
+		$buffer = fread($zip, $read_size);
+		$binary_data .= pack('a'.$read_size, $buffer);
+		$size -= $read_size;
+	      }
+	    $str = gzinflate($binary_data, $header['size']);
+	    if ($header['crc'] == crc32($str)) {
+	      return $str;
+	    } else {
+	      die("Crc Error");
+	    }
+	  }
+      }
+    return NULL;
+  }
+  
+ function _ret_bytes($val) {
+   $val = trim($val);
+   $last = $val{strlen($val)-1};
+   switch($last) {
+   case 'k':
+   case 'K':
+     return (int) $val * 1024;
+     break;
+   case 'm':
+   case 'M':
+     return (int) $val * 1048576;
+     break;
+   default:
+     return $val;
+   }
+ }
 }
 

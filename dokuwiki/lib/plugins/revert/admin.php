@@ -1,5 +1,7 @@
 <?php
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../../').'/');
+// must be run within Dokuwiki
+if(!defined('DOKU_INC')) die();
+
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'admin.php');
 require_once(DOKU_INC.'inc/changelog.php');
@@ -29,7 +31,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
         return array(
             'author' => 'Andreas Gohr',
             'email'  => 'andi@splitbrain.org',
-            'date'   => '2007-04-22',
+            'date'   => '2008-05-94',
             'name'   => 'Revert Manager',
             'desc'   => 'Allows you to mass revert recent edits',
             'url'    => 'http://wiki.splitbrain.org/plugin:revert',
@@ -65,7 +67,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
 
         $this->_searchform();
 
-        if(is_array($_REQUEST['revert'])){
+        if(is_array($_REQUEST['revert']) && checkSecurityToken()){
             $this->_revert($_REQUEST['revert'],$_REQUEST['filter']);
         }elseif(isset($_REQUEST['filter'])){
             $this->_list($_REQUEST['filter']);
@@ -77,12 +79,12 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
      */
     function _searchform(){
         global $lang;
-        echo '<form action="" method="post">';
+        echo '<form action="" method="post"><div class="no">';
         echo '<label>'.$this->getLang('filter').': </label>';
         echo '<input type="text" name="filter" class="edit" value="'.hsc($_REQUEST['filter']).'" />';
         echo '<input type="submit" class="button" value="'.$lang['btn_search'].'" />';
         echo ' <span>'.$this->getLang('note1').'</span>';
-        echo '</form><br /><br />';
+        echo '</div></form><br /><br />';
     }
 
     /**
@@ -129,8 +131,9 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
     function _list($filter){
         global $conf;
         echo '<hr /><br />';
-        echo '<form action="" method="post">';
+        echo '<form action="" method="post"><div class="no">';
         echo '<input type="hidden" name="filter" value="'.hsc($filter).'" />';
+        formSecurityToken();
 
         $recents = getRecents(0,$this->max_lines);
         echo '<ul>';
@@ -143,7 +146,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
             }
 
             $cnt++;
-            $date = date($conf['dformat'],$recent['date']);
+            $date = strftime($conf['dformat'],$recent['date']);
 
             echo ($recent['type']===DOKU_CHANGE_TYPE_MINOR_EDIT) ? '<li class="minor">' : '<li>';
             echo '<div class="li">';
@@ -192,7 +195,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
         printf($this->getLang('note2'),hsc($filter));
         echo '</p>';
 
-        echo '</form>';
+        echo '</div></form>';
     }
 
 }

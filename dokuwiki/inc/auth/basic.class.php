@@ -109,7 +109,8 @@ class auth_basic {
    * If this function is implemented it will be used to
    * authenticate a user - all other DokuWiki internals
    * will not be used for authenticating, thus
-   * implementing the functions below becomes optional.
+   * implementing the checkPass() function is not needed
+   * anymore.
    *
    * The function can be used to authenticate against third
    * party cookies or Apache auth mechanisms and replaces
@@ -159,6 +160,8 @@ class auth_basic {
    * Checks if the given user exists and the given
    * plaintext password is correct
    *
+   * May be ommited if trustExternal is used.
+   *
    * @author  Andreas Gohr <andi@splitbrain.org>
    * @return  bool
    */
@@ -181,7 +184,7 @@ class auth_basic {
    * @return  array containing user data or false
    */
   function getUserData($user) {
-    msg("no valid authorisation system in use", -1);
+    if(!$this->cando['external']) msg("no valid authorisation system in use", -1);
     return false;
   }
 
@@ -189,7 +192,7 @@ class auth_basic {
    * Create a new User [implement only where required/possible]
    *
    * Returns false if the user already exists, null when an error
-   * occured and true if everything went well.
+   * occurred and true if everything went well.
    *
    * The new user HAS TO be added to the default group by this
    * function!
@@ -285,6 +288,36 @@ class auth_basic {
   function retrieveGroups($start=0,$limit=0) {
     msg("authorisation method does not support group list retrieval", -1);
     return array();
+  }
+
+  /**
+   * Check Session Cache validity [implement only where required/possible]
+   *
+   * DokuWiki caches user info in the user's session for the timespan defined
+   * in $conf['securitytimeout'].
+   *
+   * This makes sure slow authentication backends do not slow down DokuWiki.
+   * This also means that changes to the user database will not be reflected
+   * on currently logged in users.
+   *
+   * To accommodate for this, the user manager plugin will touch a reference
+   * file whenever a change is submitted. This function compares the filetime
+   * of this reference file with the time stored in the session.
+   *
+   * This reference file mechanism does not reflect changes done directly in
+   * the backend's database through other means than the user manager plugin.
+   *
+   * Fast backends might want to return always false, to force rechecks on
+   * each page load. Others might want to use their own checking here. If
+   * unsure, do not override.
+   *
+   * @param  string $user - The username
+   * @author Andreas Gohr <andi@splitbrain.org>
+   * @return bool
+   */
+  function useSessionCache($user){
+    global $conf;
+    return ($_SESSION[DOKU_COOKIE]['auth']['time'] >= @filemtime($conf['cachedir'].'/sessionpurge'));
   }
 
 }

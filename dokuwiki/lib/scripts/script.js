@@ -17,6 +17,9 @@ if (clientPC.indexOf('opera')!=-1) {
     var is_opera_seven = (window.opera && document.childNodes);
 }
 
+// prepare empty toolbar for checks by lazy plugins
+var toolbar = '';
+
 /**
  * Rewrite the accesskey tooltips to be more browser and OS specific.
  *
@@ -352,7 +355,7 @@ function footnote(e){
     if (!a){ return; }
 
     // anchor parent is the footnote container, get its innerHTML
-    var content = new String (a.parentNode.innerHTML);
+    var content = new String (a.parentNode.parentNode.innerHTML);
 
     // strip the leading content anchors and their comma separators
     content = content.replace(/<a\s.*?href=\".*\#fnt__\d+\".*?<\/a>/gi, '');

@@ -6,7 +6,7 @@
  * @author     Chris Smith <chris@jalakai.co.uk>
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 
 require_once(DOKU_INC.'inc/io.php');
 require_once(DOKU_INC.'inc/pageutils.php');
@@ -105,10 +105,10 @@ class cache {
    * cache $data
    *
    * @param   string $data   the data to be cached
-   * @return  none
+   * @return  bool           true on success, false otherwise
    */
   function storeCache($data) {
-    io_savefile($this->cache, $data);
+    return io_savefile($this->cache, $data);
   }
 
   /**
@@ -233,7 +233,7 @@ class cache_renderer extends cache_parser {
 
         if (!empty($links)) {
           foreach ($links as $id => $exists) {
-            if ($exists != @file_exists(wikiFN($id,'',false))) return false;
+            if ($exists != page_exists($id,'',false)) return false;
           }
         }
       }
@@ -286,6 +286,6 @@ class cache_instructions extends cache_parser {
   }
 
   function storeCache($instructions) {
-    io_savefile($this->cache,serialize($instructions));
+    return io_savefile($this->cache,serialize($instructions));
   }
 }

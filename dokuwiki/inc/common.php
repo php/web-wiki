@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 require_once(DOKU_CONF.'dokuwiki.php');
 require_once(DOKU_INC.'inc/io.php');
 require_once(DOKU_INC.'inc/changelog.php');
@@ -39,8 +39,8 @@ function hsc($string){
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function ptln($string,$intend=0){
-  echo str_repeat(' ', $intend)."$string\n";
+function ptln($string,$indent=0){
+  echo str_repeat(' ', $indent)."$string\n";
 }
 
 /**
@@ -50,6 +50,44 @@ function ptln($string,$intend=0){
  */
 function stripctl($string){
   return preg_replace('/[\x00-\x1F]+/s','',$string);
+}
+
+/**
+ * Return a secret token to be used for CSRF attack prevention
+ *
+ * @author  Andreas Gohr <andi@splitbrain.org>
+ * @link    http://en.wikipedia.org/wiki/Cross-site_request_forgery
+ * @link    http://christ1an.blogspot.com/2007/04/preventing-csrf-efficiently.html
+ * @return  string
+ */
+function getSecurityToken(){
+  return md5(auth_cookiesalt().session_id());
+}
+
+/**
+ * Check the secret CSRF token
+ */
+function checkSecurityToken($token=null){
+  if(is_null($token)) $token = $_REQUEST['sectok'];
+  if(getSecurityToken() != $token){
+    msg('Security Token did not match. Possible CSRF attack.',-1);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Print a hidden form field with a secret CSRF token
+ *
+ * @author  Andreas Gohr <andi@splitbrain.org>
+ */
+function formSecurityToken($print=true){
+  $ret = '<div class="no"><input type="hidden" name="sectok" value="'.getSecurityToken().'" /></div>'."\n";
+  if($print){
+    echo $ret;
+  }else{
+    return $ret;
+  }
 }
 
 /**
@@ -70,10 +108,11 @@ function pageinfo(){
   $info['rev'] = $REV;
 
   if($_SERVER['REMOTE_USER']){
-    $info['userinfo']   = $USERINFO;
-    $info['perm']       = auth_quickaclcheck($ID);
-    $info['subscribed'] = is_subscribed($ID,$_SERVER['REMOTE_USER']);
-    $info['client']     = $_SERVER['REMOTE_USER'];
+    $info['userinfo']     = $USERINFO;
+    $info['perm']         = auth_quickaclcheck($ID);
+    $info['subscribed']   = is_subscribed($ID,$_SERVER['REMOTE_USER'],false);
+    $info['subscribedns'] = is_subscribed($ID,$_SERVER['REMOTE_USER'],true);
+    $info['client']       = $_SERVER['REMOTE_USER'];
 
     // set info about manager/admin status
     $info['isadmin']   = false;
@@ -98,7 +137,7 @@ function pageinfo(){
 
   $info['namespace'] = getNS($ID);
   $info['locked']    = checklock($ID);
-  $info['filepath']  = realpath(wikiFN($ID));
+  $info['filepath']  = fullpath(wikiFN($ID));
   $info['exists']    = @file_exists($info['filepath']);
   if($REV){
     //check if current revision was meant
@@ -106,7 +145,7 @@ function pageinfo(){
       $REV = '';
     }else{
       //really use old revision
-      $info['filepath'] = realpath(wikiFN($ID,$REV));
+      $info['filepath'] = fullpath(wikiFN($ID,$REV));
       $info['exists']   = @file_exists($info['filepath']);
     }
   }
@@ -197,10 +236,11 @@ function buildURLparams($params, $sep='&amp;'){
  *
  * @author Andreas Gohr
  */
-function buildAttributes($params){
+function buildAttributes($params,$skipempty=false){
   $url = '';
   foreach($params as $key => $val){
     if($key{0} == '_') continue;
+    if($val === '' && $skipempty) continue;
 
     $url .= $key.'="';
     $url .= htmlspecialchars ($val);
@@ -240,7 +280,7 @@ function breadcrumbs(){
   $name = noNSorNS($ID);
   if ($conf['useheading']) {
     // get page title
-    $title = p_get_first_heading($ID);
+    $title = p_get_first_heading($ID,true);
     if ($title) {
       $name = $title;
     }
@@ -318,9 +358,12 @@ function wl($id='',$more='',$abs=false,$sep='&amp;'){
   }elseif($conf['userewrite']){
     $xlink .= $id;
     if($more) $xlink .= '?'.$more;
-  }else{
+  }elseif($id){
     $xlink .= DOKU_SCRIPT.'?id='.$id;
     if($more) $xlink .= $sep.$more;
+  }else{
+    $xlink .= DOKU_SCRIPT;
+    if($more) $xlink .= '?'.$more;
   }
 
   return $xlink;
@@ -480,7 +523,7 @@ function checkwordblock(){
       if(empty($block)) continue;
       $re[]  = $block;
     }
-    if(preg_match('#('.join('|',$re).')#si',$text)) {
+    if(count($re) && preg_match('#('.join('|',$re).')#si',$text)) {
       return true;
     }
   }
@@ -535,6 +578,26 @@ function clientIP($single=false){
   }
   // still here? just use the first (last) address
   return $ip[0];
+}
+
+/**
+ * Convert one or more comma separated IPs to hostnames
+ *
+ * @author Glen Harris <astfgl@iamnota.org>
+ * @returns a comma separated list of hostnames
+ */
+function gethostsbyaddrs($ips){
+  $hosts = array();
+  $ips = explode(',',$ips);
+
+  if(is_array($ips)) {
+    foreach($ips as $ip){
+      $hosts[] = gethostbyaddr(trim($ip));
+    }
+    return join(',',$hosts);
+  } else {
+    return gethostbyaddr(trim($ips));
+  }
 }
 
 /**
@@ -649,14 +712,35 @@ function pageTemplate($data){
   $id = $data[0];
   global $conf;
   global $INFO;
-  $tpl = io_readFile(dirname(wikiFN($id)).'/_template.txt');
+
+  $path = dirname(wikiFN($id));
+
+  if(@file_exists($path.'/_template.txt')){
+    $tpl = io_readFile($path.'/_template.txt');
+  }else{
+    // search upper namespaces for templates
+    $len = strlen(rtrim($conf['datadir'],'/'));
+    while (strlen($path) >= $len){
+      if(@file_exists($path.'/__template.txt')){
+        $tpl = io_readFile($path.'/__template.txt');
+        break;
+      }
+      $path = substr($path, 0, strrpos($path, '/'));
+    }
+  }
+  if(!$tpl) return '';
+
+  // replace placeholders
   $tpl = str_replace('@ID@',$id,$tpl);
   $tpl = str_replace('@NS@',getNS($id),$tpl);
   $tpl = str_replace('@PAGE@',strtr(noNS($id),'_',' '),$tpl);
   $tpl = str_replace('@USER@',$_SERVER['REMOTE_USER'],$tpl);
   $tpl = str_replace('@NAME@',$INFO['userinfo']['name'],$tpl);
   $tpl = str_replace('@MAIL@',$INFO['userinfo']['mail'],$tpl);
-  $tpl = str_replace('@DATE@',date($conf['dformat']),$tpl);
+  $tpl = str_replace('@DATE@',$conf['dformat'],$tpl);
+  // we need the callback to work around strftime's char limit
+  $tpl = preg_replace_callback('/%./',create_function('$m','return strftime($m[0]);'),$tpl);
+
   return $tpl;
 }
 
@@ -700,7 +784,8 @@ function con($pre,$text,$suf,$pretty=false){
     if($suf && substr($text,-1) != "\n") $text .= "\n";
   }
 
-  if($pre) $pre .= "\n";
+  // Avoid double newline above section when saving section edit
+  //if($pre) $pre .= "\n";
   if($suf) $text .= "\n";
   return $pre.$text.$suf;
 }
@@ -748,6 +833,9 @@ function saveWikiText($id,$text,$summary,$minor=false){
   }
 
   if ($wasRemoved){
+    // Send "update" event with empty data, so plugins can react to page deletion
+    $data = array(array($file, '', false), getNS($id), noNS($id), false);
+    trigger_event('IO_WIKIPAGE_WRITE', $data);
     // pre-save deleted revision
     @touch($file);
     clearstatcache();
@@ -757,10 +845,13 @@ function saveWikiText($id,$text,$summary,$minor=false){
     // remove old meta info...
     $mfiles = metaFiles($id);
     $changelog = metaFN($id, '.changes');
+    $metadata  = metaFN($id, '.meta');
     foreach ($mfiles as $mfile) {
-      // but keep per-page changelog to preserve page history
-      if (@file_exists($mfile) && $mfile!==$changelog) { @unlink($mfile); }
+      // but keep per-page changelog to preserve page history and keep meta data
+      if (@file_exists($mfile) && $mfile!==$changelog && $mfile!==$metadata) { @unlink($mfile); }
     }
+    // purge meta data
+    p_purge_metadata($id);
     $del = true;
     // autoset summary on deletion
     if(empty($summary)) $summary = $lang['deleted'];
@@ -850,10 +941,11 @@ function notify($id,$who,$rev='',$summary='',$minor=false,$replace=array()){
     return; //just to be safe
   }
 
-  $text = str_replace('@DATE@',date($conf['dformat']),$text);
+  $ip   = clientIP();
+  $text = str_replace('@DATE@',strftime($conf['dformat']),$text);
   $text = str_replace('@BROWSER@',$_SERVER['HTTP_USER_AGENT'],$text);
-  $text = str_replace('@IPADDRESS@',$_SERVER['REMOTE_ADDR'],$text);
-  $text = str_replace('@HOSTNAME@',gethostbyaddr($_SERVER['REMOTE_ADDR']),$text);
+  $text = str_replace('@IPADDRESS@',$ip,$text);
+  $text = str_replace('@HOSTNAME@',gethostsbyaddrs($ip),$text);
   $text = str_replace('@NEWPAGE@',wl($id,'',true,'&'),$text);
   $text = str_replace('@PAGE@',$id,$text);
   $text = str_replace('@TITLE@',$conf['title'],$text);
@@ -892,20 +984,29 @@ function notify($id,$who,$rev='',$summary='',$minor=false,$replace=array()){
 }
 
 /**
- * extracts the query from a google referer
+ * extracts the query from a search engine referrer
  *
- * @todo   should be more generic and support yahoo et al
  * @author Andreas Gohr <andi@splitbrain.org>
+ * @author Todd Augsburger <todd@rollerorgans.com>
  */
 function getGoogleQuery(){
   $url = parse_url($_SERVER['HTTP_REFERER']);
   if(!$url) return '';
 
-  if(!preg_match("#google\.#i",$url['host'])) return '';
   $query = array();
   parse_str($url['query'],$query);
+  if(isset($query['q']))
+    $q = $query['q'];        // google, live/msn, aol, ask, altavista, alltheweb, gigablast
+  elseif(isset($query['p']))
+    $q = $query['p'];        // yahoo
+  elseif(isset($query['query']))
+    $q = $query['query'];    // lycos, netscape, clusty, hotbot
+  elseif(preg_match("#a9\.com#i",$url['host'])) // a9
+    $q = urldecode(ltrim($url['path'],'/'));
 
-  return $query['q'];
+  if(!$q) return '';
+  $q = preg_split('/[\s\'"\\\\`()\]\[?:!\.{};,#+*<>\\/]+/',$q,-1,PREG_SPLIT_NO_EMPTY);
+  return $q;
 }
 
 /**
@@ -977,12 +1078,20 @@ function obfuscate($email) {
 }
 
 /**
- * Let us know if a user is tracking a page
+ * Let us know if a user is tracking a page or a namespace
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function is_subscribed($id,$uid){
-  $file=metaFN($id,'.mlist');
+function is_subscribed($id,$uid,$ns=false){
+  if(!$ns) {
+    $file=metaFN($id,'.mlist');
+  } else {
+    if(!getNS($id)) {
+      $file = metaFN(getNS($id),'.mlist');
+    } else {
+      $file = metaFN(getNS($id),'/.mlist');
+    }
+  }
   if (@file_exists($file)) {
     $mlist = file($file);
     $pos = array_search($uid."\n",$mlist);
@@ -1002,33 +1111,58 @@ function subscriber_addresslist($id){
   global $conf;
   global $auth;
 
-  $emails = '';
+  if (!$conf['subscribers']) return '';
 
-  if (!$conf['subscribers']) return;
+  $users = array();
+  $emails = array();
 
+  // load the page mlist file content
   $mlist = array();
   $file=metaFN($id,'.mlist');
   if (@file_exists($file)) {
     $mlist = file($file);
-  }
-  if(count($mlist) > 0) {
     foreach ($mlist as $who) {
       $who = rtrim($who);
+      $users[$who] = true;
+    }
+  }
+
+  // load also the namespace mlist file content
+  $ns = getNS($id);
+  while ($ns) {
+    $nsfile = metaFN($ns,'/.mlist');
+    if (@file_exists($nsfile)) {
+      $mlist = file($nsfile);
+      foreach ($mlist as $who) {
+        $who = rtrim($who);
+        $users[$who] = true;
+      }
+    }
+    $ns = getNS($ns);
+  }
+  // root namespace
+  $nsfile = metaFN('','.mlist');
+  if (@file_exists($nsfile)) {
+    $mlist = file($nsfile);
+    foreach ($mlist as $who) {
+      $who = rtrim($who);
+      $users[$who] = true;
+    }
+  }
+  if(!empty($users)) {
+    foreach (array_keys($users) as $who) {
       $info = $auth->getUserData($who);
+      if($info === false) continue;
       $level = auth_aclcheck($id,$who,$info['grps']);
       if ($level >= AUTH_READ) {
         if (strcasecmp($info['mail'],$conf['notify']) != 0) {
-          if (empty($emails)) {
-            $emails = $info['mail'];
-          } else {
-            $emails = "$emails,".$info['mail'];
-          }
+          $emails[] = $info['mail'];
         }
       }
     }
   }
 
-  return $emails;
+  return implode(',',$emails);
 }
 
 /**
@@ -1038,6 +1172,38 @@ function subscriber_addresslist($id){
  */
 function unslash($string,$char="'"){
   return str_replace('\\'.$char,$char,$string);
+}
+
+/**
+ * Convert php.ini shorthands to byte
+ *
+ * @author <gilthans dot NO dot SPAM at gmail dot com>
+ * @link   http://de3.php.net/manual/en/ini.core.php#79564
+ */
+function php_to_byte($v){
+    $l = substr($v, -1);
+    $ret = substr($v, 0, -1);
+    switch(strtoupper($l)){
+        case 'P':
+            $ret *= 1024;
+        case 'T':
+            $ret *= 1024;
+        case 'G':
+            $ret *= 1024;
+        case 'M':
+            $ret *= 1024;
+        case 'K':
+            $ret *= 1024;
+        break;
+    }
+    return $ret;
+}
+
+/**
+ * Wrapper around preg_quote adding the default delimiter
+ */
+function preg_quote_cb($string){
+    return preg_quote($string,'/');
 }
 
 //Setup VIM: ex: et ts=2 enc=utf-8 :

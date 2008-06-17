@@ -1,13 +1,13 @@
 <?php
 /**
- * Utilities for collecting data from config files
+ * Utilities for accessing the parser
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Harry Fuecks <hfuecks@gmail.com>
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
 
   require_once(DOKU_INC.'inc/confutils.php');
   require_once(DOKU_INC.'inc/pageutils.php');
@@ -33,7 +33,7 @@ function p_wiki_xhtml($id, $rev='', $excuse=true){
 
   if($rev){
     if(@file_exists($file)){
-      $ret = p_render('xhtml',p_get_instructions(io_readfile($file)),$info); //no caching on old revisions
+      $ret = p_render('xhtml',p_get_instructions(io_readWikiPage($file,$id,$rev)),$info); //no caching on old revisions
     }elseif($excuse){
       $ret = p_locale_xhtml('norev');
     }
@@ -75,7 +75,7 @@ function p_wiki_xhtml_summary($id, &$title, $rev='', $excuse=true){
   if($rev){
     if(@file_exists($file)){
       //no caching on old revisions
-      $ins = p_get_instructions(io_readfile($file));
+      $ins = p_get_instructions(io_readWikiPage($file,$id,$rev));
     }elseif($excuse){
       $ret = p_locale_xhtml('norev');
       //restore ID (just in case)
@@ -147,7 +147,7 @@ function p_cached_output($file, $format='xhtml', $id='') {
 
   $cache = new cache_renderer($id, $file, $format);
   if ($cache->useCache()) {
-    $parsed = $cache->retrieveCache();
+    $parsed = $cache->retrieveCache(false);
     if($conf['allowdebug'] && $format=='xhtml') $parsed .= "\n<!-- cachefile {$cache->cache} used -->\n";
   } else {
     $parsed = p_render($format, p_cached_instructions($file,false,$id), $info);
@@ -182,9 +182,12 @@ function p_cached_instructions($file,$cacheonly=false,$id='') {
     return $cache->retrieveCache();
   } else if (@file_exists($file)) {
     // no cache - do some work
-    $ins = p_get_instructions(io_readfile($file));
-    $cache->storeCache($ins);
-    $run[$file] = true; // we won't rebuild these instructions in the same run again
+    $ins = p_get_instructions(io_readWikiPage($file,$id));
+    if ($cache->storeCache($ins)) {
+      $run[$file] = true; // we won't rebuild these instructions in the same run again
+    } else {
+      msg('Unable to save cache file. Hint: disk full; file permissions; safe_mode setting.',-1);
+    }
     return $ins;
   }
 
@@ -233,8 +236,8 @@ function p_get_metadata($id, $key=false, $render=false){
   $cache = ($ID == $id);
   $meta = p_read_metadata($id, $cache);
 
-  // metadata has never been rendered before - do it!
-  if ($render && !$meta['current']['description']['abstract']){
+  // metadata has never been rendered before - do it! (but not for non-existent pages)
+  if ($render && !$meta['current']['description']['abstract'] && page_exists($id)){
     $meta = p_render_metadata($id, $meta);
     io_saveFile(metaFN($id, '.meta'), serialize($meta));
 
@@ -246,9 +249,13 @@ function p_get_metadata($id, $key=false, $render=false){
   // filter by $key
   if ($key){
     list($key, $subkey) = explode(' ', $key, 2);
-    if (trim($subkey)) return $meta['current'][$key][$subkey];
+    $subkey = trim($subkey);
 
-    return $meta['current'][$key];
+    if ($subkey) {
+      return isset($meta['current'][$key][$subkey]) ? $meta['current'][$key][$subkey] : null;
+    }
+
+    return isset($meta['current'][$key]) ? $meta['current'][$key] : null;
   }
 
   return $meta['current'];
@@ -279,22 +286,20 @@ function p_set_metadata($id, $data, $render=false, $persistent=true){
     if ($key == 'relation'){
 
       foreach ($value as $subkey => $subvalue){
-        $meta['current'][$key][$subkey] = array_merge($meta['current'][$key][$subkey], $subvalue);
+        $meta['current'][$key][$subkey] = !empty($meta['current'][$key][$subkey]) ? array_merge($meta['current'][$key][$subkey], $subvalue) : $subvalue;
         if ($persistent)
-          $meta['persistent'][$key][$subkey] = array_merge($meta['persistent'][$key][$subkey], $subvalue);
+          $meta['persistent'][$key][$subkey] = !empty($meta['persistent'][$key][$subkey]) ? array_merge($meta['persistent'][$key][$subkey], $subvalue) : $subvalue;
       }
 
     // be careful with some senisitive arrays of $meta
     } elseif (in_array($key, $protected)){
 
-      if (is_array($value)){
-        #FIXME not sure if this is the intended thing:
-        if(!is_array($meta['current'][$key])) $meta['current'][$key] = array($meta['current'][$key]);
-        $meta['current'][$key] = array_merge($meta['current'][$key], $value);
+      // these keys, must have subkeys - a legitimate value must be an array
+      if (is_array($value)) {
+        $meta['current'][$key] = !empty($meta['current'][$key]) ? array_merge($meta['current'][$key],$value) : $value;
 
         if ($persistent) {
-          if(!is_array($meta['persistent'][$key])) $meta['persistent'][$key] = array($meta['persistent'][$key]);
-          $meta['persistent'][$key] = array_merge($meta['persistent'][$key], $value);
+          $meta['persistent'][$key] = !empty($meta['persistent'][$key]) ? array_merge($meta['persistent'][$key],$value) : $value;
         }
       }
 
@@ -315,6 +320,25 @@ function p_set_metadata($id, $data, $render=false, $persistent=true){
   if (!empty($INFO) && ($id == $INFO['id'])) { $INFO['meta'] = $meta['current']; }
 
   return io_saveFile(metaFN($id, '.meta'), serialize($meta));
+}
+
+/**
+ * Purges the non-persistant part of the meta data
+ * used on page deletion
+ *
+ * @author Michael Klier <chi@chimeric.de>
+ */
+function p_purge_metadata($id) {
+    $metafn = metaFN('id', '.meta');
+    $meta   = p_read_metadata($id);
+    foreach($meta['current'] as $key => $value) {
+        if(is_array($meta[$key])) {
+            $meta['current'][$key] = array();
+        } else {
+            $meta['current'][$key] = '';
+        }
+    }
+    return io_saveFile(metaFN($id, '.meta'), serialize($meta));
 }
 
 /**
@@ -373,6 +397,11 @@ function p_read_metadata($id,$cache=false) {
  * @author Esther Brunner <esther@kaffeehaus.ch>
  */
 function p_render_metadata($id, $orig){
+  // make sure the correct ID is in global ID
+  global $ID;
+  $keep = $ID;
+  $ID   = $id;
+
 
   // add an extra key for the event - to tell event handlers the page whose metadata this is
   $orig['page'] = $id;
@@ -383,7 +412,10 @@ function p_render_metadata($id, $orig){
 
     // get instructions
     $instructions = p_cached_instructions(wikiFN($id),false,$id);
-    if(is_null($instructions)) return null; // something went wrong with the instructions
+    if(is_null($instructions)){
+      $ID = $keep;
+      return null; // something went wrong with the instructions
+    }
 
     // set up the renderer
     $renderer = & new Doku_Renderer_metadata();
@@ -400,6 +432,7 @@ function p_render_metadata($id, $orig){
   }
   $evt->advise_after();
 
+  $ID = $keep;
   return $evt->result;
 }
 
@@ -513,29 +546,13 @@ function p_sort_modes($a, $b){
  * @author Harry Fuecks <hfuecks@gmail.com>
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function p_render($mode,$instructions,& $info){
+function p_render($mode,$instructions,&$info){
   if(is_null($instructions)) return '';
 
-  // try default renderer first:
-  $file = DOKU_INC."inc/parser/$mode.php";
-  if(@file_exists($file)){
-    require_once $file;
-    $rclass = "Doku_Renderer_$mode";
+  $Renderer =& p_get_renderer($mode);
+  if (is_null($Renderer)) return null;
 
-    if ( !class_exists($rclass) ) {
-      trigger_error("Unable to resolve render class $rclass",E_USER_WARNING);
-      msg("Renderer for $mode not valid",-1);
-      return null;
-    }
-    $Renderer = & new $rclass();
-  }else{
-    // Maybe a plugin is available?
-    $Renderer =& plugin_load('renderer',$mode);
-    if(is_null($Renderer)){
-      msg("No renderer for $mode found",-1);
-      return null;
-    }
-  }
+  $Renderer->reset();
 
   $Renderer->smileys = getSmileys();
   $Renderer->entities = getEntities();
@@ -558,20 +575,49 @@ function p_render($mode,$instructions,& $info){
   return $Renderer->doc;
 }
 
+function & p_get_renderer($mode) {
+  global $conf;
+
+  $rname = !empty($conf['renderer_'.$mode]) ? $conf['renderer_'.$mode] : $mode;
+
+  // try default renderer first:
+  $file = DOKU_INC."inc/parser/$rname.php";
+  if(@file_exists($file)){
+    require_once $file;
+    $rclass = "Doku_Renderer_$rname";
+
+    if ( !class_exists($rclass) ) {
+      trigger_error("Unable to resolve render class $rclass",E_USER_WARNING);
+      msg("Renderer '$rname' for $mode not valid",-1);
+      return null;
+    }
+    $Renderer = & new $rclass();
+  }else{
+    // Maybe a plugin is available?
+    $Renderer =& plugin_load('renderer',$rname);
+    if(is_null($Renderer)){
+      msg("No renderer '$rname' found for mode '$mode'",-1);
+      return null;
+    }
+  }
+
+  return $Renderer;
+}
+
 /**
  * Gets the first heading from a file
  *
  * @param   string   $id       dokuwiki page id
  * @param   bool     $render   rerender if first heading not known
- *                             default: false  -- this protects against loops where $id requires a
- *                                                first heading further pages which eventually result
- *                                                in a request for a first heading from a page already
- *                                                in the chain (FS#1010)
- *
+ *                             default: true  -- must be set to false for calls from the metadata renderer to
+ *                                               protects against loops and excessive resource usage when pages 
+ *                                               for which only a first heading is required will attempt to
+ *                                               render metadata for all the pages for which they require first
+ *                                               headings ... and so on.
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function p_get_first_heading($id, $render=false){
+function p_get_first_heading($id, $render=true){
   global $conf;
   return $conf['useheading'] ? p_get_metadata($id,'title',$render) : null;
 }
@@ -579,34 +625,50 @@ function p_get_first_heading($id, $render=false){
 /**
  * Wrapper for GeSHi Code Highlighter, provides caching of its output
  *
+ * @param  string   $code       source code to be highlighted
+ * @param  string   $language   language to provide highlighting
+ * @param  string   $wrapper    html element to wrap the returned highlighted text
+ *
  * @author Christopher Smith <chris@jalakai.co.uk>
+ * @author Andreas Gohr <andi@splitbrain.org>
  */
-function p_xhtml_cached_geshi($code, $language) {
+function p_xhtml_cached_geshi($code, $language, $wrapper='pre') {
+  global $conf;
+  $language = strtolower($language);
+
+  // remove any leading or trailing blank lines
+  $code = preg_replace('/^\s*?\n|\s*?\n$/','',$code);
+
   $cache = getCacheName($language.$code,".code");
-
-  if (@file_exists($cache) && !$_REQUEST['purge'] &&
-     (filemtime($cache) > filemtime(DOKU_INC . 'inc/geshi.php'))) {
-
+  $ctime = @filemtime($cache);
+  if($ctime && !$_REQUEST['purge'] &&
+     $ctime > filemtime(DOKU_INC.'inc/geshi.php') &&
+     $ctime > @filemtime(DOKU_INC.'inc/geshi/'.$language.'.php') &&
+     $ctime > filemtime(DOKU_CONF.'dokuwiki.php')){
     $highlighted_code = io_readFile($cache, false);
-    @touch($cache);
 
   } else {
 
     require_once(DOKU_INC . 'inc/geshi.php');
 
-    $geshi = new GeSHi($code, strtolower($language), DOKU_INC . 'inc/geshi');
+    $geshi = new GeSHi($code, $language, DOKU_INC . 'inc/geshi');
     $geshi->set_encoding('utf-8');
     $geshi->enable_classes();
     $geshi->set_header_type(GESHI_HEADER_PRE);
-    $geshi->set_overall_class("code $language");
     $geshi->set_link_target($conf['target']['extern']);
 
-    $highlighted_code = $geshi->parse_code();
-
+    // remove GeSHi's wrapper element (we'll replace it with our own later)
+    // we need to use a GeSHi wrapper to avoid <BR> throughout the highlighted text
+    $highlighted_code = preg_replace('!^<pre[^>]*>|</pre>$!','',$geshi->parse_code());
     io_saveFile($cache,$highlighted_code);
   }
 
-  return $highlighted_code;
+  // add a wrapper element if required
+  if ($wrapper) {
+    return "<$wrapper class=\"code $language\">$highlighted_code</$wrapper>";
+  } else {
+    return $highlighted_code;
+  }
 }
 
 //Setup VIM: ex: et ts=2 enc=utf-8 :

@@ -39,8 +39,10 @@ $lang['btn_delete'] = 'Delete';
 $lang['btn_back']   = 'Back';
 $lang['btn_backlink']    = "Backlinks";
 $lang['btn_backtomedia'] = 'Back to Mediafile Selection';
-$lang['btn_subscribe']   = 'Subscribe Changes';
-$lang['btn_unsubscribe'] = 'Unsubscribe Changes';
+$lang['btn_subscribe']   = 'Subscribe Page Changes';
+$lang['btn_unsubscribe'] = 'Unsubscribe Page Changes';
+$lang['btn_subscribens']   = 'Subscribe Namespace Changes';
+$lang['btn_unsubscribens'] = 'Unsubscribe Namespace Changes';
 $lang['btn_profile']     = 'Update Profile';
 $lang['btn_reset']       = 'Reset';
 $lang['btn_resendpwd']   = 'Send new password';
@@ -95,7 +97,7 @@ $lang['lockexpire']   = 'Lock expires at';
 $lang['willexpire']   = 'Your lock for editing this page is about to expire in a minute.\nTo avoid conflicts use the preview button to reset the locktimer.';
 
 $lang['notsavedyet'] = 'Unsaved changes will be lost.\nReally continue?';
-$lang['rssfailed']   = 'An error occured while fetching this feed: ';
+$lang['rssfailed']   = 'An error occurred while fetching this feed: ';
 $lang['nothingfound']= 'Nothing was found.';
 
 $lang['mediaselect'] = 'Media Files';
@@ -130,7 +132,8 @@ $lang['quickhits']  = 'Matching pagenames';
 $lang['toc']        = 'Table of Contents';
 $lang['current']    = 'current';
 $lang['yours']      = 'Your Version';
-$lang['diff']       = 'show differences to current version';
+$lang['diff']       = 'Show differences to current revisions';
+$lang['diff2']      = 'Show differences between selected revisions';
 $lang['line']       = 'Line';
 $lang['breadcrumb'] = 'Trace';
 $lang['youarehere'] = 'You are here';
@@ -172,13 +175,6 @@ $lang['qb_chars']   = 'Special Chars';
 
 $lang['del_confirm']= 'Really delete selected item(s)?';
 $lang['admin_register']= 'Add new user';
-
-$lang['spell_start'] = 'Check Spelling';
-$lang['spell_stop']  = 'Resume Editing';
-$lang['spell_wait']  = 'Please wait...';
-$lang['spell_noerr'] = 'No Mistakes found';
-$lang['spell_nosug'] = 'No Suggestions';
-$lang['spell_change']= 'Change';
 
 $lang['metaedit']    = 'Edit Metadata';
 $lang['metasaveerr'] = 'Writing metadata failed';
@@ -224,7 +220,7 @@ $lang['i_badhash']    = 'unrecognised or modified dokuwiki.php (hash=<code>%s</c
 $lang['i_badval']     = '<code>%s</code> - illegal or empty value';
 $lang['i_success']    = 'The configuration was finished successfully. You may delete the install.php file now. Continue to
                         <a href="doku.php">your new DokuWiki</a>.';
-$lang['i_failure']    = 'Some errors occured while writing the configuration files. You may need to fix them manually before
+$lang['i_failure']    = 'Some errors occurred while writing the configuration files. You may need to fix them manually before
                          you can use <a href="doku.php">your new DokuWiki</a>.';
 $lang['i_policy']     = 'Initial ACL policy';
 $lang['i_pol0']       = 'Open Wiki (read, write, upload for everyone)';

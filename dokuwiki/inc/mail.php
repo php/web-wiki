@@ -6,7 +6,7 @@
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
+  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
   require_once(DOKU_INC.'inc/utf8.php');
 
   // end of line for mail lines - RFC822 says CRLF but postfix (and other MTAs?)
@@ -34,6 +34,27 @@
  * @see    mail()
  */
 function mail_send($to, $subject, $body, $from='', $cc='', $bcc='', $headers=null, $params=null){
+
+  $message = compact('to','subject','body','from','cc','bcc','headers','params');
+  return trigger_event('MAIL_MESSAGE_SEND',$message,'_mail_send_action');
+}
+
+function _mail_send_action($data) {
+
+  // retrieve parameters from event data, $to, $subject, $body, $from, $cc, $bcc, $headers, $params
+  $to = $data['to'];
+  $subject = $data['subject'];
+  $body = $data['body'];
+
+  // add robustness in case plugin removes any of these optional values
+  $from = isset($data['from']) ? $data['from'] : '';
+  $cc = isset($data['cc']) ? $data['cc'] : '';
+  $bcc = isset($data['bcc']) ? $data['bcc'] : '';
+  $headers = isset($data['headers']) ? $data['headers'] : null;
+  $params = isset($data['params']) ? $data['params'] : null;
+
+  // end additional code to support event ... original mail_send() code from here
+
   if(defined('MAILHEADER_ASCIIONLY')){
     $subject = utf8_deaccent($subject);
     $subject = utf8_strip($subject);
@@ -159,11 +180,11 @@ function mail_encode_address($string,$header='',$names=true){
 // NOTE: there is an unquoted '/' in RFC2822_ATEXT, it must remain unquoted to be used in the parser
 //       the pattern uses non-capturing groups as captured groups aren't allowed in the parser
 //       select pattern delimiters with care!
-if (!defined('RFC2822_ATEXT')) define('RFC2822_ATEXT',"0-9A-Za-z!#$%&'*+/=?^_`{|}~-");
-if (!defined('PREG_PATTERN_VALID_EMAIL')) define('PREG_PATTERN_VALID_EMAIL', '['.RFC2822_ATEXT.']+(?:\.['.RFC2822_ATEXT.']+)*@(?:[0-9A-Za-z][0-9A-Za-z-]*\.)+[A-Za-z]{2,4}');
+if (!defined('RFC2822_ATEXT')) define('RFC2822_ATEXT',"0-9a-zA-Z!#$%&'*+/=?^_`{|}~-");
+if (!defined('PREG_PATTERN_VALID_EMAIL')) define('PREG_PATTERN_VALID_EMAIL', '['.RFC2822_ATEXT.']+(?:\.['.RFC2822_ATEXT.']+)*@(?i:[0-9a-z][0-9a-z-]*\.)+(?i:[a-z]{2,4}|museum|travel)');
 
 function mail_isvalid($email){
-  return preg_match('<^'.PREG_PATTERN_VALID_EMAIL.'$>', $email);
+  return preg_match('<^'.PREG_PATTERN_VALID_EMAIL.'$>i', $email);
 }
 
 /**

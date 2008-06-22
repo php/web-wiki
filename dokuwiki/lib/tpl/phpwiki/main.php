@@ -38,10 +38,50 @@ if (!defined('DOKU_INC')) die();
    @import url("http://static.php.net/www.php.net/styles/print.css");
   </style>
  <!--[if IE]><![endif]><![endif]-->
+  <style type="text/css">
+  div.dokuwiki input.button_disabled {
+    color: #999;
+  }
+  </style>
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
  <link rel="shortcut icon" href="http://static.php.net/www.php.net/favicon.ico" />
  <link rel="search" type="application/opensearchdescription+xml" href="http://www.php.net/phpnetimprovedsearch.src" title="Add PHP.net search" />
  <script type="text/javascript" src="http://static.php.net/www.php.net/userprefs.js"></script>
+ <script type="text/javascript">
+function installSummaryEnforcement()
+{
+    var summary_input = document.getElementById('edit__summary');
+    if(summary_input !== null)
+    {
+        var minoredit_input = document.getElementById('minoredit');
+
+        addEvent(summary_input, 'change', enforceSummary);
+        addEvent(summary_input, 'keyup', enforceSummary);
+        addEvent(minoredit_input, 'change', enforceSummary);
+        addEvent(minoredit_input, 'click', enforceSummary);
+        enforceSummary(); // summary may be there if we're previewing
+    }
+}
+
+function enforceSummary()
+{
+    var btn_save = document.getElementById('edbtn__save');
+    var summary_input = document.getElementById('edit__summary');
+    var minoredit_input = document.getElementById('minoredit');
+    var disabled = false;
+
+    if(summary_input.value.replace(/^\s+/,"") === '' && !minoredit_input.checked)
+        {disabled = true;}
+
+    if(disabled != btn_save.disabled || btn_save.disabled === null)
+    {
+        btn_save.className = disabled ? 'button button_disabled' : 'button';
+        btn_save.disabled = disabled;
+    }
+}
+
+addInitEvent(function(){installSummaryEnforcement();});
+</script>
 </head>
 <body onload="boldEvents();">
 

@@ -41,6 +41,7 @@ class auth_phpcvs extends auth_plain {
      * @return  bool true or int error code
      */
     function _setCVSUser($user){
+      $this->_loadUserData();
       $this->users[$user]['pass'] = null;
       $this->users[$user]['name'] = $user;
       $this->users[$user]['mail'] = $user.'@php.net';
@@ -88,7 +89,7 @@ class auth_phpcvs extends auth_plain {
         return 0;
       }
       if (isset($a["errno"])) {
-        return $a["errno"];
+        return (int)$a["errno"];
       }
 
       $this->_setCVSUser($user);
@@ -109,7 +110,8 @@ class auth_phpcvs extends auth_plain {
 
       if ($cvs_reply === true) {
         return true;
-      } elseif($cvs_reply == 1) {
+      // username did not match an existing username
+      } elseif($cvs_reply < 2) {
         return parent::checkPass($user,$pass);
       }
 

@@ -11,7 +11,7 @@ umask(0775);
 $conf['useacl'] = 1;
 $conf['superuser'] = '@admin';
 $conf['manager'] = '@phpcvs';
-$conf['registernotify'] = 'lsmith@php.net';
+$conf['registernotify'] = 'smith@pooteeweet.org';
 $conf['spellchecker'] = 1;
 $conf['userewrite'] = '1';
 $conf['useslash'] = 1;

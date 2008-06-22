@@ -24,8 +24,8 @@ $conf['allowdebug']  = 0;                 //allow debug output, enable if needed
 /* Display Options */
 
 $conf['start']       = 'start';           //name of start page
-$conf['title']       = 'PHP Wiki';        //what to show in the title
-$conf['template']    = 'phpwiki';         //see tpl directory
+$conf['title']       = 'DokuWiki';        //what to show in the title
+$conf['template']    = 'default';         //see tpl directory
 $conf['fullpath']    = 0;                 //show full path of the document or relative to datadir only? 0|1
 $conf['recent']      = 20;                //how many entries to show in recent
 $conf['breadcrumbs'] = 10;                //how many recent visited pages to show
@@ -60,7 +60,7 @@ $conf['iexssprotect']= 1;                 // check for JavaScript and HTML in up
 
 $conf['useacl']      = 0;                //Use Access Control Lists to restrict access?
 $conf['autopasswd']  = 1;                //autogenerate passwords and email them to user
-$conf['authtype']    = 'phpcvs';          //which authentication backend should be used
+$conf['authtype']    = 'plain';          //which authentication backend should be used
 $conf['passcrypt']   = 'smd5';           //Used crypt method (smd5,md5,sha1,ssha,crypt,mysql,my411)
 $conf['defaultgroup']= 'user';           //Default groups new Users are added to
 $conf['superuser']   = '!!not set!!';    //The admin can be user or @group or comma separated list user1,@group1,user2
@@ -108,7 +108,7 @@ $conf['rss_linkto'] = 'diff';            //what page RSS entries link to:
                                          //  'page'    - the revised page itself
                                          //  'rev'     - page showing all revisions
                                          //  'current' - most recent revision of page
-$conf['rss_content'] = 'htmldiff';       // what to put in the items by deafult?
+$conf['rss_content'] = 'abstract';       // what to put in the items by deafult?
                                          //  'abstract' - plain text, first paragraph or so
                                          //  'diff'     - plain text unified diff wrapped in <pre> tags
                                          //  'htmldiff' - diff as HTML table
@@ -143,3 +143,4 @@ $conf['ftp']['port'] = '21';
 $conf['ftp']['user'] = 'user';
 $conf['ftp']['pass'] = 'password';
 $conf['ftp']['root'] = '/home/user/htdocs';
+

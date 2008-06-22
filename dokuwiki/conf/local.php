@@ -8,7 +8,6 @@
 
 umask(0775);
 
-$conf['title'] = 'PHP Wiki';
 $conf['useacl'] = 1;
 $conf['superuser'] = '@admin';
 $conf['manager'] = '@phpcvs';
@@ -20,6 +19,10 @@ $conf['mailfrom'] = 'php-webmaster@php.net';
 $conf['send404'] = 1;
 $conf['plugin']['hcalendar']['locale'] = 'en_US';
 $conf['updatecheck'] = 0;
+$conf['rss_content'] = 'htmldiff';
+$conf['title']       = 'PHP Wiki';
+$conf['template']    = 'phpwiki';
+$conf['authtype']    = 'phpcvs';
 
 @include(DOKU_CONF.'local.protected.php');
 

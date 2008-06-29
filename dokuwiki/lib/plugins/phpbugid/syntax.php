@@ -74,11 +74,12 @@ class  syntax_plugin_phpbugid extends DokuWiki_Syntax_Plugin {
             $name = 'bug #'.$bugid;
         }
 
-//        $name = $renderer->_xmlEntities($renderer->_getLinkTitle($name, $url, $isImage));
-        $name = $renderer->externallink($name, $url);
         $url = 'http://bugs.php.net/bug.php?id='.$bugid;
 
-        $class='wikilink1';
+//        $name = $renderer->_xmlEntities($renderer->_getLinkTitle($name, $url, $isImage));
+        $name = $renderer->_getLinkTitle($name, $url, $isImage);
+
+        $class='urlextern';
         $link['target'] = $conf['target']['wiki'];
         $link['style']  = '';
         $link['pre']    = '';
@@ -87,7 +88,7 @@ class  syntax_plugin_phpbugid extends DokuWiki_Syntax_Plugin {
         $link['class']  = $class;
         $link['url']    = $url;
         $link['name']   = $name;
-        $link['title']  = $renderer->_xmlEntities($url);
+        $link['title']  = $renderer->_xmlEntities($name);
 
         //output formatted
         return $renderer->_formatLink($link);

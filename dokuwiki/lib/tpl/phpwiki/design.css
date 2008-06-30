@@ -550,6 +550,7 @@ div.dokuwiki ul.toc {
 div.dokuwiki ul.toc li {
   background: transparent url(images/tocdot2.gif) 0 0.6em no-repeat;
   padding-left: 0.4em;
+  font-size: 100%;
 }
 
 div.dokuwiki ul.toc li.clear {

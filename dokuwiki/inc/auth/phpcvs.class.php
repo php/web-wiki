@@ -19,7 +19,9 @@ class auth_phpcvs extends auth_plain {
      */
     function auth_phpcvs() {
       parent::auth_plain();
-      $this->cando['external']    = true;
+      global $conf;
+      $this->cnf = $conf['auth']['phpcvs'];
+      $this->cando['external'] = true;
     }
 
   function trustExternal($user,$pass,$sticky=false){
@@ -46,7 +48,7 @@ class auth_phpcvs extends auth_plain {
       $this->users[$user]['name'] = $user;
       $this->users[$user]['mail'] = $user.'@php.net';
       $grps = array('phpcvs');
-      if (in_array($user, array('lsmith', 'pajoye', 'philip'))) {
+      if (in_array($user, $this->cnf['admins'])) {
         $grps[] = 'admin';
       }
       $this->users[$user]['grps'] = $grps;

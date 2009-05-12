@@ -6,4 +6,4 @@
 
 Fill in all the information below to create a new account in this wiki. Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address. The login name should be a valid [[doku>wiki:pagename|pagename]].
 
-Once you have completed the registration send an email to the [[mailto:php-webmaster@lists.php.net|php-webmaster]] mailing list to introduce yourself briefly. Please also include the username under which you registered as well as all relevant information about what part of the wiki you want to edit.
+To reduce vandalism, we check registrations, which can take a few hours. Do send a quick introduction to [[mailto:php-webmaster@lists.php.net|php-webmaster]] to say hi, and mention your username, and what you're planning on doing with the wiki. We won't reject anything vaguely reasonable.

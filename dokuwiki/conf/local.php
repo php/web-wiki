@@ -11,7 +11,6 @@ $conf['title'] = 'PHP Wiki';
 $conf['template'] = 'phpwiki';
 $conf['useacl'] = 1;
 $conf['authtype'] = 'phpcvs';
-$conf['auth']['phpcvs'] = array('admins' => array('lsmith', 'pajoye', 'philip', 'scottmac', 'bjori'));
 $conf['superuser'] = '@admin';
 $conf['manager'] = '@phpcvs';
 $conf['registernotify'] = 'php-webmaster@lists.php.net';

@@ -1,9 +1,9 @@
 ====== Register as new user ======
 
-**Note**: For minor modifications (typo/grammar fixes etc.) just email the [[mailto:php-webmaster@lists.php.net|php-webmaster]] mailing list with the url and the change you are suggesting.
+**Note**: For minor modifications (typo/grammar fixes etc.) just email the [[php-webmaster@lists.php.net|php-webmaster]] mailing list with the url and the change you are suggesting.
 
 **Note**: All information on this wiki is **readable without registering**. Write access is controlled however. All users with an account on cvs.php.net have full write access to the wiki and can simply login using their CVS account credentials!
 
 Fill in all the information below to create a new account in this wiki. Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address. The login name should be a valid [[doku>wiki:pagename|pagename]].
 
-To reduce vandalism, we check registrations, which can take a few hours. Do send a quick introduction to [[mailto:php-webmaster@lists.php.net|php-webmaster]] to say hi, and mention your username, and what you're planning on doing with the wiki. We won't reject anything vaguely reasonable.
+To reduce vandalism, we check registrations, which can take a few hours. Do send a quick introduction to [[php-webmaster@lists.php.net|php-webmaster]] to say hi, and mention your username, and what you're planning on doing with the wiki. We won't reject anything vaguely reasonable.

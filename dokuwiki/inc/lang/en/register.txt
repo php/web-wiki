@@ -1,4 +1,14 @@
-====== Register as new user ======
+====== Register as a new wiki user ======
+ 
+Welcome and thank you for desiring a PHP.net wiki account!
+ 
+**Note**: If you find a minor problem with the wiki (like a typo or invalid grammar) then please email the [[php-webmaster@lists.php.net|php-webmaster]] mailing list with the URL, and suggested change.
 
-Fill in all the information below to create a new account in this wiki. Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address. The login name should be a valid [[doku>pagename|pagename]].
+**Note**: All information here is readable without registering. Write access is controlled however. All users with a svn.php.net account have full write access to the wiki, and may simply login with their SVN credentials.
+
+To create a new wiki account, please fill out all of the information below. Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address. The login name should be a valid [[doku>wiki:pagename|pagename]].
+
+To reduce vandalism, we check (and must approve) each individual registration request, and this may take several hours or days. We request you send a quick introduction to [[php-webmaster@lists.php.net|php-webmaster]] to say hi, and mention your username, and what you're planning on doing with the wiki. Doing so means we'll know you're a human (and not a robot) and what you'll be working on.
+
+**Note**: After submitting this registration form, your information (name and email) is sent to the publicly viewable <a href="http://news.php.net/php.webmaster">php-webmaster</a> mailing list, along with your IP address, hostname, and user agent (browser info).
 

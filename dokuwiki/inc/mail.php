@@ -133,6 +133,10 @@ function _mail_send_action($data) {
 
     $body = mail_quotedprintable_encode($body);
 
+    // TODO: fixme hack .. this needs to be in a plugin or config file
+    if (substr($to, -7) === 'php.net') {
+        $params = '-fnoreply@php.net';
+    }
     if($params == null){
         return @mail($to,$subject,$body,$header);
     }else{

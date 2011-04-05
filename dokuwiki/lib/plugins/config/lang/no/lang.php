@@ -6,6 +6,12 @@
  * @author Arild Burud <arildb@met.no>
  * @author Torkill Bruland <torkar-b@online.no>
  * @author Rune M. Andersen <rune.andersen@gmail.com>
+ * @author Jakob Vad Nielsen (me@jakobnielsen.net)
+ * @author Kjell Tore Næsgaard  <kjell.t.nasgaard@ntnu.no>
+ * @author Knut Staring <knutst@gmail.com>
+ * @author Lisa Ditlefsen <lisa@vervesearch.com>
+ * @author Erik Pedersen <erik.pedersen@shaw.ca>
+ * @author Erik Bjørn Pedersen <erik.pedersen@shaw.ca>
  */
 $lang['menu']                  = 'Konfigurasjonsinnstillinger';
 $lang['error']                 = 'Innstillingene ble ikke oppdatert på grunn av en eller flere ugyldig verdier. Vennligst se gjennom endringene og prøv på nytt.
@@ -15,6 +21,11 @@ $lang['nochoice']              = '(ingen andre mulige valg)';
 $lang['locked']                = 'Innstillingene kan ikke oppdateres. Hvis dette ikke er meningen,<br />
 forsikre deg om at fila med de lokale innstillingene har korrekt filnavn<br/>
 og tillatelser.';
+$lang['danger']                = 'Advarsel: Endrig av dette valget kan føre til at wiki og konfigurasjon menyen ikke blir tilgjengelig.';
+$lang['warning']               = 'Advarsel: Endring av dette valget kan føre til utilsiktede atferd.
+
+';
+$lang['security']              = 'Sikkerhets Advarsel: Endring av dette valget kan føre til sikkerhetsrisiko.';
 $lang['_configuration_manager'] = 'Konfigurasjonsinnstillinger';
 $lang['_header_dokuwiki']      = 'Innstillinger for DokuWiki';
 $lang['_header_plugin']        = 'Innstillinger for tillegg';
@@ -23,7 +34,7 @@ $lang['_header_undefined']     = 'Udefinerte innstillinger';
 $lang['_basic']                = 'Grunnleggende innstillinger';
 $lang['_display']              = 'Innstillinger for visning av sider';
 $lang['_authentication']       = 'Innstillinger for autentisering';
-$lang['_anti_spam']            = 'Anti-spam-innstillinger';
+$lang['_anti_spam']            = 'Motsøppel-innstillinger';
 $lang['_editing']              = 'Innstillinger for redigering';
 $lang['_links']                = 'Innstillinger for lenker';
 $lang['_media']                = 'Innstillinger for media-filer';
@@ -43,6 +54,7 @@ $lang['savedir']               = 'Mappe for lagring av data';
 $lang['start']                 = 'Sidenavn på forsiden';
 $lang['title']                 = 'Navn på Wikien';
 $lang['template']              = 'Mal';
+$lang['license']               = 'Under hvilken lisens skal ditt innhold utgis?';
 $lang['fullpath']              = 'Vis full sti til sider i bunnteksten';
 $lang['recent']                = 'Siste endringer';
 $lang['breadcrumbs']           = 'Antall nylig besøkte sider som vises';
@@ -53,9 +65,10 @@ $lang['phpok']                 = 'Tillat PHP';
 $lang['dformat']               = 'Datoformat (se <a href="http://www.php.net/strftime">PHPs datofunksjon</a>)';
 $lang['signature']             = 'Signatur';
 $lang['toptoclevel']           = 'Toppnivå for innholdsfortegnelse';
+$lang['tocminheads']           = 'Minimum antall overskrifter som bestemmer om innholdsbetegnelse skal bygges.';
 $lang['maxtoclevel']           = 'Maksimalt antall nivåer i innholdsfortegnelse';
 $lang['maxseclevel']           = 'Maksimalt nivå for redigering av seksjon';
-$lang['camelcase']             = 'Gjør CamelCase til lenke automatisk';
+$lang['camelcase']             = 'Gjør KamelKasse til lenke automatisk';
 $lang['deaccent']              = 'Rensk sidenavn';
 $lang['useheading']            = 'Bruk første overskrift som tittel';
 $lang['refcheck']              = 'Sjekk referanser før mediafiler slettes';
@@ -66,22 +79,26 @@ $lang['indexdelay']            = 'Forsinkelse før indeksering (sekunder)';
 $lang['relnofollow']           = 'Bruk rel="nofollow" på eksterne lenker';
 $lang['mailguard']             = 'Beskytt e-postadresser';
 $lang['iexssprotect']          = 'Sjekk om opplastede filer inneholder skadelig JavaScrips- eller HTML-kode';
+$lang['showuseras']            = 'Hva som skal med når man viser brukeren som sist redigerte en side.';
 $lang['useacl']                = 'Bruk lister for adgangskontroll (ACL)';
 $lang['autopasswd']            = 'Generer passord automatisk';
 $lang['authtype']              = 'Autentiseringsmetode';
 $lang['passcrypt']             = 'Metode for kryptering av passord';
 $lang['defaultgroup']          = 'Standardgruppe';
-$lang['superuser']             = 'Superbruker - en gruppe eller bruker med full tilgang til alle sider og funksjoner uavhengig av ACL-innstillingene';
-$lang['manager']               = 'Administrator - en gruppe eller bruker med tilgang til visse administratorfunksjoner';
+$lang['superuser']             = 'Superbruker - en gruppe, bruker eller liste (kommaseparert) med full tilgang til alle sider og funksjoner uavhengig av ACL-innstillingene';
+$lang['manager']               = 'Administrator - en gruppe, bruker eller liste (kommaseparert) med tilgang til visse administratorfunksjoner';
 $lang['profileconfirm']        = 'Bekreft profilendringer med passord';
 $lang['disableactions']        = 'Skru av følgende DokuWiki-kommandoer';
 $lang['disableactions_check']  = 'Sjekk';
 $lang['disableactions_subscription'] = 'Meld på/av';
-$lang['disableactions_nssubscription'] = 'Navnerom Abonnere /Stoppe abonnement';
 $lang['disableactions_wikicode'] = 'Vis kildekode/eksporter rådata';
 $lang['disableactions_other']  = 'Andre kommandoer (kommaseparert)';
 $lang['sneaky_index']          = 'DokuWiki vil som standard vise alle navnerom i innholdsfortegnelsen. Hvis du skrur på dette alternativet vil brukere bare se de navnerommene der de har lesetilgang. Dette kan føre til at tilgjengelige undernavnerom skjules. Det kan gjøre innholdsfortegnelsen ubrukelig med enkelte ACL-oppsett.';
 $lang['auth_security_timeout'] = 'Autentisering utløper etter (sekunder)';
+$lang['securecookie']          = 'Skal informasjonskapsler satt via HTTPS kun sendes via HTTPS av nettleseren? Skal ikke velges dersom bare innloggingen til din wiki er sikret med SSL, og annen navigering  på wikien er usikret.';
+$lang['xmlrpc']                = 'Slå på/slå av XML-RPC-grensesnitt';
+$lang['xmlrpcuser']            = 'Å tillate XML-RPC-adgang til bestemte grupper eller brukere, sette deres navne (kommaseparert) her. Slik får du tilgang til alle, la feltet tomt.
+';
 $lang['updatecheck']           = 'Se etter oppdateringer og sikkerhetsadvarsler? Denne funksjonen er avhengig av å kontakte splitbrain.org.';
 $lang['userewrite']            = 'Bruk pene URLer';
 $lang['useslash']              = 'Bruk / som skilletegn mellom navnerom i URLer';
@@ -107,10 +124,10 @@ $lang['send404']               = 'Send "HTTP 404/Page Not Found" for ikke-eksist
 $lang['sitemap']               = 'Lag Google-sidekart (dager)';
 $lang['broken_iua']            = 'Er funksjonen ignore_user_abort på ditt system ødelagt? Dette kan gjøre at indeksering av søk ikke fungerer. Dette er et kjent problem med IIS+PHP/CGI. Se <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a> for mer informasjon.';
 $lang['xsendfile']             = 'Bruk X-Sendfile header for å la webserver levere statiske filer? Din webserver må støtte dette.';
-$lang['xmlrpc']                = 'Slå på/slå av XML-RPC-grensesnitt';
 $lang['renderer_xhtml']        = 'Renderer til bruk for wiki-output (XHTML)';
 $lang['renderer__core']        = '%s (dokuwikikjerne)';
 $lang['renderer__plugin']      = '%s (plugin)';
+$lang['rememberme']            = 'Tillat permanente informasjonskapsler for innlogging (husk meg)';
 $lang['rss_type']              = 'Type XML-feed';
 $lang['rss_linkto']            = 'XML-feed lenker til';
 $lang['rss_content']           = 'Hva skal vises i XML-feed elementer?';
@@ -133,6 +150,7 @@ $lang['ftp____port']           = 'FTP-port for safemode-hack';
 $lang['ftp____user']           = 'FTP-brukernavn for safemode-hack';
 $lang['ftp____pass']           = 'FTP-passord for safemode-hack';
 $lang['ftp____root']           = 'FTP-rotmappe for safemode-hack';
+$lang['license_o_']            = 'Ingen valgt';
 $lang['typography_o_0']        = 'ingen';
 $lang['typography_o_1']        = 'Kun doble anførselstegn';
 $lang['typography_o_2']        = 'Alle anførselstegn (virker ikke alltid)';
@@ -165,3 +183,11 @@ $lang['xsendfile_o_0']         = 'ikke bruk';
 $lang['xsendfile_o_1']         = 'Proprietær lighttpd header (før release 1.5)';
 $lang['xsendfile_o_2']         = 'Standard X-Sendfile header';
 $lang['xsendfile_o_3']         = 'Priprietær Nginx X-Accel-Redirect header';
+$lang['showuseras_o_loginname'] = 'Brukernavn';
+$lang['showuseras_o_username'] = 'Brukerens fulle navn';
+$lang['showuseras_o_email']    = 'Brukerens epostadresse (tilpasset i henhold til mailguar-instilling)';
+$lang['showuseras_o_email_link'] = 'Brukerens epost-addresse som "mailto:"-lenke';
+$lang['useheading_o_0']        = 'Aldri';
+$lang['useheading_o_navigation'] = 'Kun navigering';
+$lang['useheading_o_content']  = 'Kun wiki-innhold';
+$lang['useheading_o_1']        = 'Alltid';

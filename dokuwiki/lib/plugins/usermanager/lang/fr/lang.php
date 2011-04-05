@@ -6,6 +6,14 @@
  * @author Delassaux Julien <julien@delassaux.fr>
  * @author Maurice A. LeBlanc <leblancma@cooptel.qc.ca>
  * @author gb@isis.u-strasbg.fr
+ * @author stephane.gully@gmail.com
+ * @author Guillaume Turri <guillaume.turri@gmail.com>
+ * @author Erik Pedersen <erik.pedersen@shaw.ca>
+ * @author olivier duperray <duperray.olivier@laposte.net>
+ * @author Vincent Feltz <psycho@feltzv.fr>
+ * @author Philippe Bajoit <philippe.bajoit@gmail.com>
+ * @author Florian Gaub <floriang@floriang.net>
+ * @author Samuel Dorsaz samuel.dorsaz@novelion.net
  */
 $lang['menu']                  = 'Gestion des utilisateurs';
 $lang['noauth']                = '(authentification utilisateur non disponible)';
@@ -21,8 +29,8 @@ $lang['value']                 = 'Valeur';
 $lang['add']                   = 'Ajouter';
 $lang['delete']                = 'Supprimer';
 $lang['delete_selected']       = 'Supprimer la sélection';
-$lang['edit']                  = 'Éditer';
-$lang['edit_prompt']           = 'Éditer cet utilisateur';
+$lang['edit']                  = 'Modifier';
+$lang['edit_prompt']           = 'Modifier cet utilisateur';
 $lang['modify']                = 'Enregistrer les modifications';
 $lang['search']                = 'Rechercher';
 $lang['search_prompt']         = 'Effectuer la recherche';
@@ -32,9 +40,9 @@ $lang['summary']               = 'Affichage des utilisateurs %1$d-%2$d parmi %3$
 $lang['nonefound']             = 'Aucun utilisateur trouvé. %d utilisateur(s) au total.';
 $lang['delete_ok']             = '%d utilisateurs effacés';
 $lang['delete_fail']           = '%d effacement échoué.';
-$lang['update_ok']             = 'utilisateur mis à jour avec succès';
-$lang['update_fail']           = 'échec de la mise à jour utilisateur';
-$lang['update_exists']         = 'échec du changement de nom d\'utilisateur, le nom spécifié (%s) existe déjà (toutes les autres modifications seront effectuées).';
+$lang['update_ok']             = 'Utilisateur mis à jour avec succès';
+$lang['update_fail']           = 'Échec de la mise à jour utilisateur';
+$lang['update_exists']         = 'Échec du changement de nom d\'utilisateur, le nom spécifié (%s) existe déjà (toutes les autres modifications seront effectuées).';
 $lang['start']                 = 'Démarrage';
 $lang['prev']                  = 'Précédent';
 $lang['next']                  = 'Suivant';
@@ -43,6 +51,7 @@ $lang['edit_usermissing']      = 'Utilisateur sélectionné non trouvé, cet uti
 $lang['user_notify']           = 'Notifier l\'utilisateur ';
 $lang['note_notify']           = 'Envoi de notification par courriel uniquement lorsqu\'un nouveau mot de passe est attribué à l\'utilisateur.';
 $lang['note_group']            = 'Les nouveaux utilisateurs seront ajoutés au groupe par défaut (%s) si aucun groupe n\'est spécifié.';
+$lang['note_pass']             = 'Le mot de passe sera généré automatiquement si le champ est laissé vide et si la notification de l\'utilisateur est activée.';
 $lang['add_ok']                = 'Utilisateur ajouté avec succès';
 $lang['add_fail']              = 'Échec de l\'ajout de l\'utilisateur';
 $lang['notify_ok']             = 'Courriel de notification expédié';

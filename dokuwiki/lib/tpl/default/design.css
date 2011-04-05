@@ -2,7 +2,7 @@
  * Design elements for default Template
  *
  * @author Andreas Gohr <andi@splitbrain.org>
- * @author Anika Henke <henke@cosmocode.de>
+ * @author Anika Henke <anika@selfthinker.org>
  */
 
 /* -------------- general elements --------------- */
@@ -91,7 +91,10 @@ div.dokuwiki textarea.edit {
   background-color: __background__;
   border: 1px solid __border__;
   padding: 0.3em 0 0 0.3em;
-  width: 100%;
+  /* should just be "width: 100%", but IE8 doesn't like it, see FS#1910 + FS#1667 */
+  width: 700px;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* nice alphatransparency background except for IE <7 */
@@ -137,6 +140,7 @@ div.dokuwiki textarea.edit[disabled],
 div.dokuwiki textarea.edit[readonly],
 div.dokuwiki input.edit[disabled],
 div.dokuwiki input.edit[readonly],
+div.dokuwiki input.button[disabled],
 div.dokuwiki select.edit[disabled] {
   background-color: __background_neu__!important;
   color: __text_neu__!important;
@@ -171,8 +175,18 @@ div.dokuwiki div#draft__status {
   color: __text_alt__;
 }
 
-/* --------- buttons ------------------- */
+div.dokuwiki div.license {
+  padding: 0.5em;
+  font-size: 90%;
+  text-align: center;
+}
 
+div.dokuwiki form#dw__editform div.license {
+  clear: left;
+  font-size: 90%;
+}
+
+/* --------- buttons ------------------- */
 
 div.dokuwiki input.button,
 div.dokuwiki button.button {
@@ -394,18 +408,18 @@ div.dokuwiki h4 {font-size: 120%; margin-left: 60px; border-bottom: none; font-w
 div.dokuwiki h5 {font-size: 100%; margin-left: 80px; border-bottom: none; font-weight: bold;}
 
 /* indent different sections */
-div.dokuwiki div.level1 {margin-left: 3px;}
-div.dokuwiki div.level2 {margin-left: 23px;}
-div.dokuwiki div.level3 {margin-left: 43px;}
-div.dokuwiki div.level4 {margin-left: 63px;}
-div.dokuwiki div.level5 {margin-left: 83px;}
+div.dokuwiki div.level1 { margin-left: 3px; }
+div.dokuwiki div.level2 { margin-left: 23px; }
+div.dokuwiki div.level3 { margin-left: 43px; }
+div.dokuwiki div.level4 { margin-left: 63px; }
+div.dokuwiki div.level5 { margin-left: 83px; }
 
 /* unordered lists */
 div.dokuwiki ul {
   line-height: 1.5em;
   list-style-type: square;
   list-style-image: none;
-  margin: 0 0 0.5em 1.5em;
+  margin: 0 0 1em 3.5em;
   color: __text_alt__;
 }
 
@@ -413,9 +427,15 @@ div.dokuwiki ul {
 div.dokuwiki ol {
   line-height: 1.5em;
   list-style-image: none;
-  margin: 0 0 0.5em 1.5em;
+  margin: 0 0 1em 3.5em;
   color: __text_alt__;
   font-weight: bold;
+}
+
+/* no bottom gap in between and smaller left margin for nested lists */
+div.dokuwiki li ul,
+div.dokuwiki li ol {
+  margin: 0 0 0 1.5em;
 }
 
 /* the list items overriding the ul/ol definition */
@@ -424,10 +444,10 @@ div.dokuwiki .li {
   font-weight: normal;
 }
 
-div.dokuwiki ol {list-style-type: decimal}
-div.dokuwiki ol ol {list-style-type: upper-roman}
-div.dokuwiki ol ol ol {list-style-type: lower-alpha}
-div.dokuwiki ol ol ol ol {list-style-type: lower-greek}
+div.dokuwiki ol { list-style-type: decimal; }
+div.dokuwiki ol ol { list-style-type: upper-roman; }
+div.dokuwiki ol ol ol { list-style-type: lower-alpha; }
+div.dokuwiki ol ol ol ol { list-style-type: lower-greek; }
 
 div.dokuwiki li.open {
   list-style-image: url(images/open.gif);
@@ -445,6 +465,7 @@ div.dokuwiki blockquote {
 }
 
 div.dokuwiki pre {
+  font-family: monospace;
   font-size: 120%;
   padding: 0.5em;
   border: 1px dashed __border__;
@@ -462,14 +483,45 @@ div.dokuwiki pre.code {
   background-color: __background_other__;
 }
 
-/* inline code words */
-div.dokuwiki code {
-  font-size: 120%;
-}
-
 /* code blocks by file tag */
 div.dokuwiki pre.file {
   background-color: __background_alt__;
+}
+
+/* filenames for file and code blocks */
+div.dokuwiki dl.file,
+div.dokuwiki dl.code {
+    margin-top: 2em;
+    margin-bottom: 2.5em;
+}
+
+div.dokuwiki dl.file dt,
+div.dokuwiki dl.code dt {
+    border: 1px dashed __border__;
+    display: inline;
+    padding: 0.1em 1em;
+    margin-left: 2em;
+}
+
+div.dokuwiki dl.code dt a,
+div.dokuwiki dl.file dt a {
+    color: __text__;
+}
+
+div.dokuwiki dl.code dt {
+    background-color: __background_other__;
+    border-bottom: 1px solid __background_other__;
+}
+
+div.dokuwiki dl.file dt {
+    background-color: __background_alt__;
+    border-bottom: 1px solid __background_alt__;
+}
+
+
+/* inline code words */
+div.dokuwiki code {
+  font-size: 120%;
 }
 
 /* inline tables */
@@ -577,10 +629,24 @@ div.dokuwiki td.diff-blockheader {
 }
 div.dokuwiki table.diff th {
   border-bottom: 1px solid __border__;
-  font-size: 120%;
+  font-size: 110%;
   width: 50%;
   font-weight: normal;
   text-align: left;
+}
+div.dokuwiki table.diff th a {
+    font-weight: bold;
+}
+div.dokuwiki table.diff th span.user {
+    color: __text__;
+    font-size: 80%;
+}
+div.dokuwiki table.diff th span.sum {
+    font-size: 80%;
+    font-weight: bold;
+}
+div.dokuwiki table.diff th.minor {
+  font-style: italic;
 }
 div.dokuwiki table.diff td {
   font-family: monospace;
@@ -626,6 +692,7 @@ div.insitu-footnote {
   text-align: left;
   padding: 4px;
   max-width: 40%;    /* IE's width is handled in javascript */
+  min-width: 5em;
 }
 
 /* overcome IE issue with one line code or file boxes which require h. scrolling */
@@ -675,8 +742,12 @@ div.dokuwiki ul.search_quickhits {
 
 div.dokuwiki ul.search_quickhits li {
   margin: 0 1.0em 0 1.0em;
-  float:left;
+  float: left;
   width: 30%;
+}
+
+div.dokuwiki .section_highlight {
+  background-color: __background_alt__ !important;
 }
 
 /* ------------------ Additional ---------------------- */
@@ -729,6 +800,10 @@ div.picker {
   background-color: __background_alt__;
 }
 
+div.pk_hl {
+  width: 125px;
+}
+
 button.pickerbutton {
   padding: 0px;
   margin: 0 1px 1px 0;
@@ -760,6 +835,7 @@ div.dokuwiki div.imagemeta {
 }
 
 div.dokuwiki div.imagemeta img.thumb {
-  float:left;
+  float: left;
   margin-right: 0.1em;
 }
+

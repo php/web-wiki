@@ -5,10 +5,7 @@
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
-require_once(DOKU_INC.'inc/HTTPClient.php');
-require_once(DOKU_INC.'inc/SimplePie.php');
-
+if(!defined('DOKU_INC')) die('meh.');
 
 /**
  * We override some methods of the original SimplePie class here

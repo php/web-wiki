@@ -6,9 +6,9 @@ Browser : @BROWSER@
 Indirizzo IP : @IPADDRESS@
 Hostname : @HOSTNAME@
 Dimensione : @SIZE@
-MIME Type : @MIME@
+Tipo MIME : @MIME@
 Utente : @USER@
 
---
+-- 
 Questa email è stata generata dal DokuWiki di
 @DOKUWIKIURL@

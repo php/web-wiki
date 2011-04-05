@@ -6,6 +6,12 @@
  * @author Arild Burud <arildb@met.no>
  * @author Torkill Bruland <torkar-b@online.no>
  * @author Rune M. Andersen <rune.andersen@gmail.com>
+ * @author Jakob Vad Nielsen (me@jakobnielsen.net)
+ * @author Kjell Tore Næsgaard  <kjell.t.nasgaard@ntnu.no>
+ * @author Knut Staring <knutst@gmail.com>
+ * @author Lisa Ditlefsen <lisa@vervesearch.com>
+ * @author Erik Pedersen <erik.pedersen@shaw.ca>
+ * @author Erik Bjørn Pedersen <erik.pedersen@shaw.ca>
  */
 $lang['menu']                  = 'Behandle brukere';
 $lang['noauth']                = '(autentisering av brukere ikke tilgjengelig)';
@@ -43,6 +49,7 @@ $lang['edit_usermissing']      = 'Fant ikke valgte brukere. Det oppgitte brukern
 $lang['user_notify']           = 'Varsle bruker';
 $lang['note_notify']           = 'E-post med varsling blir bare sendt hvis brukeren blir gitt nytt passord.';
 $lang['note_group']            = 'Nye brukere vil bli lagt til standardgruppen (%s) hvis ingen gruppe oppgis.';
+$lang['note_pass']             = 'Passordet vil bli autogenerert dersom feltet er tomt og varsle bruker er valgt.';
 $lang['add_ok']                = 'Brukeren ble lagt til';
 $lang['add_fail']              = 'Brukeren kunne ikke legges til';
 $lang['notify_ok']             = 'Varsling sendt';

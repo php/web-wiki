@@ -5,6 +5,8 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author DoK <kamberd@yahoo.com>
  * @author Dotan Kamber <kamberd@yahoo.com>
+ * @author Moshe Kaplan <mokplan@gmail.com>
+ * @author Yaron Yogev <yaronyogev@gmail.com>
  */
 $lang['menu']                  = 'הגדרות תצורה';
 $lang['error']                 = 'ההגדרות לא עודכנו בגלל ערך לא תקף, נא לעיין בשינויים ולשלוח שנית.
@@ -75,11 +77,11 @@ $lang['profileconfirm']        = 'אשר שינוי פרופילים עם סיס
 $lang['disableactions']        = 'בטל פעולות DokuWiki';
 $lang['disableactions_check']  = 'בדיקה';
 $lang['disableactions_subscription'] = 'הרשמה/הסרה מרשימה';
-$lang['disableactions_nssubscription'] = 'הרשמה / הסרת הרשמה ממרחב שם';
 $lang['disableactions_wikicode'] = 'הצגת המקור/יצוא גולמי';
 $lang['disableactions_other']  = 'פעולות אחרות (מופרדות בפסיק)';
 $lang['sneaky_index']          = 'כברירת מחדל, דוקוויקי יציג את כל מרחבי השמות בתצוגת תוכן הענינים. בחירה באפשרות זאת תסתיר את אלו שבהם למשתמש אין הרשאות קריאה. התוצאה עלולה להיות הסתרת תת מרחבי שמות אליהם יש למשתמש גישה. באופן זה תוכן הענינים עלול להפוך לחסר תועלת עם הגדרות ACL מסוימות';
 $lang['auth_security_timeout'] = 'מגבלת אבטח פסק הזמן להזדהות (שניות)';
+$lang['xmlrpc']                = 'לאפשר.לחסום את מנשק XML-RPC';
 $lang['updatecheck']           = 'בדיקת עידכוני אבטחה והתראות? על DokuWiki להתקשר אל splitbrain.org לצורך כך.';
 $lang['userewrite']            = 'השתמש בכתובות URL יפות';
 $lang['useslash']              = 'השתמש בלוכסן להגדרת מרחבי שמות בכתובות';
@@ -105,7 +107,6 @@ $lang['send404']               = 'שלח "HTTP 404/Page Not Found" עבור דפ
 $lang['sitemap']               = 'צור מפת אתר של Google (ימים)';
 $lang['broken_iua']            = 'האם הפעולה ignore_user_abort תקולה במערכת שלך? הדבר עלול להביא לתוכן חיפוש שאינו תקין. IIS+PHP/CGI ידוע כתקול. ראה את <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">באג 852</a> למידע נוסף';
 $lang['xsendfile']             = 'להשתמש בכותר X-Sendfile כדי לאפשר לשרת לספק קבצים סטטיים? על השרת שלך לתמוך באפשרות זאת.';
-$lang['xmlrpc']                = 'לאפשר.לחסום את מנשק XML-RPC';
 $lang['renderer_xhtml']        = 'מחולל לשימוש עבור פלט הויקי העיקרי (xhtml)';
 $lang['renderer__core']        = '%s (ליבת דוקוויקי)';
 $lang['renderer__plugin']      = '%s (הרחבות)';
@@ -163,3 +164,5 @@ $lang['xsendfile_o_0']         = 'אל תשתמש';
 $lang['xsendfile_o_1']         = 'כותר lighttpd קנייני (לפני גרסה 1.5)';
 $lang['xsendfile_o_2']         = 'כותר X-Sendfile רגיל';
 $lang['xsendfile_o_3']         = 'כותר Nginx X-Accel-Redirect קנייני';
+$lang['useheading_o_navigation'] = 'ניווט בלבד';
+$lang['useheading_o_1']        = 'תמיד';

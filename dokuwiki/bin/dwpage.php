@@ -1,8 +1,9 @@
-#!/usr/bin/php -d short_open_tag=on
+#!/usr/bin/php
 <?php
 #------------------------------------------------------------------------------
 if ('cli' != php_sapi_name()) die();
 
+ini_set('memory_limit','128M');
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
 require_once DOKU_INC.'inc/init.php';
 require_once DOKU_INC.'inc/common.php';
@@ -40,6 +41,7 @@ function usage($action) {
     OPTIONS
         -h, --help=<action>: get help
         -f: force obtaining a lock for the page (generally bad idea)
+        -t, trivial: minor change
         -m (required): Summary message describing the change
 ";
         break;
@@ -96,12 +98,12 @@ function usage($action) {
 #------------------------------------------------------------------------------
 function getUser() {
     $user = getenv('USER');
-    if (empty ($username)) {
+    if (empty ($user)) {
         $user = getenv('USERNAME');
     } else {
         return $user;
     }
-    if (empty ($username)) {
+    if (empty ($user)) {
         $user = 'admin';
     }
     return $user;
@@ -189,11 +191,12 @@ $SYSTEM_ID = '127.0.0.1';
 #------------------------------------------------------------------------------
 $OPTS = Doku_Cli_Opts::getOptions(
     __FILE__,
-    'h::fm:u:s:',
+    'h::fm:u:s:t',
     array(
         'help==',
         'user=',
         'system=',
+        'trivial',
         )
 );
 
@@ -313,7 +316,7 @@ switch ( $OPTS->arg(0) ) {
 
         obtainLock($WIKI_ID);
 
-        saveWikiText($WIKI_ID, file_get_contents($TARGET_FN), $OPTS->get('m'));
+        saveWikiText($WIKI_ID, file_get_contents($TARGET_FN), $OPTS->get('m'), $OPTS->has('t'));
 
         clearLock($WIKI_ID);
 

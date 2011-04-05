@@ -35,26 +35,31 @@ function removeEvent(element, type, handler) {
 function handleEvent(event) {
     var returnValue = true;
     // grab the event object (IE uses a global event object)
-    event = event || fixEvent(window.event);
+    event = event || fixEvent(window.event, this);
     // get a reference to the hash table of event handlers
     var handlers = this.events[event.type];
     // execute each event handler
     for (var i in handlers) {
         if (!handlers.hasOwnProperty(i)) continue;
-        this.$$handleEvent = handlers[i];
-        if (this.$$handleEvent(event) === false) {
+        if (handlers[i].call(this, event) === false) {
             returnValue = false;
         }
     }
     return returnValue;
 };
 
-function fixEvent(event) {
+function fixEvent(event, _this) {
     // add W3C standard event methods
     event.preventDefault = fixEvent.preventDefault;
     event.stopPropagation = fixEvent.stopPropagation;
     // fix target
     event.target = event.srcElement;
+    event.currentTarget = _this;
+    // fix coords
+    var base = (document.documentElement.scrollTop?document.documentElement:document.body);
+    event.pageX = (typeof event.pageX !== 'undefined') ? event.pageX : event.clientX + base.scrollLeft;
+    event.pageY = (typeof event.pageY !== 'undefined') ? event.pageY : event.clientY + base.scrollTop;
+
     return event;
 };
 fixEvent.preventDefault = function() {
@@ -103,8 +108,8 @@ window.fireoninit = function() {
   }
 
   // for Internet Explorer (using conditional comments)
-  /*@cc_on @*/
-  /*@if (@_win32)
+  /*@cc_on
+    @if (@_win32)
     document.write("<scr" + "ipt id=\"__ie_init\" defer=\"true\" src=\"//:\"><\/script>");
     var script = document.getElementById("__ie_init");
     script.onreadystatechange = function() {
@@ -112,7 +117,7 @@ window.fireoninit = function() {
             window.fireoninit(); // call the onload handler
         }
     };
-  /*@end @*/
+    @end @*/
 
   // for Safari
   if (/WebKit/i.test(navigator.userAgent)) { // sniff
@@ -156,4 +161,21 @@ function addInitEvent(func) {
   }
 }
 
-
+/**
+ * Bind variables to a function call creating a closure
+ *
+ * Use this to circumvent variable scope problems when creating closures
+ * inside a loop
+ *
+ * @author  Adrian Lang <lang@cosmocode.de>
+ * @link    http://www.cosmocode.de/en/blog/gohr/2009-10/15-javascript-fixing-the-closure-scope-in-loops
+ * @param   functionref fnc - the function to be called
+ * @param   mixed - any arguments to be passed to the function
+ * @returns functionref
+ */
+function bind (fnc) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return function() {
+        return fnc.apply(this, args);
+    };
+}

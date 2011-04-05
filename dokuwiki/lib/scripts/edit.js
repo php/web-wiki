@@ -1,7 +1,7 @@
 /**
  * Functions for text editing (toolbar stuff)
  *
- * @todo I'm no JS guru please help if you know how to improve
+ * @todo most of the stuff in here should be revamped and then moved to toolbar.js
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
@@ -12,15 +12,18 @@
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function createToolButton(icon,label,key,id){
+function createToolButton(icon,label,key,id,classname){
     var btn = document.createElement('button');
     var ico = document.createElement('img');
 
     // preapare the basic button stuff
     btn.className = 'toolbutton';
+    if(classname){
+        btn.className += ' '+classname;
+    }
     btn.title = label;
     if(key){
-        btn.title += ' [ALT+'+key.toUpperCase()+']';
+        btn.title += ' ['+key.toUpperCase()+']';
         btn.accessKey = key;
     }
 
@@ -49,25 +52,34 @@ function createToolButton(icon,label,key,id){
  * class or the picker buttons with the pickerbutton class. Picker
  * windows are appended to the body and created invisible.
  *
+ * @param  string id    the ID to assign to the picker
+ * @param  array  props the properties for the picker
+ * @param  string edid  the ID of the textarea
+ * @rteurn DOMobject    the created picker
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function createPicker(id,list,icobase,edid){
-    var cnt = list.length;
+function createPicker(id,props,edid){
+    var icobase = props['icobase'];
+    var list    = props['list'];
 
-    var picker = document.createElement('div');
-    picker.className = 'picker';
-    picker.id = id;
-    picker.style.position = 'absolute';
-    picker.style.display  = 'none';
+    // create the wrapping div
+    var picker            = document.createElement('div');
+    picker.className      = 'picker';
+    if(props['class']){
+        picker.className += ' '+props['class'];
+    }
+    picker.id               = id;
+    picker.style.position   = 'absolute';
+    picker.style.marginLeft = '-10000px'; // no display:none, to keep access keys working
+    picker.style.marginTop  = '-10000px';
 
     for(var key in list){
         if (!list.hasOwnProperty(key)) continue;
-        var btn = document.createElement('button');
 
-        btn.className = 'pickerbutton';
-
-        // associative array?
         if(isNaN(key)){
+            // associative array -> treat as image/value pairs
+            var btn = document.createElement('button');
+            btn.className = 'pickerbutton';
             var ico = document.createElement('img');
             if(list[key].substr(0,1) == '/'){
                 ico.src = list[key];
@@ -76,22 +88,27 @@ function createPicker(id,list,icobase,edid){
             }
             btn.title     = key;
             btn.appendChild(ico);
-            eval("btn.onclick = function(){pickerInsert('"+id+"','"+
-                                  jsEscape(key)+"','"+
-                                  jsEscape(edid)+"');return false;}");
-        }else{
+            addEvent(btn,'click',bind(pickerInsert,key,edid));
+            picker.appendChild(btn);
+        }else if(isString(list[key])){
+            // a list of text -> treat as text picker
+            var btn = document.createElement('button');
+            btn.className = 'pickerbutton';
             var txt = document.createTextNode(list[key]);
             btn.title     = list[key];
             btn.appendChild(txt);
-            eval("btn.onclick = function(){pickerInsert('"+id+"','"+
-                                  jsEscape(list[key])+"','"+
-                                  jsEscape(edid)+"');return false;}");
+            addEvent(btn,'click',bind(pickerInsert,list[key],edid));
+            picker.appendChild(btn);
+        }else{
+            // a list of lists -> treat it as subtoolbar
+            initToolbar(picker,edid,list);
+            break; // all buttons handled already
         }
 
-        picker.appendChild(btn);
     }
     var body = document.getElementsByTagName('body')[0];
     body.appendChild(picker);
+    return picker;
 }
 
 /**
@@ -99,103 +116,9 @@ function createPicker(id,list,icobase,edid){
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-function pickerInsert(pickerid,text,edid){
-    // insert
+function pickerInsert(text,edid){
     insertAtCarret(edid,text);
-    // close picker
-    pobj = document.getElementById(pickerid);
-    pobj.style.display = 'none';
-}
-
-/**
- * Show a previosly created picker window
- *
- * @author Andreas Gohr <andi@splitbrain.org>
- */
-function showPicker(pickerid,btn){
-    var picker = document.getElementById(pickerid);
-    var x = findPosX(btn);
-    var y = findPosY(btn);
-    if(picker.style.display == 'none'){
-        picker.style.display = 'block';
-        picker.style.left = (x+3)+'px';
-        picker.style.top = (y+btn.offsetHeight+3)+'px';
-    }else{
-        picker.style.display = 'none';
-    }
-}
-
-/**
- * Create a toolbar
- *
- * @param  string tbid ID of the element where to insert the toolbar
- * @param  string edid ID of the editor textarea
- * @param  array  tb   Associative array defining the buttons
- * @author Andreas Gohr <andi@splitbrain.org>
- */
-function initToolbar(tbid,edid,tb){
-    var toolbar = $(tbid);
-    if(!toolbar) return;
-
-    //empty the toolbar area:
-    toolbar.innerHTML='';
-
-    var cnt = tb.length;
-    for(var i=0; i<cnt; i++){
-        // create new button
-        var btn = createToolButton(tb[i]['icon'],
-                               tb[i]['title'],
-                               tb[i]['key']);
-
-        var actionFunc = 'addBtnAction'+tb[i]['type'].charAt(0).toUpperCase()+tb[i]['type'].substring(1);
-        var exists = eval("typeof("+actionFunc+") == 'function'");
-        if(exists)
-        {
-            if(eval(actionFunc+"(btn, tb[i], edid, i)"))
-                toolbar.appendChild(btn);
-        }
-    } // end for
-}
-
-/**
- * Add button action for format buttons
- *
- * @param  DOMElement btn   Button element to add the action to
- * @param  array      props Associative array of button properties
- * @param  string     edid  ID of the editor textarea
- * @return boolean    If button should be appended
- * @author Gabriel Birke <birke@d-scribe.de>
- */
-function addBtnActionFormat(btn, props, edid)
-{
-    var sample = props['title'];
-    if(props['sample']){ sample = props['sample']; }
-    eval("btn.onclick = function(){insertTags('"+
-        jsEscape(edid)+"','"+
-        jsEscape(props['open'])+"','"+
-        jsEscape(props['close'])+"','"+
-        jsEscape(sample)+
-    "');return false;}");
-
-    return true;
-}
-
-/**
- * Add button action for insert buttons
- *
- * @param  DOMElement btn   Button element to add the action to
- * @param  array      props Associative array of button properties
- * @param  string     edid  ID of the editor textarea
- * @return boolean    If button should be appended
- * @author Gabriel Birke <birke@d-scribe.de>
- */
-function addBtnActionInsert(btn, props, edid)
-{
-    eval("btn.onclick = function(){insertAtCarret('"+
-        jsEscape(edid)+"','"+
-        jsEscape(props['insert'])+
-    "');return false;}");
-    return true;
+    pickerClose();
 }
 
 /**
@@ -207,188 +130,131 @@ function addBtnActionInsert(btn, props, edid)
  * @return boolean    If button should be appended
  * @author Gabriel Birke <birke@d-scribe.de>
  */
-function addBtnActionSignature(btn, props, edid)
-{
+function addBtnActionSignature(btn, props, edid) {
     if(typeof(SIG) != 'undefined' && SIG != ''){
-        eval("btn.onclick = function(){insertAtCarret('"+
-            jsEscape(edid)+"','"+
-            jsEscape(SIG)+
-        "');return false;}");
+        addEvent(btn,'click',bind(insertAtCarret,edid,SIG));
         return true;
     }
     return false;
 }
 
 /**
- * Add button action for picker buttons and create picker element
+ * Make intended formattings easier to handle
  *
- * @param  DOMElement btn   Button element to add the action to
- * @param  array      props Associative array of button properties
- * @param  string     edid  ID of the editor textarea
- * @param  int        id    Unique number of the picker
- * @return boolean    If button should be appended
- * @author Gabriel Birke <birke@d-scribe.de>
- */
-function addBtnActionPicker(btn, props, edid, id)
-{
-    createPicker('picker'+id,
-         props['list'],
-         props['icobase'],
-         edid);
-    eval("btn.onclick = function(){showPicker('picker"+id+
-                                    "',this);return false;}");
-    return true;
-}
-
-/**
- * Add button action for the mediapopup button
+ * Listens to all key inputs and handle indentions
+ * of lists and code blocks
  *
- * @param  DOMElement btn   Button element to add the action to
- * @param  array      props Associative array of button properties
- * @return boolean    If button should be appended
- * @author Gabriel Birke <birke@d-scribe.de>
- */
-function addBtnActionMediapopup(btn, props)
-{
-    eval("btn.onclick = function(){window.open('"+
-        jsEscape(props['url']+encodeURIComponent(NS))+"','"+
-        jsEscape(props['name'])+"','"+
-        jsEscape(props['options'])+
-    "');return false;}");
-    return true;
-}
-
-/**
- * Format selection
+ * Currently handles space, backspce and enter presses
  *
- * Apply tagOpen/tagClose to selection in textarea, use sampleText instead
- * of selection if there is none. Copied and adapted from phpBB
- *
- * @author phpBB development team
- * @author MediaWiki development team
  * @author Andreas Gohr <andi@splitbrain.org>
- * @author Jim Raynor <jim_raynor@web.de>
+ * @fixme handle tabs
  */
-function insertTags(edid,tagOpen, tagClose, sampleText) {
-  var txtarea = document.getElementById(edid);
-  // IE
-  if(document.selection  && !is_gecko) {
-    var theSelection = document.selection.createRange().text;
-    var replaced = true;
-    if(!theSelection){
-      replaced = false;
-      theSelection=sampleText;
-    }
-    txtarea.focus();
+function keyHandler(e){
+    if(e.keyCode != 13 &&
+       e.keyCode != 8  &&
+       e.keyCode != 32) return;
+    var field     = e.target;
+    var selection = getSelection(field);
+    if(selection.getLength()) return; //there was text selected, keep standard behavior
+    var search    = "\n"+field.value.substr(0,selection.start);
+    var linestart = Math.max(search.lastIndexOf("\n"),
+                             search.lastIndexOf("\r")); //IE workaround
+    search = search.substr(linestart);
 
-    // This has change
-    var text = theSelection;
-    if(theSelection.charAt(theSelection.length - 1) == " "){// exclude ending space char, if any
-      theSelection = theSelection.substring(0, theSelection.length - 1);
-      r = document.selection.createRange();
-      r.text = tagOpen + theSelection + tagClose + " ";
-    } else {
-      r = document.selection.createRange();
-      r.text = tagOpen + theSelection + tagClose;
-    }
-    if(!replaced){
-      r.moveStart('character',-text.length-tagClose.length);
-      r.moveEnd('character',-tagClose.length);
-    }
-    r.select();
-  // Mozilla
-  } else if(txtarea.selectionStart || txtarea.selectionStart == '0') {
-    replaced = false;
-    var startPos = txtarea.selectionStart;
-    var endPos   = txtarea.selectionEnd;
-    if(endPos - startPos){ replaced = true; }
-    var scrollTop=txtarea.scrollTop;
-    var myText = (txtarea.value).substring(startPos, endPos);
-    if(!myText) { myText=sampleText;}
-    if(myText.charAt(myText.length - 1) == " "){ // exclude ending space char, if any
-      subst = tagOpen + myText.substring(0, (myText.length - 1)) + tagClose + " ";
-    } else {
-      subst = tagOpen + myText + tagClose;
-    }
-    txtarea.value = txtarea.value.substring(0, startPos) + subst +
-                    txtarea.value.substring(endPos, txtarea.value.length);
-    txtarea.focus();
 
-    //set new selection
-    if(replaced){
-      var cPos=startPos+(tagOpen.length+myText.length+tagClose.length);
-      txtarea.selectionStart=cPos;
-      txtarea.selectionEnd=cPos;
-    }else{
-      txtarea.selectionStart=startPos+tagOpen.length;
-      txtarea.selectionEnd=startPos+tagOpen.length+myText.length;
-    }
-    txtarea.scrollTop=scrollTop;
-  // All others
-  } else {
-    var copy_alertText=alertText;
-    var re1=new RegExp("\\$1","g");
-    var re2=new RegExp("\\$2","g");
-    copy_alertText=copy_alertText.replace(re1,sampleText);
-    copy_alertText=copy_alertText.replace(re2,tagOpen+sampleText+tagClose);
+    if(e.keyCode == 13){ // Enter
+        // keep current indention for lists and code
+        var match = search.match(/(\n  +([\*-] ?)?)/);
+        if(match){
+            var scroll = field.scrollHeight;
+            var match2 = search.match(/^\n  +[\*-]\s*$/);
+            // Cancel list if the last item is empty (i. e. two times enter)
+            if (match2 && field.value.substr(selection.start).match(/^($|\r?\n)/)) {
+                field.value = field.value.substr(0, linestart) + "\n" +
+                              field.value.substr(selection.start);
+                selection.start = linestart + 1;
+                selection.end = linestart + 1;
+                setSelection(selection);
+            } else {
+                insertAtCarret(field.id,match[1]);
+            }
+            field.scrollTop += (field.scrollHeight - scroll);
+            e.preventDefault(); // prevent enter key
+            return false;
+        }
+    }else if(e.keyCode == 8){ // Backspace
+        // unindent lists
+        var match = search.match(/(\n  +)([*-] ?)$/);
+        if(match){
+            var spaces = match[1].length-1;
 
-    if (sampleText) {
-      text=prompt(copy_alertText);
-    } else {
-      text="";
+            if(spaces > 3){ // unindent one level
+                field.value = field.value.substr(0,linestart)+
+                              field.value.substr(linestart+2);
+                selection.start = selection.start - 2;
+                selection.end   = selection.start;
+            }else{ // delete list point
+                field.value = field.value.substr(0,linestart)+
+                              field.value.substr(selection.start);
+                selection.start = linestart;
+                selection.end   = linestart;
+            }
+            setSelection(selection);
+            e.preventDefault(); // prevent backspace
+            return false;
+        }
+    }else if(e.keyCode == 32){ // Space
+        // intend list item
+        var match = search.match(/(\n  +)([*-] )$/);
+        if(match){
+            field.value = field.value.substr(0,linestart)+'  '+
+                          field.value.substr(linestart);
+            selection.start = selection.start + 2;
+            selection.end   = selection.start;
+            setSelection(selection);
+            e.preventDefault(); // prevent space
+            return false;
+        }
     }
-    if(!text) { text=sampleText;}
-    text=tagOpen+text+tagClose;
-    //append to the end
-    txtarea.value += "\n"+text;
-
-    // in Safari this causes scrolling
-    if(!is_safari) {
-      txtarea.focus();
-    }
-
-  }
-  // reposition cursor if possible
-  if (txtarea.createTextRange){
-    txtarea.caretPos = document.selection.createRange().duplicate();
-  }
 }
 
-/*
- * Insert the given value at the current cursor position
+//FIXME consolidate somewhere else
+addInitEvent(function(){
+    var field = $('wiki__text');
+    if(!field) return;
+    // in Firefox, keypress doesn't send the correct keycodes,
+    // in Opera, the default of keydown can't be prevented
+    if (is_opera) {
+        addEvent(field,'keypress',keyHandler);
+    } else {
+        addEvent(field,'keydown',keyHandler);
+    }
+});
+
+/**
+ * Determine the current section level while editing
  *
- * @see http://www.alexking.org/index.php?content=software/javascript/content.php
+ * @author Andreas Gohr <gohr@cosmocode.de>
  */
-function insertAtCarret(edid,value){
-  var field = document.getElementById(edid);
+function currentHeadlineLevel(textboxId){
+    var field     = $(textboxId);
+    var selection = getSelection(field);
+    var search    = "\n"+field.value.substr(0,selection.start);
+    var lasthl    = search.lastIndexOf("\n==");
+    if(lasthl == -1 && field.form.prefix){
+        // we need to look in prefix context
+        search = field.form.prefix.value;
+        lasthl    = search.lastIndexOf("\n==");
+    }
+    search    = search.substr(lasthl+1,6);
 
-  //IE support
-  if (document.selection) {
-    field.focus();
-    sel = document.selection.createRange();
-    sel.text = value;
+    if(search == '======') return 1;
+    if(search.substr(0,5) == '=====') return 2;
+    if(search.substr(0,4) == '====') return 3;
+    if(search.substr(0,3) == '===') return 4;
+    if(search.substr(0,2) == '==') return 5;
 
-  //MOZILLA/NETSCAPE support
-  }else if (field.selectionStart || field.selectionStart == '0') {
-    var startPos  = field.selectionStart;
-    var endPos    = field.selectionEnd;
-    var scrollTop = field.scrollTop;
-    field.value = field.value.substring(0, startPos) +
-                  value +
-                  field.value.substring(endPos, field.value.length);
-
-    field.focus();
-    var cPos=startPos+(value.length);
-    field.selectionStart=cPos;
-    field.selectionEnd=cPos;
-    field.scrollTop=scrollTop;
-  } else {
-    field.value += "\n"+value;
-  }
-  // reposition cursor if possible
-  if (field.createTextRange){
-    field.caretPos = document.selection.createRange().duplicate();
-  }
+    return 0;
 }
 
 
@@ -398,91 +264,68 @@ function insertAtCarret(edid,value){
 var textChanged = false;
 
 /**
- * Check for changes before leaving the page
+ * Delete the draft before leaving the page
  */
-function changeCheck(msg){
-  if(textChanged){
-    var ok = confirm(msg);
-    if(ok){
-        // remove a possibly saved draft using ajax
-        var dwform = $('dw__editform');
-        if(dwform){
-            var params = 'call=draftdel';
-            params += '&id='+encodeURIComponent(dwform.elements.id.value);
+function deleteDraft() {
+    if (is_opera) return;
 
-            var sackobj = new sack(DOKU_BASE + 'lib/exe/ajax.php');
-            sackobj.AjaxFailedAlert = '';
-            sackobj.encodeURIString = false;
-            sackobj.runAJAX(params);
-            // we send this request blind without waiting for
-            // and handling the returned data
-        }
+    // remove a possibly saved draft using ajax
+    var dwform = $('dw__editform');
+    if(dwform){
+        var params = 'call=draftdel';
+        params += '&id='+encodeURIComponent(dwform.elements.id.value);
+
+        var sackobj = new sack(DOKU_BASE + 'lib/exe/ajax.php');
+        // this needs to be synchronous and GET to not be aborted upon page unload
+        sackobj.asynchronous = false;
+        sackobj.method = 'GET';
+        sackobj.AjaxFailedAlert = '';
+        sackobj.encodeURIString = false;
+        sackobj.runAJAX(params);
     }
-    return ok;
-  }else{
-    return true;
-  }
 }
 
 /**
- * Add changeCheck to all Links and Forms (except those with a
- * JSnocheck class), add handlers to monitor changes
+ * Activate "not saved" dialog, add draft deletion to page unload,
+ * add handlers to monitor changes
  *
  * Sets focus to the editbox as well
  */
-function initChangeCheck(msg){
-    if(!document.getElementById){ return false; }
-    // add change check for links
-    var links = document.getElementsByTagName('a');
-    for(var i=0; i < links.length; i++){
-        if(links[i].className.indexOf('JSnocheck') == -1){
-            links[i].onclick = function(){
-                                    var rc = changeCheck(msg);
-                                    if(window.event) window.event.returnValue = rc;
-                                    return rc;
-                               };
-            links[i].onkeypress = function(){
-                                    var rc = changeCheck(msg);
-                                    if(window.event) window.event.returnValue = rc;
-                                    return rc;
-                               };
-        }
-    }
-    // add change check for forms
-    var forms = document.forms;
-    for(i=0; i < forms.length; i++){
-        if(forms[i].className.indexOf('JSnocheck') == -1){
-            forms[i].onsubmit = function(){
-                                    var rc = changeCheck(msg);
-                                    if(window.event) window.event.returnValue = rc;
-                                    return rc;
-                               };
-        }
+addInitEvent(function (){
+    var editform = $('dw__editform');
+    if (!editform) return;
+
+    var edit_text   = $('wiki__text');
+    if(edit_text) {
+        if(edit_text.readOnly) return;
+
+        // set focus
+        edit_text.focus();
     }
 
-    // reset change memory var on submit
-    var btn_save        = document.getElementById('edbtn__save');
-    btn_save.onclick    = function(){ textChanged = false; };
-    btn_save.onkeypress = function(){ textChanged = false; };
-    var btn_prev        = document.getElementById('edbtn__preview');
-    btn_prev.onclick    = function(){ textChanged = false; };
-    btn_prev.onkeypress = function(){ textChanged = false; };
-
-    // add change memory setter
-    var edit_text   = document.getElementById('wiki__text');
-    edit_text.onchange = function(){
+    var checkfunc = function(){
         textChanged = true; //global var
         summaryCheck();
     };
-    edit_text.onkeyup  = summaryCheck;
-    var summary = document.getElementById('edit__summary');
+    addEvent(editform, 'change', checkfunc);
+    addEvent(editform, 'keydown', checkfunc);
+
+    window.onbeforeunload = function(){
+        if(textChanged) {
+            return LANG.notsavedyet;
+        }
+    };
+    window.onunload = deleteDraft;
+
+    // reset change memory var on submit
+    addEvent($('edbtn__save'), 'click', function(){ textChanged = false; });
+    addEvent($('edbtn__preview'), 'click', function(){ textChanged = false; });
+
+    var summary = $('edit__summary');
     addEvent(summary, 'change', summaryCheck);
     addEvent(summary, 'keyup', summaryCheck);
     if (textChanged) summaryCheck();
-
-    // set focus
-    edit_text.focus();
-}
+});
 
 /**
  * Checks if a summary was entered - if not the style is changed
@@ -529,8 +372,7 @@ var locktimer = new locktimer_class();
         locktimer.sack.onCompletion = locktimer.refreshed;
 
         // register refresh event
-        addEvent($('dw__editform').elements.wikitext,'keyup',function(){locktimer.refresh();});
-
+        addEvent($('dw__editform'),'keypress',function(){locktimer.refresh();});
         // start timer
         locktimer.reset();
     };
@@ -571,12 +413,14 @@ var locktimer = new locktimer_class();
         // refresh every minute only
         if(now.getTime() - locktimer.lasttime.getTime() > 30*1000){ //FIXME decide on time
             var params = 'call=lock&id='+encodeURIComponent(locktimer.pageid);
-            if(locktimer.draft){
-                var dwform = $('dw__editform');
+            var dwform = $('dw__editform');
+            if(locktimer.draft && dwform.elements.wikitext){
                 params += '&prefix='+encodeURIComponent(dwform.elements.prefix.value);
                 params += '&wikitext='+encodeURIComponent(dwform.elements.wikitext.value);
                 params += '&suffix='+encodeURIComponent(dwform.elements.suffix.value);
-                params += '&date='+encodeURIComponent(dwform.elements.date.value);
+                if(dwform.elements.date){
+                    params += '&date='+encodeURIComponent(dwform.elements.date.value);
+                }
             }
             locktimer.sack.runAJAX(params);
             locktimer.lasttime = now;

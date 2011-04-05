@@ -9,13 +9,11 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once(DOKU_PLUGIN.'admin.php');
-
 define('CM_KEYMARKER','____');            // used for settings with multiple dimensions of array indices
 
 define('PLUGIN_SELF',dirname(__FILE__).'/');
 define('PLUGIN_METADATA',PLUGIN_SELF.'settings/config.metadata.php');
+if(!defined('DOKU_PLUGIN_IMAGES')) define('DOKU_PLUGIN_IMAGES',DOKU_BASE.'lib/plugins/config/images/');
 
 require_once(PLUGIN_SELF.'settings/config.class.php');  // main configuration class and generic settings classes
 require_once(PLUGIN_SELF.'settings/extra.class.php');   // settings classes specific to these settings
@@ -45,7 +43,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         'date'   => '2007-08-05',
         'name'   => 'Configuration Manager',
         'desc'   => "Manage Dokuwiki's Configuration Settings",
-        'url'    => 'http://wiki.splitbrain.org/plugin:config',
+        'url'    => 'http://dokuwiki.org/plugin:config',
       );
     }
 
@@ -111,7 +109,11 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
       elseif ($this->_changed)
         ptln('<div class="success">'.$this->getLang('updated').'</div>');
 
-      ptln('<form action="'.wl($ID).'" method="post">');
+      // POST to script() instead of wl($ID) so config manager still works if
+      // rewrite config is broken. Add $ID as hidden field to remember
+      // current ID in most cases.
+      ptln('<form action="'.script().'" method="post">');
+      ptln('<input type="hidden" name="id" value="'.$ID.'" />');
       formSecurityToken();
       $this->_print_h1('dokuwiki_settings', $this->getLang('_header_dokuwiki'));
 
@@ -151,11 +153,12 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
           $class = $setting->is_default() ? ' class="default"' : ($setting->is_protected() ? ' class="protected"' : '');
           $error = $setting->error() ? ' class="value error"' : ' class="value"';
+          $icon = $setting->caution() ? '<img src="'.DOKU_PLUGIN_IMAGES.$setting->caution().'.png" alt="'.$setting->caution().'" title="'.$this->getLang($setting->caution()).'" />' : '';
 
           ptln('    <tr'.$class.'>');
           ptln('      <td class="label">');
-          ptln('        <span class="outkey">'.$setting->_out_key(true).'</span>');
-          ptln('        '.$label);
+          ptln('        <span class="outkey">'.$setting->_out_key(true, true).'</span>');
+          ptln('        '.$icon.$label);
           ptln('      </td>');
           ptln('      <td'.$error.'>'.$input.'</td>');
           ptln('    </tr>');

@@ -5,10 +5,18 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Andreas Gohr <andi@splitbrain.org>
  * @author Christof <gagi@fin.de>
- * @author Anika Henke <henke@cosmocode.de>
+ * @author Anika Henke <anika@selfthinker.org>
  * @author Esther Brunner <esther@kaffeehaus.ch>
  * @author Matthias Grimm <matthiasgrimm@users.sourceforge.net>
  * @author Michael Klier <chi@chimeric.de>
+ * @author Leo Moll <leo@yeasoft.com>
+ * @author Florian Anderiasch <fa@art-core.org>
+ * @author Robin Kluth <commi1993@gmail.com>
+ * @author Arne Pelka <mail@arnepelka.de>
+ * @author Dirk Einecke <dirk@dirkeinecke.de>
+ * @author Blitzi94@gmx.de
+ * @author Robert Bogenschneider <robog@GMX.de>
+ * @author Robert Bogenschneider <robog@gmx.de>
  */
 $lang['admin_acl']             = 'Zugangsverwaltung';
 $lang['acl_group']             = 'Gruppe';
@@ -23,8 +31,9 @@ $lang['p_group_id']            = 'Mitglieder der Gruppe <b class="aclgroup">%s</
 $lang['p_group_ns']            = 'Mitglieder der Gruppe <b class="aclgroup">%s</b> haben momentan folgende Berechtigungen für den Namensraum <b class="aclns">%s</b>: <i>%s</i>.';
 $lang['p_choose_id']           = 'Bitte geben Sie in obigem Formular eine <b>einen Nutzer oder eine Gruppe</b> an, um die Berechtigungen für die Seite <b class="aclpage">%s</b> zu sehen oder zu ändern.';
 $lang['p_choose_ns']           = 'Bitte geben Sie in obigem Formular eine <b>einen Nutzer oder eine Gruppe</b> an, um die Berechtigungen für den Namensraum <b class="aclns">%s</b> zu sehen oder zu ändern.';
-$lang['p_inherited']           = 'Hinweis: Diese Berechtigungen wureden nicht explizit gesetzt sondern von anderen Gruppen oder höher liegenden Namensräumen geerbt.';
+$lang['p_inherited']           = 'Hinweis: Diese Berechtigungen wurden nicht explizit gesetzt, sondern von anderen Gruppen oder höher liegenden Namensräumen geerbt.';
 $lang['p_isadmin']             = 'Hinweis: Die ausgewählte Gruppe oder Nutzer haben immer alle Berechtigungen das sie als Superuser konfiguriert wurden.';
+$lang['p_include']             = 'Höhere Berechtigungen schließen niedrigere mit ein. Anlegen, Hochladen und Entfernen gilt nur für Namensräume, nicht für einzelne Seiten';
 $lang['current']               = 'Momentane Zugriffsregeln';
 $lang['where']                 = 'Seite/Namensraum';
 $lang['who']                   = 'Nutzer/Gruppe';

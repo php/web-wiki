@@ -6,6 +6,15 @@
  * @author Per Foreby <per@foreby.se>
  * @author Nicklas Henriksson <nicklas[at]nihe.se>
  * @author Håkan Sandell <hakan.sandell[at]mydata.se>
+ * @author Dennis Karlsson
+ * @author Tormod Otter Johansson <tormod@latast.se>
+ * @author emil@sys.nu
+ * @author Pontus Bergendahl <pontus.bergendahl@gmail.com>
+ * @author Tormod Johansson tormod.otter.johansson@gmail.com
+ * @author Emil Lind <emil@sys.nu>
+ * @author Bogge Bogge <bogge@bogge.com>
+ * @author Peter Åström <eaustreum@gmail.com>
+ * @author Håkan Sandell <hakan.sandell@home.se>
  */
 $lang['menu']                  = 'Hantera inställningar';
 $lang['error']                 = 'Inställningarna uppdaterades inte på grund av ett felaktigt värde. Titta igenom dina ändringar och försök sedan spara igen.
@@ -14,6 +23,9 @@ $lang['updated']               = 'Inställningarna uppdaterade.';
 $lang['nochoice']              = '(inga andra val tillgängliga)';
 $lang['locked']                = 'Filen med inställningar kan inte uppdateras. Om det inte är meningen att det ska vara så, <br />
                        kontrollera att filen med lokala inställningar har rätt namn och filskydd.';
+$lang['danger']                = 'Risk: Denna förändring kan göra wikin och inställningarna otillgängliga.';
+$lang['warning']               = 'Varning: Denna förändring kan orsaka icke åsyftade resultat.';
+$lang['security']              = 'Säkerhetsvarning: Denna förändring kan innebära en säkerhetsrisk.';
 $lang['_configuration_manager'] = 'Hantera inställningar';
 $lang['_header_dokuwiki']      = 'Inställningar för DokuWiki';
 $lang['_header_plugin']        = 'Inställningar för insticksmoduler';
@@ -42,6 +54,7 @@ $lang['savedir']               = 'Katalog för att spara data';
 $lang['start']                 = 'Startsidans namn';
 $lang['title']                 = 'Wikins namn';
 $lang['template']              = 'Mall';
+$lang['license']               = 'Under vilken licens skall ditt innehåll publiceras?';
 $lang['fullpath']              = 'Visa fullständig sökväg i sidfoten';
 $lang['recent']                = 'Antal poster under "Nyligen ändrat"';
 $lang['breadcrumbs']           = 'Antal spår';
@@ -52,6 +65,7 @@ $lang['phpok']                 = 'Tillåt inbäddad PHP';
 $lang['dformat']               = 'Datumformat (se PHP:s <a href="http://www.php.net/strftime">strftime</a>-funktion)';
 $lang['signature']             = 'Signatur';
 $lang['toptoclevel']           = 'Toppnivå för innehållsförteckning';
+$lang['tocminheads']           = 'Minimalt antal rubriker för att avgöra om innehållsförteckning byggs';
 $lang['maxtoclevel']           = 'Maximal nivå för innehållsförteckning';
 $lang['maxseclevel']           = 'Maximal nivå för redigering av rubriker';
 $lang['camelcase']             = 'Använd CamelCase för länkar';
@@ -65,13 +79,14 @@ $lang['indexdelay']            = 'Tidsfördröjning före indexering (sek)';
 $lang['relnofollow']           = 'Använd rel="nofollow" för externa länkar';
 $lang['mailguard']             = 'Koda e-postadresser';
 $lang['iexssprotect']          = 'Kontrollera om uppladdade filer innehåller eventuellt skadlig JavaScript eller HTML-kod';
+$lang['showuseras']            = 'Vad som skall visas när man visar den användare som senast redigerade en sida';
 $lang['useacl']                = 'Använd behörighetslista (ACL)';
 $lang['autopasswd']            = 'Autogenerera lösenord';
 $lang['authtype']              = 'System för autentisering';
 $lang['passcrypt']             = 'Metod för kryptering av lösenord';
 $lang['defaultgroup']          = 'Förvald grupp';
 $lang['superuser']             = 'Huvudadministratör - en grupp eller en användare med full tillgång till alla sidor och funktioner, oavsett behörighetsinställningars';
-$lang['manager']               = 'Administratör - en grupp eller användare med tillgång till vissa administrativa funktioner.';
+$lang['manager']               = 'Administratör -- en grupp eller användare med tillgång till vissa administrativa funktioner.';
 $lang['profileconfirm']        = 'Bekräfta ändringarna i profilen med lösenordet';
 $lang['disableactions']        = 'Stäng av funktioner i DokuWiki';
 $lang['disableactions_check']  = 'Kontroll';
@@ -80,6 +95,9 @@ $lang['disableactions_wikicode'] = 'Visa källkod/Exportera råtext';
 $lang['disableactions_other']  = 'Andra funktioner (kommaseparerade)';
 $lang['sneaky_index']          = 'Som standard visar DokuWiki alla namnrymder på indexsidan. Genom att aktivera det här valet döljer man namnrymder som användaren inte har behörighet att läsa. Det kan leda till att man döljer åtkomliga undernamnrymder, och gör indexet oanvändbart med vissa ACL-inställningar.';
 $lang['auth_security_timeout'] = 'Autentisieringssäkerhets timeout (sekunder)';
+$lang['securecookie']          = 'Skall cookies som sätts via HTTPS endast skickas via HTTPS från webbläsaren? Avaktivera detta alternativ endast om inloggningen till din wiki är säkrad med SSL men läsning av wikin är osäkrad.';
+$lang['xmlrpc']                = 'Aktivera/avaktivera XML-RPC-gränssnitt';
+$lang['xmlrpcuser']            = 'Begränsa XML-RPC tillträde till komma separerade grupper eller användare som ges här. Lämna tomt för att ge tillgång till alla.';
 $lang['updatecheck']           = 'Kontrollera uppdateringar och säkerhetsvarningar? DokuWiki behöver kontakta splitbrain.org för den här funktionen.';
 $lang['userewrite']            = 'Använd rena webbadresser';
 $lang['useslash']              = 'Använd snedstreck för att separera namnrymder i webbadresser';
@@ -88,9 +106,9 @@ $lang['sepchar']               = 'Ersätt blanktecken i webbadresser med';
 $lang['canonical']             = 'Använd fullständiga webbadresser';
 $lang['autoplural']            = 'Leta efter pluralformer av länkar';
 $lang['compression']           = 'Metod för komprimering av gamla versioner';
-$lang['cachetime']             = 'Max livslängd för cache (sek)';
-$lang['locktime']              = 'Max livslängd för fillåsning (sek)';
-$lang['fetchsize']             = 'Max storlek (bytes) som fetch.php får ladda ned  externt';
+$lang['cachetime']             = 'Maximal livslängd för cache (sek)';
+$lang['locktime']              = 'Maximal livslängd för fillåsning (sek)';
+$lang['fetchsize']             = 'Maximal storlek (bytes) som fetch.php får ladda ned  externt';
 $lang['notify']                = 'Skicka meddelande om ändrade sidor till den här e-postadressen';
 $lang['registernotify']        = 'Skicka meddelande om nyregistrerade användare till en här e-postadressen';
 $lang['mailfrom']              = 'Avsändaradress i automatiska e-postmeddelanden';
@@ -105,6 +123,10 @@ $lang['send404']               = 'Skicka "HTTP 404/Page Not Found" för sidor so
 $lang['sitemap']               = 'Skapa Google sitemap (dagar)';
 $lang['broken_iua']            = 'Är funktionen ignore_user_abort trasig på ditt system? Det kan i så fall leda till att indexering av sökningar inte fungerar. Detta är ett känt problem med IIS+PHP/CGI. Se <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a> för mer info.';
 $lang['xsendfile']             = 'Använd X-Sendfile huvudet för att låta webservern leverera statiska filer? Din webserver behöver stöd för detta.';
+$lang['renderer_xhtml']        = 'Generera för användning i huvudwikipresentation (xhtml)';
+$lang['renderer__core']        = '%s (dokuwiki core)';
+$lang['renderer__plugin']      = '%s (plugin)';
+$lang['rememberme']            = 'Tillåt permanenta inloggningscookies (kom ihåg mig)';
 $lang['rss_type']              = 'Typ av XML-flöde';
 $lang['rss_linkto']            = 'XML-flöde pekar på';
 $lang['rss_content']           = 'Vad ska visas för saker i XML-flödet?';
@@ -127,8 +149,10 @@ $lang['ftp____port']           = 'FTP-port för safemode hack';
 $lang['ftp____user']           = 'FTP-användarnamn för safemode hack';
 $lang['ftp____pass']           = 'FTP-lösenord för safemode hack';
 $lang['ftp____root']           = 'FTP-rotkatalog för safemode hack';
+$lang['license_o_']            = 'Ingen vald';
 $lang['typography_o_0']        = 'Inga';
-$lang['typography_o_1']        = 'Citat tecken enbart';
+$lang['typography_o_1']        = 'enbart dubbla citattecken';
+$lang['typography_o_2']        = 'både dubbla och enkla citattecken (fungerar inte alltid)';
 $lang['userewrite_o_0']        = 'av';
 $lang['userewrite_o_1']        = '.htaccess';
 $lang['userewrite_o_2']        = 'DokuWiki internt';
@@ -144,13 +168,25 @@ $lang['rss_type_o_rss2']       = 'RSS 2.0';
 $lang['rss_type_o_atom']       = 'Atom 0.3';
 $lang['rss_type_o_atom1']      = 'Atom 1.0';
 $lang['rss_content_o_abstract'] = 'Abstrakt';
+$lang['rss_content_o_diff']    = 'Unified Diff';
 $lang['rss_content_o_htmldiff'] = 'HTML formaterad diff tabell';
+$lang['rss_content_o_html']    = 'Sidans innehåll i full HTML';
 $lang['rss_linkto_o_diff']     = 'lista på skillnader';
 $lang['rss_linkto_o_page']     = 'den reviderade sidan';
 $lang['rss_linkto_o_rev']      = 'lista över ändringar';
 $lang['rss_linkto_o_current']  = 'den aktuella sidan';
-$lang['compression_o_0']       = 'none';
+$lang['compression_o_0']       = 'ingen';
 $lang['compression_o_gz']      = 'gzip';
 $lang['compression_o_bz2']     = 'bz2';
 $lang['xsendfile_o_0']         = 'använd ej';
-$lang['xsendfile_o_2']         = 'Standard X-Sendfile huvud';
+$lang['xsendfile_o_1']         = 'Proprietär lighttpd-header (före version 1.5)';
+$lang['xsendfile_o_2']         = 'Standard X-Sendfile-huvud';
+$lang['xsendfile_o_3']         = 'Proprietär Nginx X-Accel-Redirect header';
+$lang['showuseras_o_loginname'] = 'Användarnamn';
+$lang['showuseras_o_username'] = 'Namn';
+$lang['showuseras_o_email']    = 'Användarens e-postadress (obfuskerad enligt inställningarna i mailguard)';
+$lang['showuseras_o_email_link'] = 'Användarens e-postadress som mailto: länk';
+$lang['useheading_o_0']        = 'Aldrig';
+$lang['useheading_o_navigation'] = 'Endst navigering';
+$lang['useheading_o_content']  = 'Endast innehåll i wiki';
+$lang['useheading_o_1']        = 'Alltid';

@@ -2,10 +2,6 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once(DOKU_PLUGIN.'admin.php');
-require_once(DOKU_INC.'inc/changelog.php');
-
 /**
  * All DokuWiki plugins to extend the admin function
  * need to inherit from this class
@@ -31,10 +27,10 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
         return array(
             'author' => 'Andreas Gohr',
             'email'  => 'andi@splitbrain.org',
-            'date'   => '2008-05-94',
+            'date'   => '2008-12-10',
             'name'   => 'Revert Manager',
             'desc'   => 'Allows you to mass revert recent edits',
-            'url'    => 'http://wiki.splitbrain.org/plugin:revert',
+            'url'    => 'http://dokuwiki.org/plugin:revert',
         );
     }
 
@@ -130,6 +126,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
      */
     function _list($filter){
         global $conf;
+        global $lang;
         echo '<hr /><br />';
         echo '<form action="" method="post"><div class="no">';
         echo '<input type="hidden" name="filter" value="'.hsc($filter).'" />';
@@ -175,7 +172,7 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
             echo "<img $att />";
             echo '</a> ';
 
-            echo html_wikilink(':'.$recent['id'],$conf['useheading']?NULL:$recent['id']);
+            echo html_wikilink(':'.$recent['id'],(useHeading('navigation'))?NULL:$recent['id']);
             echo ' &ndash; '.htmlspecialchars($recent['sum']);
 
             echo ' <span class="user">';

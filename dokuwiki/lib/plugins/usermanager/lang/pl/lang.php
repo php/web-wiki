@@ -3,6 +3,13 @@
  * polish language file
  *
  * @author Grzegorz Żur <grzegorz.zur@gmail.com>
+ * @author Mariusz Kujawski <marinespl@gmail.com>
+ * @author Maciej Kurczewski <pipijajko@gmail.com>
+ * @author Sławomir Boczek <slawkens@gmail.com>
+ * @author sleshek@wp.pl
+ * @author Leszek Stachowski <shazarre@gmail.com>
+ * @author maros <dobrimaros@yahoo.pl>
+ * @author Grzegorz Widła <dzesdzes@gmail.com>
  */
 $lang['menu']                  = 'Menadżer użytkowników';
 $lang['noauth']                = '(uwierzytelnienie użytkownika niemożliwe)';
@@ -40,6 +47,7 @@ $lang['edit_usermissing']      = 'Nie znaleziono wybranego użytkownika, nazwa u
 $lang['user_notify']           = 'Powiadamianie użytkownika';
 $lang['note_notify']           = 'Powiadomienia wysyłane są tylko jeżeli zmieniono hasło użytkownika.';
 $lang['note_group']            = 'Nowy użytkownik zostanie dodany do grupy domyślnej (%s) jeśli nie podano innej grupy.';
+$lang['note_pass']             = 'Jeśli pole będzie puste i powiadamianie użytkownika jest włączone, hasło zostanie automatyczne wygenerowane.';
 $lang['add_ok']                = 'Dodano użytkownika';
 $lang['add_fail']              = 'Dodawanie użytkownika nie powiodło się';
 $lang['notify_ok']             = 'Powiadomienie zostało wysłane';

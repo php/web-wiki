@@ -5,6 +5,13 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Michał Tkacz <mehow@autocom.pl>
  * @author Grzegorz Żur <grzegorz.zur@gmail.com>
+ * @author Mariusz Kujawski <marinespl@gmail.com>
+ * @author Maciej Kurczewski <pipijajko@gmail.com>
+ * @author Sławomir Boczek <slawkens@gmail.com>
+ * @author sleshek@wp.pl
+ * @author Leszek Stachowski <shazarre@gmail.com>
+ * @author maros <dobrimaros@yahoo.pl>
+ * @author Grzegorz Widła <dzesdzes@gmail.com>
  */
 $lang['menu']                  = 'Menadżer wtyczek';
 $lang['download']              = 'Ściągnij i zainstaluj nową wtyczkę';
@@ -46,3 +53,7 @@ $lang['error_dircreate']       = 'Nie powiodło się stworzenie tymczasowego kat
 $lang['error_decompress']      = 'Menadżer wtyczek nie był w stanie rozpakować ściągniętego pliku. Może to być spowodowane przez nieudany transfer (w takim przypadku powinieneś spróbować ponownie) lub nieznany format kompresji (w takim przypadku będziesz musiał ściągnąć i zainstalować wtyczkę ręcznie).';
 $lang['error_copy']            = 'Wystąpił błąd podczas kopiowania pliku w trakcie instalacji wtyczki %s: być może dysk jest pełny lub prawa dostępu są niepoprawne. Efektem może być częściowo zainstalowana wtyczka co może spowodować niestabilność Twojej instalacji wiki.';
 $lang['error_delete']          = 'Wystąpił błąd przy próbie usunięcia wtyczki <em>%s</em>. Prawdopodobną przyczyną są niewystarczające uprawnienia do katalogu.';
+$lang['enabled']               = 'Wtyczka %s włączona.';
+$lang['notenabled']            = 'Nie udało się uruchomić wtyczki %s, sprawdź uprawnienia dostępu do plików.';
+$lang['disabled']              = 'Wtyczka % wyłączona.';
+$lang['notdisabled']           = 'Nie udało się wyłączyć wtyczki %s, sprawdź uprawnienia dostępu do plików.';

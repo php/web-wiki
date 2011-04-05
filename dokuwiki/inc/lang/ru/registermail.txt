@@ -2,7 +2,7 @@
 
 Логин       : @NEWUSER@
 Полное имя  : @NEWNAME@
-E-mail      : @NEWEMAIL@
+Эл. адрес   : @NEWEMAIL@
 
 Дата        : @DATE@
 Браузер     : @BROWSER@
@@ -10,5 +10,5 @@ E-mail      : @NEWEMAIL@
 Хост        : @HOSTNAME@
 
 -- 
-Это сообщение было сгенерировано DokuWiki по адресу
+Это сообщение было сгенерировано «ДокуВики» по адресу
 @DOKUWIKIURL@

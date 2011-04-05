@@ -1,5 +1,4 @@
-======Farklar======
+====== Farklar ======
 
-Bu sayfanın seçili sürümü ile mevcut versiyonu arasındaki farkları 
-gösterir.
+Bu sayfanın seçili sürümü ile mevcut sürümü arasındaki farkları gösterir.
 

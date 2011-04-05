@@ -3,9 +3,11 @@
  * Finnish language file
  *
  * @author otto@valjakko.net
+ * @author Otto Vainio <otto@valjakko.net>
+ * @author Teemu Mattila <ghcsystems@gmail.com>
  */
 $lang['menu']                  = 'Käyttäjähallinta';
-$lang['noauth']                = '(aautentikointi ei ole käytössä)';
+$lang['noauth']                = '(autentikointi ei ole käytössä)';
 $lang['nosupport']             = '(käyttäjähallinta ei ole tuettu)';
 $lang['badauth']               = 'Viallinen autentikointimenetelmä';
 $lang['user_id']               = 'Käyttäjä';
@@ -31,15 +33,16 @@ $lang['delete_ok']             = '%d käyttäjää poistettu';
 $lang['delete_fail']           = '%d poistoa epäonnistui';
 $lang['update_ok']             = 'Käyttäjän päivitys onnistui';
 $lang['update_fail']           = 'Käyttäjän päivitys epäonnistui';
-$lang['update_exists']         = 'Käyttäjän nimen vaihto epäonnistui. Nimi (%s) on jo olemassa (muut muutokset ok)';
+$lang['update_exists']         = 'Käyttäjän nimen vaihto epäonnistui. Nimi (%s) on jo olemassa (muut muutokset onnistuivat)';
 $lang['start']                 = 'alku';
-$lang['prev']                  = 'edellien';
+$lang['prev']                  = 'edellinen';
 $lang['next']                  = 'seuraava';
 $lang['last']                  = 'viimeinen';
 $lang['edit_usermissing']      = 'Valittua käyttäjää ei löytynyt. Käyttäjä on voitu päivittää tai poistaa muualta.';
-$lang['user_notify']           = 'Tiedotä käyttäjälle';
+$lang['user_notify']           = 'Tiedota käyttäjälle';
 $lang['note_notify']           = 'Tiedotus lähetetään vain, jos käyttäjälle on määritelty uusi salasana.';
 $lang['note_group']            = 'Uudelle käyttäjälle määritellään oletusryhmä (%s), jos ryhmää ei erikseen määritellä.';
+$lang['note_pass']             = 'Salasana luodaan automaattisesti, mikäli kenttä jätetään tyhjäksi ja jos käyttäjän tiedotus on päällä.';
 $lang['add_ok']                = 'Käyttäjä lisätty onnistuneesti';
 $lang['add_fail']              = 'Käyttäjän lisäys epäonnistui';
 $lang['notify_ok']             = 'Ilmoitus sähköpostilla lähetetty';

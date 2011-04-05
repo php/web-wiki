@@ -8,8 +8,6 @@
 if(!defined('DOKU_INC')) define('DOKU_INC',dirname(__FILE__).'/../../');
 define('DOKU_DISABLE_GZIP_OUTPUT',1);
 require_once(DOKU_INC.'inc/init.php');
-require_once(DOKU_INC.'inc/auth.php');
-require_once(DOKU_INC.'inc/events.php');
 session_write_close();  //close session
 if(!defined('NL')) define('NL',"\n");
 
@@ -20,31 +18,32 @@ define('INDEXER_VERSION', 2);
 @ignore_user_abort(true);
 
 // check if user abort worked, if yes send output early
-if(@ignore_user_abort() && !$conf['broken_iua']){
+$defer = !@ignore_user_abort() || $conf['broken_iua'];
+if(!$defer){
     sendGIF(); // send gif
-    $defer = false;
-}else{
-    $defer = true;
 }
 
 $ID = cleanID($_REQUEST['id']);
 
 // Catch any possible output (e.g. errors)
-if(!$_REQUEST['debug']) ob_start();
+$output = isset($_REQUEST['debug']) && $conf['allowdebug'];
+if(!$output) ob_start();
 
 // run one of the jobs
-$tmp = array();
+$tmp = array(); // No event data
 $evt = new Doku_Event('INDEXER_TASKS_RUN', $tmp);
 if ($evt->advise_before()) {
-  runIndexer() or 
-  metaUpdate() or 
-  runSitemapper() or 
-  runTrimRecentChanges() or 
+  runIndexer() or
+  metaUpdate() or
+  runSitemapper() or
+  sendDigest() or
+  runTrimRecentChanges() or
+  runTrimRecentChanges(true) or
   $evt->advise_after();
 }
 if($defer) sendGIF();
 
-if(!$_REQUEST['debug']) ob_end_clean();
+if(!$output) ob_end_clean();
 exit;
 
 // --------------------------------------------------------------------
@@ -52,38 +51,33 @@ exit;
 /**
  * Trims the recent changes cache (or imports the old changelog) as needed.
  *
+ * @param media_changes If the media changelog shall be trimmed instead of
+ * the page changelog
+ *
  * @author Ben Coburn <btcoburn@silicodon.net>
  */
-function runTrimRecentChanges() {
+function runTrimRecentChanges($media_changes = false) {
     global $conf;
 
-    // Import old changelog (if needed)
-    // Uses the imporoldchangelog plugin to upgrade the changelog automaticaly.
-    // FIXME: Remove this from runTrimRecentChanges when it is no longer needed.
-    if (isset($conf['changelog_old']) &&
-        @file_exists($conf['changelog_old']) && !@file_exists($conf['changelog']) &&
-        !@file_exists($conf['changelog'].'_importing') && !@file_exists($conf['changelog'].'_tmp')) {
-            $tmp = array(); // no event data
-            trigger_event('TEMPORARY_CHANGELOG_UPGRADE_EVENT', $tmp);
-            return true;
-    }
+    $fn = ($media_changes ? $conf['media_changelog'] : $conf['changelog']);
 
     // Trim the Recent Changes
     // Trims the recent changes cache to the last $conf['changes_days'] recent
     // changes or $conf['recent'] items, which ever is larger.
     // The trimming is only done once a day.
-    if (@file_exists($conf['changelog']) &&
-        (filectime($conf['changelog'])+86400)<time() &&
-        !@file_exists($conf['changelog'].'_tmp')) {
-            io_lock($conf['changelog']);
-            $lines = file($conf['changelog']);
+    if (@file_exists($fn) &&
+        (@filemtime($fn.'.trimmed')+86400)<time() &&
+        !@file_exists($fn.'_tmp')) {
+            @touch($fn.'.trimmed');
+            io_lock($fn);
+            $lines = file($fn);
             if (count($lines)<=$conf['recent']) {
                 // nothing to trim
-                io_unlock($conf['changelog']);
+                io_unlock($fn);
                 return false;
             }
 
-            io_saveFile($conf['changelog'].'_tmp', '');          // presave tmp as 2nd lock
+            io_saveFile($fn.'_tmp', '');          // presave tmp as 2nd lock
             $trim_time = time() - $conf['recent_days']*86400;
             $out_lines = array();
 
@@ -97,6 +91,13 @@ function runTrimRecentChanges() {
               }
             }
 
+            if (count($lines)==count($out_lines)) {
+              // nothing to trim
+              @unlink($fn.'_tmp');
+              io_unlock($fn);
+              return false;
+            }
+
             // sort the final result, it shouldn't be necessary,
             //   however the extra robustness in making the changelog cache self-correcting is worth it
             ksort($out_lines);
@@ -107,15 +108,15 @@ function runTrimRecentChanges() {
             }
 
             // save trimmed changelog
-            io_saveFile($conf['changelog'].'_tmp', implode('', $out_lines));
-            @unlink($conf['changelog']);
-            if (!rename($conf['changelog'].'_tmp', $conf['changelog'])) {
+            io_saveFile($fn.'_tmp', implode('', $out_lines));
+            @unlink($fn);
+            if (!rename($fn.'_tmp', $fn)) {
                 // rename failed so try another way...
-                io_unlock($conf['changelog']);
-                io_saveFile($conf['changelog'], implode('', $out_lines));
-                @unlink($conf['changelog'].'_tmp');
+                io_unlock($fn);
+                io_saveFile($fn, implode('', $out_lines));
+                @unlink($fn.'_tmp');
             } else {
-                io_unlock($conf['changelog']);
+                io_unlock($fn);
             }
             return true;
     }
@@ -133,18 +134,6 @@ function runIndexer(){
     global $ID;
     global $conf;
     print "runIndexer(): started".NL;
-
-    // Move index files (if needed)
-    // Uses the importoldindex plugin to upgrade the index automatically.
-    // FIXME: Remove this from runIndexer when it is no longer needed.
-    if (@file_exists($conf['cachedir'].'/page.idx') &&
-        (!@file_exists($conf['indexdir'].'/page.idx') ||
-         !filesize($conf['indexdir'].'/page.idx'))  &&
-        !@file_exists($conf['indexdir'].'/index_importing')) {
-        echo "trigger TEMPORARY_INDEX_UPGRADE_EVENT\n";
-        $tmp = array(); // no event data
-        trigger_event('TEMPORARY_INDEX_UPGRADE_EVENT', $tmp);
-    }
 
     if(!$ID) return false;
 
@@ -175,12 +164,6 @@ function runIndexer(){
     }
     if($conf['dperm']) chmod($lock, $conf['dperm']);
 
-    require_once(DOKU_INC.'inc/indexer.php');
-
-    // upgrade to version 2
-    if (!@file_exists($conf['indexdir'].'/pageword.idx'))
-        idx_upgradePageWords();
-
     // do the work
     idx_addPage($ID);
 
@@ -209,10 +192,7 @@ function metaUpdate(){
     if (@file_exists($file)) return false;
     if (!@file_exists(wikiFN($ID))) return false;
 
-    require_once(DOKU_INC.'inc/common.php');
-    require_once(DOKU_INC.'inc/parserutils.php');
     global $conf;
-
 
     // gather some additional info from changelog
     $info = io_grep($conf['changelog'],
@@ -266,13 +246,13 @@ function runSitemapper(){
         if(!is_writable(DOKU_INC)) return false;
     }
 
-    if(@filesize(DOKU_INC.$sitemap) && 
+    if(@filesize(DOKU_INC.$sitemap) &&
        @filemtime(DOKU_INC.$sitemap) > (time()-($conf['sitemap']*60*60*24))){
        print 'runSitemapper(): Sitemap up to date'.NL;
        return false;
     }
 
-    $pages = file($conf['indexdir'].'/page.idx');
+    $pages = idx_getIndex('page', '');
     print 'runSitemapper(): creating sitemap using '.count($pages).' pages'.NL;
 
     // build the sitemap
@@ -323,7 +303,7 @@ function runSitemapper(){
 
     //ping microsoft
     print 'runSitemapper(): pinging microsoft'.NL;
-    $url  = 'http://search.live.com/ping?sitemap=';
+    $url  = 'http://www.bing.com/webmaster/ping.aspx?siteMap=';
     $url .= urlencode(DOKU_URL.$sitemap);
     $resp = $http->get($url);
     if($http->error) print 'runSitemapper(): '.$http->error.NL;
@@ -331,6 +311,98 @@ function runSitemapper(){
 
     print 'runSitemapper(): finished'.NL;
     return true;
+}
+
+/**
+ * Send digest and list mails for all subscriptions which are in effect for the
+ * current page
+ *
+ * @author Adrian Lang <lang@cosmocode.de>
+ */
+function sendDigest() {
+    echo 'sendDigest(): start'.NL;
+    global $ID;
+    global $conf;
+    if (!$conf['subscribers']) {
+        return;
+    }
+    $subscriptions = subscription_find($ID, array('style' => '(digest|list)',
+                                                  'escaped' => true));
+    global $auth;
+    global $lang;
+    global $conf;
+    global $USERINFO;
+
+    // remember current user info
+    $olduinfo = $USERINFO;
+    $olduser  = $_SERVER['REMOTE_USER'];
+
+    foreach($subscriptions as $id => $users) {
+        if (!subscription_lock($id)) {
+            continue;
+        }
+        foreach($users as $data) {
+            list($user, $style, $lastupdate) = $data;
+            $lastupdate = (int) $lastupdate;
+            if ($lastupdate + $conf['subscribe_time'] > time()) {
+                // Less than the configured time period passed since last
+                // update.
+                continue;
+            }
+
+            // Work as the user to make sure ACLs apply correctly
+            $USERINFO = $auth->getUserData($user);
+            $_SERVER['REMOTE_USER'] = $user;
+            if ($USERINFO === false) {
+                continue;
+            }
+
+            if (substr($id, -1, 1) === ':') {
+                // The subscription target is a namespace
+                $changes = getRecentsSince($lastupdate, null, getNS($id));
+            } else {
+                if(auth_quickaclcheck($id) < AUTH_READ) continue;
+
+                $meta = p_get_metadata($id);
+                $changes = array($meta['last_change']);
+            }
+
+            // Filter out pages only changed in small and own edits
+            $change_ids = array();
+            foreach($changes as $rev) {
+                $n = 0;
+                while (!is_null($rev) && $rev['date'] >= $lastupdate &&
+                       ($_SERVER['REMOTE_USER'] === $rev['user'] ||
+                        $rev['type'] === DOKU_CHANGE_TYPE_MINOR_EDIT)) {
+                    $rev = getRevisions($rev['id'], $n++, 1);
+                    $rev = (count($rev) > 0) ? $rev[0] : null;
+                }
+
+                if (!is_null($rev) && $rev['date'] >= $lastupdate) {
+                    // Some change was not a minor one and not by myself
+                    $change_ids[] = $rev['id'];
+                }
+            }
+
+            if ($style === 'digest') {
+                foreach($change_ids as $change_id) {
+                    subscription_send_digest($USERINFO['mail'], $change_id,
+                                             $lastupdate);
+                }
+            } elseif ($style === 'list') {
+                subscription_send_list($USERINFO['mail'], $change_ids, $id);
+            }
+            // TODO: Handle duplicate subscriptions.
+
+            // Update notification time.
+            subscription_set($user, $id, $style, time(), true);
+        }
+        subscription_unlock($id);
+    }
+
+    // restore current user info
+    $USERINFO = $olduinfo;
+    $_SERVER['REMOTE_USER'] = $olduser;
 }
 
 /**
@@ -350,12 +422,12 @@ function date_iso8601($int_date) {
 
 /**
  * Just send a 1x1 pixel blank gif to the browser
- * 
+ *
  * @author Andreas Gohr <andi@splitbrain.org>
  * @author Harry Fuecks <fuecks@gmail.com>
  */
 function sendGIF(){
-    if($_REQUEST['debug']){
+    if(isset($_REQUEST['debug'])){
         header('Content-Type: text/plain');
         return;
     }

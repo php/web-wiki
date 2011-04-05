@@ -8,6 +8,8 @@
  * @author Chris Smith <chris@jalakai.co.uk>
  * @author Thanos Massias <tm@thriasio.gr>
  * @author Αθανάσιος Νταής <homunculus@wana.gr>
+ * @author Konstantinos Koryllos <koryllos@gmail.com>
+ * @author George Petsagourakis <petsagouris@gmail.com>
  */
 $lang['menu']                  = 'Διαχείριση Χρηστών';
 $lang['noauth']                = '(η είσοδος χρηστών δεν είναι δυνατή)';
@@ -45,6 +47,7 @@ $lang['edit_usermissing']      = 'Ο επιλεγμένος χρήστης δε�
 $lang['user_notify']           = 'Ειδοποίηση χρήστη';
 $lang['note_notify']           = 'Τα ενημερωτικά e-mails στέλνονται μόνο όταν δίνεται νέος κωδικός στον χρήστη.';
 $lang['note_group']            = 'Οι νέοι χρήστες θα ανήκουν στην ομάδα (%s) αν δεν οριστεί άλλη ομάδα.';
+$lang['note_pass']             = 'Ο κωδικός θα δημιουργηθεί αυτόματα εάν το πεδίο μείνει κενό και έχει επιλεγεί η αποστολή ειδοποίησης χρήστη.';
 $lang['add_ok']                = 'Επιτυχημένη εγγραφή  χρήστη';
 $lang['add_fail']              = 'Η εγγραφή του χρήστη απέτυχε';
 $lang['notify_ok']             = 'Εστάλη ενημερωτικό e-mail';

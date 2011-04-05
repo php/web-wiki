@@ -4,7 +4,7 @@ Arquivo : @MEDIA@
 Data : @DATE@
 Navegador : @BROWSER@
 Enderezo IP : @IPADDRESS@
-Nome de Host : @HOSTNAME@
+Nome do Host : @HOSTNAME@
 Tamaño : @SIZE@
 Tipo MIME : @MIME@
 Usuario : @USER@

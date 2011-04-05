@@ -1,16 +1,15 @@
 <?php
 /**
- * Common DokuWiki functions
+ * Functions to create the fulltext search index
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Andreas Gohr <andi@splitbrain.org>
  */
 
-  if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
-  require_once(DOKU_CONF.'dokuwiki.php');
-  require_once(DOKU_INC.'inc/io.php');
-  require_once(DOKU_INC.'inc/utf8.php');
-  require_once(DOKU_INC.'inc/parserutils.php');
+if(!defined('DOKU_INC')) die('meh.');
+
+// set the minimum token length to use in the index (note, this doesn't apply to numeric tokens)
+if (!defined('IDX_MINWORDLENGTH')) define('IDX_MINWORDLENGTH',2);
 
 // Asian characters are handled as words. The following regexp defines the
 // Unicode-Ranges for Asian characters
@@ -72,8 +71,23 @@ function idx_saveIndex($pre, $wlen, &$idx){
         fwrite($fh,$line);
     }
     fclose($fh);
-    if($conf['fperm']) chmod($fn.'.tmp', $conf['fperm']);
+    if(isset($conf['fperm'])) chmod($fn.'.tmp', $conf['fperm']);
     io_rename($fn.'.tmp', $fn.'.idx');
+    return true;
+}
+
+/**
+ * Append a given line to an index file.
+ *
+ * @author Andreas Gohr <andi@splitbrain.org>
+ */
+function idx_appendIndex($pre, $wlen, $line){
+    global $conf;
+    $fn = $conf['indexdir'].'/'.$pre.$wlen;
+    $fh = @fopen($fn.'.idx','a');
+    if(!$fh) return false;
+    fwrite($fh,$line);
+    fclose($fh);
     return true;
 }
 
@@ -202,7 +216,7 @@ function idx_getPageWords($page){
     unset($evt);
 
     list($page,$body) = $data;
-    
+
     $body   = strtr($body, "\r\n\t", '   ');
     $tokens = explode(' ', $body);
     $tokens = array_count_values($tokens);   // count the frequency of each token
@@ -210,18 +224,18 @@ function idx_getPageWords($page){
     // ensure the deaccented or romanised page names of internal links are added to the token array
     // (this is necessary for the backlink function -- there maybe a better way!)
     if ($conf['deaccent']) {
-      $links = p_get_metadata($page,'relation references');
+        $links = p_get_metadata($page,'relation references');
 
-      if (!empty($links)) {
-        $tmp = join(' ',array_keys($links));                // make a single string
-        $tmp = strtr($tmp, ':', ' ');                       // replace namespace separator with a space
-        $link_tokens = array_unique(explode(' ', $tmp));    // break into tokens
+        if (!empty($links)) {
+            $tmp = join(' ',array_keys($links));                // make a single string
+            $tmp = strtr($tmp, ':', ' ');                       // replace namespace separator with a space
+            $link_tokens = array_unique(explode(' ', $tmp));    // break into tokens
 
-        foreach ($link_tokens as $link_token) {
-          if (isset($tokens[$link_token])) continue;
-          $tokens[$link_token] = 1;
+            foreach ($link_tokens as $link_token) {
+                if (isset($tokens[$link_token])) continue;
+                $tokens[$link_token] = 1;
+            }
         }
-      }
     }
 
     $words = array();
@@ -282,14 +296,16 @@ function idx_addPage($page){
     // get page id (this is the linenumber in page.idx)
     $pid = array_search("$page\n",$page_idx);
     if(!is_int($pid)){
-        $page_idx[] = "$page\n";
-        $pid = count($page_idx)-1;
+        $pid = count($page_idx);
         // page was new - write back
-        if (!idx_saveIndex('page','',$page_idx)){
+        if (!idx_appendIndex('page','',"$page\n")){
             trigger_error("Failed to write page index", E_USER_ERROR);
             return false;
         }
     }
+    unset($page_idx); // free memory
+
+    idx_saveIndexLine('title', '', $pid, p_get_first_heading($page, false));
 
     $pagewords = array();
     // get word usage in page
@@ -318,7 +334,7 @@ function idx_addPage($page){
             }
         }
     }
-    
+
     // Remove obsolete index entries
     $pageword_idx = trim(idx_getIndexLine('pageword','',$pid));
     if ($pageword_idx !== '') {
@@ -397,40 +413,85 @@ function idx_updateIndexLine($line,$pid,$count){
 }
 
 /**
+ * Get the list of lenghts indexed in the wiki
+ *
+ * Read the index directory or a cache file and returns
+ * a sorted array of lengths of the words used in the wiki.
+ *
+ * @author YoBoY <yoboy.leguesh@gmail.com>
+ */
+function idx_listIndexLengths() {
+    global $conf;
+    // testing what we have to do, create a cache file or not.
+    if ($conf['readdircache'] == 0) {
+        $docache = false;
+    } else {
+        clearstatcache();
+        if (@file_exists($conf['indexdir'].'/lengths.idx') and (time() < @filemtime($conf['indexdir'].'/lengths.idx') + $conf['readdircache'])) {
+            if (($lengths = @file($conf['indexdir'].'/lengths.idx', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ) !== false) {
+                $idx = array();
+                foreach ( $lengths as $length) {
+                    $idx[] = (int)$length;
+                }
+                return $idx;
+            }
+        }
+        $docache = true;
+    }
+
+    if ($conf['readdircache'] == 0 or $docache ) {
+        $dir = @opendir($conf['indexdir']);
+        if($dir===false)
+            return array();
+        $idx[] = array();
+        while (($f = readdir($dir)) !== false) {
+            if (substr($f,0,1) == 'i' && substr($f,-4) == '.idx'){
+                $i = substr($f,1,-4);
+                if (is_numeric($i))
+                    $idx[] = (int)$i;
+            }
+        }
+        closedir($dir);
+        sort($idx);
+        // we save this in a file.
+        if ($docache === true) {
+            $handle = @fopen($conf['indexdir'].'/lengths.idx','w');
+            @fwrite($handle, implode("\n",$idx));
+            @fclose($handle);
+        }
+        return $idx;
+    }
+
+    return array();
+}
+
+/**
  * Get the word lengths that have been indexed.
  *
  * Reads the index directory and returns an array of lengths
  * that there are indices for.
  *
- * @author Tom N Harris <tnharris@whoopdedo.org>
+ * @author YoBoY <yoboy.leguesh@gmail.com>
  */
 function idx_indexLengths(&$filter){
     global $conf;
-    $dir = @opendir($conf['indexdir']);
-    if($dir===false)
-        return array();
     $idx = array();
-    if(is_array($filter)){
-        while (($f = readdir($dir)) !== false) {
-            if (substr($f,0,1) == 'i' && substr($f,-4) == '.idx'){
-                $i = substr($f,1,-4);
-                if (is_numeric($i) && isset($filter[(int)$i]))
-                    $idx[] = (int)$i;
+    if (is_array($filter)){
+        // testing if index files exists only
+        foreach ($filter as $key => $value) {
+            if (@file_exists($conf['indexdir']."/i$key.idx")) {
+                $idx[] = $key;
             }
         }
-    }else{
-        // Exact match first.
-        if(@file_exists($conf['indexdir']."/i$filter.idx"))
-            $idx[] = $filter;
-        while (($f = readdir($dir)) !== false) {
-            if (substr($f,0,1) == 'i' && substr($f,-4) == '.idx'){
-                $i = substr($f,1,-4);
-                if (is_numeric($i) && $i > $filter)
-                    $idx[] = (int)$i;
+    } else {
+        $lengths = idx_listIndexLengths();
+        foreach ( $lengths as $key => $length) {
+            // we keep all the values equal or superior 
+            if ((int)$length >= (int)$filter) {
+                $idx[] = $length;
             }
         }
     }
-    closedir($dir);
     return $idx;
 }
 
@@ -472,7 +533,7 @@ function idx_getIndexWordsSorted($words,&$result){
             $wild |= 2;
             $wlen -= 1;
         }
-        if ($wlen < 3 && $wild == 0 && !is_numeric($xword)) continue;
+        if ($wlen < IDX_MINWORDLENGTH && $wild == 0 && !is_numeric($xword)) continue;
         if(!isset($tokens[$xword])){
             $tokenlength[$wlen][] = $xword;
         }
@@ -520,7 +581,7 @@ function idx_getIndexWordsSorted($words,&$result){
             }
         }
     }
-  return $wids;
+    return $wids;
 }
 
 /**
@@ -557,12 +618,16 @@ function idx_lookup($words){
 
     // merge found pages into final result array
     $final = array();
-    foreach(array_keys($result) as $word){
+    foreach($result as $word => $res){
         $final[$word] = array();
-        foreach($result[$word] as $wid){
+        foreach($res as $wid){
             $hits = &$docs[$wid];
             foreach ($hits as $hitkey => $hitcnt) {
-                $final[$word][$hitkey] = $hitcnt + $final[$word][$hitkey];
+                if (!isset($final[$word][$hitkey])) {
+                    $final[$word][$hitkey] = $hitcnt;
+                } else {
+                    $final[$word][$hitkey] += $hitcnt;
+                }
             }
         }
     }
@@ -620,61 +685,20 @@ function idx_tokenizer($string,&$stopwords,$wc=false){
 
         $arr = explode(' ', utf8_stripspecials($string,' ','\._\-:'.$wc));
         foreach ($arr as $w) {
-            if (!is_numeric($w) && strlen($w) < 3) continue;
+            if (!is_numeric($w) && strlen($w) < IDX_MINWORDLENGTH) continue;
             $w = utf8_strtolower($w);
             if($stopwords && is_int(array_search("$w\n",$stopwords))) continue;
             $words[] = $w;
         }
     }else{
         $w = $string;
-        if (!is_numeric($w) && strlen($w) < 3) return $words;
+        if (!is_numeric($w) && strlen($w) < IDX_MINWORDLENGTH) return $words;
         $w = strtolower($w);
         if(is_int(array_search("$w\n",$stopwords))) return $words;
         $words[] = $w;
     }
 
     return $words;
-}
-
-/**
- * Create a pagewords index from the existing index.
- *
- * @author Tom N Harris <tnharris@whoopdedo.org>
- */
-function idx_upgradePageWords(){
-    global $conf;
-    $page_idx = idx_getIndex('page','');
-    if (empty($page_idx)) return;
-    $pagewords = array();
-    for ($n=0;$n<count($page_idx);$n++) $pagewords[] = array();
-    unset($page_idx);
-
-    $n=0;
-    foreach (idx_indexLengths($n) as $wlen) {
-        $lines = idx_getIndex('i',$wlen);
-        for ($wid=0;$wid<count($lines);$wid++) {
-            $wkey = "$wlen*$wid";
-            foreach (explode(':',trim($lines[$wid])) as $part) {
-                if($part == '') continue;
-                list($doc,$cnt) = explode('*',$part);
-                $pagewords[(int)$doc][] = $wkey;
-            }
-        }
-    }
-
-    $fn = $conf['indexdir'].'/pageword';
-    $fh = @fopen($fn.'.tmp','w');
-    if (!$fh){
-        trigger_error("Failed to write word index", E_USER_ERROR);
-        return false;
-    }
-    foreach ($pagewords as $line){
-        fwrite($fh, join(':',$line)."\n");
-    }
-    fclose($fh);
-    if($conf['fperm']) chmod($fn.'.tmp', $conf['fperm']);
-    io_rename($fn.'.tmp', $fn.'.idx');
-    return true;
 }
 
 //Setup VIM: ex: et ts=4 enc=utf-8 :

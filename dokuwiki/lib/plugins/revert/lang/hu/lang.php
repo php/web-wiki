@@ -2,8 +2,11 @@
 /**
  * Hungarian language file
  *
- * @author Sandor TIHANYI <stihanyi@gmail.com>
- * @author SandorTIHANYI <stihanyi@gmail.com>
+ * @author Sandor TIHANYI <stihanyi+dw@gmail.com>
+ * @author Siaynoq Mage <siaynoqmage@gmail.com>
+ * @author schilling.janos@gmail.com
+ * @author Szabó Dávid (szabo.david@gyumolcstarhely.hu)
+ * @author Szabó Dávid <szabo.david@gyumolcstarhely.hu>
  */
 $lang['menu']                  = 'Visszaállítás kezelő (anti-SPAM)';
 $lang['filter']                = 'SPAM tartalmú oldalak keresése';

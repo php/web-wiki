@@ -30,7 +30,7 @@ class auth_basic {
     'getUserCount'=> false, // can the number of users be retrieved?
     'getGroups'   => false, // can a list of available groups be retrieved?
     'external'    => false, // does the module do external auth checking?
-    'logoff'      => false, // has the module some special logoff method?
+    'logout'      => true,  // can the user logout again? (eg. not possible with HTTP auth)
   );
 
 
@@ -90,13 +90,45 @@ class auth_basic {
   }
 
   /**
+   * Trigger the AUTH_USERDATA_CHANGE event and call the modification function. [ DO NOT OVERRIDE ]
+   *
+   * You should use this function instead of calling createUser, modifyUser or
+   * deleteUsers directly. The event handlers can prevent the modification, for
+   * example for enforcing a user name schema.
+   *
+   * @author Gabriel Birke <birke@d-scribe.de>
+   * @param string $type Modification type ('create', 'modify', 'delete')
+   * @param array $params Parameters for the createUser, modifyUser or deleteUsers method. The content of this array depends on the modification type
+   * @return mixed Result from the modification function or false if an event handler has canceled the action
+   */
+  function triggerUserMod($type, $params)
+  {
+    $validTypes = array(
+      'create' => 'createUser',
+      'modify' => 'modifyUser',
+      'delete' => 'deleteUsers'
+    );
+    if(empty($validTypes[$type]))
+      return false;
+    $eventdata = array('type' => $type, 'params' => $params, 'modification_result' => null);
+    $evt = new Doku_Event('AUTH_USER_CHANGE', $eventdata);
+    if ($evt->advise_before(true)) {
+      $result = call_user_func_array(array($this, $validTypes[$type]), $params);
+      $evt->data['modification_result'] = $result;
+    }
+    $evt->advise_after();
+    unset($evt);
+    return $result;
+  }
+
+  /**
    * Log off the current user [ OPTIONAL ]
    *
    * Is run in addition to the ususal logoff method. Should
    * only be needed when trustExternal is implemented.
    *
    * @see     auth_logoff()
-   * @author  Andreas Gohr
+   * @author  Andreas Gohr <andi@splitbrain.org>
    */
   function logOff(){
   }
@@ -291,10 +323,57 @@ class auth_basic {
   }
 
   /**
+   * Return case sensitivity of the backend [OPTIONAL]
+   *
+   * When your backend is caseinsensitive (eg. you can login with USER and
+   * user) then you need to overwrite this method and return false
+   */
+  function isCaseSensitive(){
+    return true;
+  }
+
+  /**
+   * Sanitize a given username [OPTIONAL]
+   *
+   * This function is applied to any user name that is given to
+   * the backend and should also be applied to any user name within
+   * the backend before returning it somewhere.
+   *
+   * This should be used to enforce username restrictions.
+   *
+   * @author Andreas Gohr <andi@splitbrain.org>
+   * @param string $user - username
+   * @param string - the cleaned username
+   */
+  function cleanUser($user){
+    return $user;
+  }
+
+  /**
+   * Sanitize a given groupname [OPTIONAL]
+   *
+   * This function is applied to any groupname that is given to
+   * the backend and should also be applied to any groupname within
+   * the backend before returning it somewhere.
+   *
+   * This should be used to enforce groupname restrictions.
+   *
+   * Groupnames are to be passed without a leading '@' here.
+   *
+   * @author Andreas Gohr <andi@splitbrain.org>
+   * @param string $group - groupname
+   * @param string - the cleaned groupname
+   */
+  function cleanGroup($group){
+    return $group;
+  }
+
+
+  /**
    * Check Session Cache validity [implement only where required/possible]
    *
    * DokuWiki caches user info in the user's session for the timespan defined
-   * in $conf['securitytimeout'].
+   * in $conf['auth_security_timeout'].
    *
    * This makes sure slow authentication backends do not slow down DokuWiki.
    * This also means that changes to the user database will not be reflected

@@ -8,7 +8,6 @@ acl = {
         addEvent(sel,'change',acl.userselhandler);
         addEvent($('acl__tree'),'click',acl.treehandler);
         addEvent($('acl__user').getElementsByTagName('input')[1],'click',acl.loadinfo);
-        addEvent($('acl__user').getElementsByTagName('input')[1],'keypress',acl.loadinfo);
     },
 
 
@@ -49,7 +48,8 @@ acl = {
         data[1] = ajax.encVar('id',frm.elements['id'].value);
         data[2] = ajax.encVar('acl_t',frm.elements['acl_t'].value);
         data[3] = ajax.encVar('acl_w',frm.elements['acl_w'].value);
-        data[4] = ajax.encVar('ajax','info');
+        data[4] = ajax.encVar('sectok',frm.elements['sectok'].value);
+        data[5] = ajax.encVar('ajax','info');
 
         ajax.elementObj = $('acl__info');
 
@@ -118,7 +118,11 @@ acl = {
         var ul = document.createElement('ul');
         listitem.appendChild(ul);
         ajax.elementObj = ul;
-        ajax.runAJAX(link.search.substr(1)+'&ajax=tree');
+        ajax.setVar('ajax', 'tree');
+        var frm = $('acl__detail').getElementsByTagName('form')[0];
+        ajax.setVar('current_ns', encodeURIComponent(frm.elements['ns'].value));
+        ajax.setVar('current_id', encodeURIComponent(frm.elements['id'].value));
+        ajax.runAJAX(link.search.substr(1));
         clicky.src = DOKU_BASE+'lib/images/minus.gif';
         return false;
     },
@@ -132,8 +136,10 @@ acl = {
             acl.treetoggle(e.target);
         } else if(e.target.href){ // is it a link?
             // remove highlighting
-            var obj = getElementsByClass('cur',$('acl__tree'),'a')[0];
-            if(obj) obj.className = obj.className.replace(/ cur/,'');
+            var obj = getElementsByClass('cur',$('acl__tree'),'a');
+            for(var i=0; i<obj.length; i++){
+                obj[i].className = obj[i].className.replace(/ cur/,'');
+            }
 
             // add new highlighting
             e.target.className += ' cur';

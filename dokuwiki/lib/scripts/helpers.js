@@ -1,12 +1,8 @@
 /**
- *  $Id: helpers.js,v 1.2 2008-06-17 11:51:04 lsmith Exp $
- *  $HeadURL: https://svn.debugger.ru/repos/jslibs/BrowserExtensions/trunk/helpers.js $
+ * Differrent helper functions
  *
- *  File contains differrent helper functions
- * 
  * @author Ilya Lebedev <ilya@lebedev.net>
  * @license LGPL
- * @version $Rev: 156 $
  */
 //-----------------------------------------------------------------------------
 //  Variable/property checks
@@ -113,20 +109,38 @@ function isEmpty (prop /* :Object */) /* :Boolean */ {
   if (isRegExp(prop) && new RegExp("").toString() == prop.toString()) return true;
   if (isString(prop) || isNumber(prop)) return !prop;
   if (Boolean(prop)&&false != prop) {
-    for (var i in prop) if(prop.hasOwnProperty(i)) return false
+    for (var i in prop) if(prop.hasOwnProperty(i)) return false;
   }
   return true;
 }
 
-/*
-*  Checks if property is derived from prototype, applies method if it is not exists
-*
-*  @param string property name
-*  @return bool true if prototyped
-*  @access public
-*/
+/**
+ *  Checks if property is derived from prototype, applies method if it is not exists
+ *
+ *  @param string property name
+ *  @return bool true if prototyped
+ *  @access public
+ */
 if ('undefined' == typeof Object.hasOwnProperty) {
   Object.prototype.hasOwnProperty = function (prop) {
     return !('undefined' == typeof this[prop] || this.constructor && this.constructor.prototype[prop] && this[prop] === this.constructor.prototype[prop]);
-  }
+  };
+}
+
+/**
+ * Very simplistic Flash plugin check, probably works for Flash 8 and higher only
+ */
+function hasFlash(version){
+    var ver = 0;
+    try{
+        if(navigator.plugins != null && navigator.plugins.length > 0){
+           ver = navigator.plugins["Shockwave Flash"].description.split(' ')[2].split('.')[0];
+        }else{
+           var axo = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+           ver = axo.GetVariable("$version").split(' ')[1].split(',')[0];
+        }
+    }catch(e){ }
+
+    if(ver >= version) return true;
+    return false;
 }

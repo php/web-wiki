@@ -6,9 +6,21 @@
  * @author Oscar M. Lage <r0sk10@gmail.com>
  * @author Gabriel Castillo <gch@pumas.ii.unam.mx>
  * @author oliver@samera.com.py
+ * @author Enrico Nicoletto <liverig@gmail.com>
+ * @author Manuel Meco <manuel.meco@gmail.com>
+ * @author VictorCastelan <victorcastelan@gmail.com>
+ * @author Jordan Mero  hack.jord@gmail.com
+ * @author Felipe Martinez <metalmartinez@gmail.com>
+ * @author Javier Aranda <internet@javierav.com>
+ * @author Zerial <fernando@zerial.org>
+ * @author Marvin Ortega <maty1206@maryanlinux.com>
+ * @author Daniel Castro Alvarado <dancas2@gmail.com>
+ * @author Fernando J. Gómez <fjgomez@gmail.com>
+ * @author Victor Castelan <victorcastelan@gmail.com>
+ * @author Mauro Javier Giamberardino <mgiamberardino@gmail.com>
  */
 $lang['menu']                  = 'Administración de usuarios';
-$lang['noauth']                = '(la autentiación de usuariosuser no está disponible)';
+$lang['noauth']                = '(la autenticación de usuarios no está disponible)';
 $lang['nosupport']             = '(la administración de usuarios no está habilitada)';
 $lang['badauth']               = 'Mecanismo de autenticación inválido';
 $lang['user_id']               = 'Usuario';
@@ -43,7 +55,8 @@ $lang['edit_usermissing']      = 'El usuario seleccionado no ha sido encontrado;
 $lang['user_notify']           = 'Notificar al usuario';
 $lang['note_notify']           = 'El correo electrónico de notificación sólo será enviado si se actualizo la contraseña del usuario.';
 $lang['note_group']            = 'Si no se especifica ningún grupo, los nuevos usuarios serán agregados al grupo por defecto (%s).';
-$lang['add_ok']                = 'El usuario fue creado exitosamente.';
+$lang['note_pass']             = 'Se generará una clave automáticamente si el campo izquierdo es vacío y se esta activo la notificación de usuario. ';
+$lang['add_ok']                = 'El usuario fue creado exitosamente';
 $lang['add_fail']              = 'Falló la creación del usuario';
 $lang['notify_ok']             = 'Se envió la notificación por correo electrónico';
 $lang['notify_fail']           = 'No se pudo enviar la notificación por correo electrónico';

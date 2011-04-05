@@ -4,8 +4,7 @@
  *
  * @author Esther Brunner <wikidesign@gmail.com>
  */
-
-if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) die('meh.');
 
 if ( !defined('DOKU_LF') ) {
     // Some whitespace to help View > Source
@@ -31,27 +30,48 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   var $headers = array();
   var $capture = true;
   var $store   = '';
+  var $firstimage = '';
 
   function getFormat(){
     return 'metadata';
   }
 
   function document_start(){
+    global $ID;
+
+    $this->headers = array();
+
+    // external pages are missing create date
+    if(!$this->persistent['date']['created']){
+        $this->persistent['date']['created'] = filectime(wikiFN($ID));
+    }
+    if(!isset($this->persistent['creator'])){
+        $this->persistent['creator'] = '';
+    }
     // reset metadata to persistent values
     $this->meta = $this->persistent;
   }
 
   function document_end(){
+    global $ID;
+
     // store internal info in metadata (notoc,nocache)
     $this->meta['internal'] = $this->info;
 
-    if (!$this->meta['description']['abstract']){
+    if (!isset($this->meta['description']['abstract'])){
       // cut off too long abstracts
       $this->doc = trim($this->doc);
       if (strlen($this->doc) > 500)
         $this->doc = utf8_substr($this->doc, 0, 500).'…';
       $this->meta['description']['abstract'] = $this->doc;
     }
+
+    $this->meta['relation']['firstimage'] = $this->firstimage;
+
+    if(!isset($this->meta['date']['modified'])){
+        $this->meta['date']['modified'] = filemtime(wikiFN($ID));
+    }
+
   }
 
   function toc_additem($id, $text, $level) {
@@ -71,8 +91,7 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   }
 
   function header($text, $level, $pos) {
-
-    if (!$this->meta['title']) $this->meta['title'] = $text;
+    if (!isset($this->meta['title'])) $this->meta['title'] = $text;
 
     // add the header to the TOC
     $hid = $this->_headerToLink($text,'true');
@@ -208,7 +227,7 @@ class Doku_Renderer_metadata extends Doku_Renderer {
     if ($this->capture) $this->doc .= $text;
   }
 
-  function file($text){
+  function file($text, $lang = null, $file = null){
     if ($this->capture){
       $this->doc .= DOKU_LF.$text;
       if (strlen($this->doc) > 250) $this->capture = false;
@@ -228,7 +247,7 @@ class Doku_Renderer_metadata extends Doku_Renderer {
     }
   }
 
-  function code($text, $language = NULL){
+  function code($text, $language = NULL, $file = null){
     if ($this->capture){
       $this->doc .= DOKU_LF.$text;
       if (strlen($this->doc) > 250) $this->capture = false;
@@ -289,11 +308,14 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   function internallink($id, $name = NULL){
     global $ID;
 
+    if(is_array($name))
+        $this->_firstimage($name['src']);
+
     $default = $this->_simpleTitle($id);
 
     // first resolve and clean up the $id
     resolve_pageid(getNS($ID), $id, $exists);
-    list($page, $hash) = split('#', $id, 2);
+    list($page, $hash) = explode('#', $id, 2);
 
     // set metadata
     $this->meta['relation']['references'][$page] = $exists;
@@ -308,21 +330,29 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   }
 
   function externallink($url, $name = NULL){
+    if(is_array($name))
+        $this->_firstimage($name['src']);
+
     if ($this->capture){
-      if ($name) $this->doc .= $name;
-      else $this->doc .= '<'.$url.'>';
+      $this->doc .= $this->_getLinkTitle($name, '<' . $url . '>');
     }
   }
 
   function interwikilink($match, $name = NULL, $wikiName, $wikiUri){
+    if(is_array($name))
+        $this->_firstimage($name['src']);
+
     if ($this->capture){
       list($wikiUri, $hash) = explode('#', $wikiUri, 2);
-      $name = $this->_getLinkTitle($name, $wikiName.'>'.$wikiUri);
+      $name = $this->_getLinkTitle($name, $wikiUri);
       $this->doc .= $name;
     }
   }
 
   function windowssharelink($url, $name = NULL){
+    if(is_array($name))
+        $this->_firstimage($name['src']);
+
     if ($this->capture){
       if ($name) $this->doc .= $name;
       else $this->doc .= '<'.$url.'>';
@@ -330,6 +360,9 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   }
 
   function emaillink($address, $name = NULL){
+    if(is_array($name))
+        $this->_firstimage($name['src']);
+
     if ($this->capture){
       if ($name) $this->doc .= $name;
       else $this->doc .= '<'.$address.'>';
@@ -339,11 +372,13 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   function internalmedia($src, $title=NULL, $align=NULL, $width=NULL,
                          $height=NULL, $cache=NULL, $linking=NULL){
     if ($this->capture && $title) $this->doc .= '['.$title.']';
+    $this->_firstimage($src);
   }
 
   function externalmedia($src, $title=NULL, $align=NULL, $width=NULL,
                          $height=NULL, $cache=NULL, $linking=NULL){
     if ($this->capture && $title) $this->doc .= '['.$title.']';
+    $this->_firstimage($src);
   }
 
   function rss($url,$params) {
@@ -361,10 +396,10 @@ class Doku_Renderer_metadata extends Doku_Renderer {
   function tablerow_open(){}
   function tablerow_close(){}
 
-  function tableheader_open($colspan = 1, $align = NULL){}
+  function tableheader_open($colspan = 1, $align = NULL, $rowspan = 1){}
   function tableheader_close(){}
 
-  function tablecell_open($colspan = 1, $align = NULL){}
+  function tablecell_open($colspan = 1, $align = NULL, $rowspan = 1){}
   function tablecell_close(){}
 
   //----------------------------------------------------------
@@ -400,21 +435,12 @@ class Doku_Renderer_metadata extends Doku_Renderer {
    * @author Andreas Gohr <andi@splitbrain.org>
    */
   function _headerToLink($title, $create=false) {
-    $title = str_replace(':','',cleanID($title));
-    $title = ltrim($title,'0123456789._-');
-    if(empty($title)) $title='section';
-
-    if($create){
-      // make sure tiles are unique
-      $num = '';
-      while(in_array($title.$num,$this->headers)){
-        ($num) ? $num++ : $num = 1;
+      if($create){
+          return sectionID($title,$this->headers);
+      }else{
+          $check = false;
+          return sectionID($title,$check);
       }
-      $title = $title.$num;
-      $this->headers[] = $title;
-    }
-
-    return $title;
   }
 
   /**
@@ -427,7 +453,7 @@ class Doku_Renderer_metadata extends Doku_Renderer {
 
     $isImage = false;
     if (is_null($title)){
-      if ($conf['useheading'] && $id){
+      if (useHeading('content') && $id){
         $heading = p_get_first_heading($id,false);
         if ($heading) return $heading;
       }
@@ -435,10 +461,22 @@ class Doku_Renderer_metadata extends Doku_Renderer {
     } else if (is_string($title)){
       return $title;
     } else if (is_array($title)){
-      return '['.$title.']';
+      return '['.$title['title'].']';
     }
   }
 
+  function _firstimage($src){
+    if($this->firstimage) return;
+    global $ID;
+
+    list($src,$hash) = explode('#',$src,2);
+    if(!preg_match('/^https?:\/\//i',$src)){
+        resolve_mediaid(getNS($ID),$src, $exists);
+    }
+    if(preg_match('/.(jpe?g|gif|png)$/i',$src)){
+        $this->firstimage = $src;
+    }
+  }
 }
 
 //Setup VIM: ex: et ts=4 enc=utf-8 :

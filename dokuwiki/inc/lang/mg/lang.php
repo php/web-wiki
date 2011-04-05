@@ -56,7 +56,7 @@ $lang['lockedby']     = 'Mbola voahidin\'i';
 $lang['lockexpire']   = 'Afaka ny hidy amin\'ny';
 $lang['willexpire']   = 'Efa ho lany fotoana afaka iray minitra ny hidy ahafahanao manova ny pejy.\nMba hialana amin\'ny conflit dia ampiasao ny bokotra topi-maso hamerenana ny timer-n\'ny hidy.';
 
-$lang['notsavedyet'] = 'Misy fiovana tsy voarakitra, ho very izany ireo.\nAzo antoka fa hotohizana?';
+$lang['js']['notsavedyet'] = "Misy fiovana tsy voarakitra, ho very izany ireo.\nAzo antoka fa hotohizana?";
 $lang['rssfailed']   = 'An error occured while fetching this feed: ';
 $lang['nothingfound']= 'Tsy nahitana n\'inon\'inona.';
 
@@ -94,9 +94,8 @@ $lang['summary']    = 'Fanovana teo';
 $lang['mail_newpage'] = 'pejy niampy:';
 $lang['mail_changed'] = 'pejy niova:';
 
-$lang['nosmblinks'] = 'rohy mankamin\'ny fizarana Windows dia amin\'ny Microsoft Internet Explorer ihany no miasa.\nAzo atao ihany anefa ny manao dika-petaka ny rohy.';
+$lang['js']['nosmblinks'] = "rohy mankamin\'ny fizarana Windows dia amin\'ny Microsoft Internet Explorer ihany no miasa.\nAzo atao ihany anefa ny manao dika-petaka ny rohy.";
 
-$lang['qb_alert']   = 'Ampidiro ny soratra tianao hamboarina format.\n Hiampy any @ farany izy avy eo.';
 $lang['qb_bold']    = 'Matavy';
 $lang['qb_italic']  = 'Mandry';
 $lang['qb_underl']  = 'Voatsipika';
@@ -115,7 +114,7 @@ $lang['qb_ul']      = 'Tanisa tsy milahatra';
 $lang['qb_media']   = 'Hanampy sary na rakitra hafa';
 $lang['qb_sig']     = 'Manisy sonia';
 
-$lang['del_confirm']= 'Hofafana ilay andalana?';
+$lang['js']['del_confirm']= 'Hofafana ilay andalana?';
 
 $lang['admin_acl']  = 'Fitantanana ACL (Access Control List)...';
 $lang['admin_register']= 'Ampio mpampiasa vaovao...';
@@ -132,6 +131,5 @@ $lang['acl_perm4']  = 'Manamboatra';
 $lang['acl_perm8']  = 'Mandefa rakitra';
 $lang['acl_perm16'] = 'Mamafa';
 $lang['acl_new']    = 'Ampio andalana vaovao';
-
 
 //Setup VIM: ex: et ts=2 enc=utf-8 :

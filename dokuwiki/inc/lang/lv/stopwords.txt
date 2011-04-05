@@ -2,24 +2,47 @@
 # Labojot failu ievēro, ja jālieto UNIX rindu aplauzumi (single newline)
 # Nevajag likt sarakstā par 3 burtiem īsākus vārdus, tos tā pat neņem vērā
 # Angļu valodai saraksts ņemts no http://www.ranks.nl/stopwords/
-gar 
+gar
 par
 pār
-pret 
+pret
 starp
 caur
-vai
-nav
-aiz 
+uz
+aiz
 apakš
 bez
-dēļ
+iz
+kopš
+no
 pēc
-pie 
+pie
 pirms
 priekš
-
-
- 
+uz
+virs
+zem
+apakšpus
+ārpus
+augšpus
+iekšpus
+lejpus
+otrpus
+šaipus
+viņpus
+virspus
+dēļ
+labad
+pēc 
+līdz 
+pa
+vai
+jā
+nē
+kaut 
+nav
+itin
+jo 
+taču
 
 

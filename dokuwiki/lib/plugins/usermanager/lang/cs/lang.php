@@ -5,6 +5,9 @@
  * @author Tomas Valenta <t.valenta@sh.cvut.cz>
  * @author Zbynek Krivka <zbynek.krivka@seznam.cz>
  * @author Bohumir Zamecnik <bohumir@zamecnik.org>
+ * @author tomas@valenta.cz
+ * @author Marek Sacha <sachamar@fel.cvut.cz>
+ * @author Lefty <lefty@multihost.cz>
  */
 $lang['menu']                  = 'Správa uživatelů';
 $lang['noauth']                = '(autentizace uživatelů není k dispozici)';
@@ -42,6 +45,7 @@ $lang['edit_usermissing']      = 'Vybraný uživatel nebyl nalezen, zadané uži
 $lang['user_notify']           = 'Upozornit uživatele';
 $lang['note_notify']           = 'Maily s upozorněním se budou posílat pouze, když uživatel dostává nové heslo.';
 $lang['note_group']            = 'Noví uživatelé budou přidáváni do této výchozí skupiny (%s), pokud pro ně není uvedena žádná skupina.';
+$lang['note_pass']             = 'Heslo bude automaticky vygenerováno pokud je pole ponacháno prázdné a je zapnutá notifikace uživatele.';
 $lang['add_ok']                = 'Uživatel úspěšně vytvořen';
 $lang['add_fail']              = 'Vytvoření uživatele selhalo';
 $lang['notify_ok']             = 'Odeslán mail s upozorněním';

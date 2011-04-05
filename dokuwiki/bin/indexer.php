@@ -2,12 +2,14 @@
 <?php
 if ('cli' != php_sapi_name()) die();
 
+ini_set('memory_limit','128M');
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../').'/');
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/common.php');
 require_once(DOKU_INC.'inc/pageutils.php');
 require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/indexer.php');
+require_once(DOKU_INC.'inc/auth.php');
 require_once(DOKU_INC.'inc/cliopts.php');
 session_write_close();
 
@@ -69,16 +71,9 @@ function _usage() {
 function _update(){
     global $conf;
 
-    // upgrade to version 2
-    if (!@file_exists($conf['indexdir'].'/pageword.idx')){
-        _lock();
-        idx_upgradePageWords();
-        _unlock();
-    }
-
     $data = array();
     _quietecho("Searching pages... ");
-    search($data,$conf['datadir'],'search_allpages',array());
+    search($data,$conf['datadir'],'search_allpages',array('skipacl' => true));
     _quietecho(count($data)." pages found.\n");
 
     foreach($data as $val){
@@ -150,6 +145,7 @@ function _clearindex(){
     _lock();
     _quietecho("Clearing index... ");
     io_saveFile($conf['indexdir'].'/page.idx','');
+    io_saveFile($conf['indexdir'].'/title.idx','');
     $dir = @opendir($conf['indexdir']);
     if($dir!==false){
         while(($f = readdir($dir)) !== false){

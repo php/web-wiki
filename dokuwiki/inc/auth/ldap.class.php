@@ -27,10 +27,9 @@ class auth_ldap extends auth_basic {
             return;
         }
 
-        if(empty($this->cnf['groupkey'])) $this->cnf['groupkey'] = 'cn';
-
-        // try to connect
-        if(!$this->_openLDAP()) $this->success = false;
+        if(empty($this->cnf['groupkey']))   $this->cnf['groupkey']   = 'cn';
+        if(empty($this->cnf['userscope']))  $this->cnf['userscope']  = 'sub';
+        if(empty($this->cnf['groupscope'])) $this->cnf['groupscope'] = 'sub';
 
         // auth_ldap currently just handles authentication, so no
         // capabilities are set
@@ -174,13 +173,15 @@ class auth_ldap extends auth_basic {
             $filter = "(ObjectClass=*)";
         }
 
-        $sr     = @ldap_search($this->con, $base, $filter);
+        $sr     = $this->_ldapsearch($this->con, $base, $filter, $this->cnf['userscope']);
         $result = @ldap_get_entries($this->con, $sr);
-        if($this->cnf['debug'])
+        if($this->cnf['debug']){
             msg('LDAP user search: '.htmlspecialchars(ldap_error($this->con)),0,__LINE__,__FILE__);
+            msg('LDAP search at: '.htmlspecialchars($base.' '.$filter),0,__LINE__,__FILE__);
+        }
 
         // Don't accept more or less than one response
-        if($result['count'] != 1){
+        if(!is_array($result) || $result['count'] != 1){
             return false; //user not found
         }
 
@@ -217,21 +218,22 @@ class auth_ldap extends auth_basic {
         $user_result = array_merge($info,$user_result);
 
         //get groups for given user if grouptree is given
-        if ($this->cnf['grouptree'] && $this->cnf['groupfilter']) {
+        if ($this->cnf['grouptree'] || $this->cnf['groupfilter']) {
             $base   = $this->_makeFilter($this->cnf['grouptree'], $user_result);
             $filter = $this->_makeFilter($this->cnf['groupfilter'], $user_result);
-
-            $sr = @ldap_search($this->con, $base, $filter, array($this->cnf['groupkey']));
+            $sr = $this->_ldapsearch($this->con, $base, $filter, $this->cnf['groupscope'], array($this->cnf['groupkey']));
+            if($this->cnf['debug']){
+                msg('LDAP group search: '.htmlspecialchars(ldap_error($this->con)),0,__LINE__,__FILE__);
+                msg('LDAP search at: '.htmlspecialchars($base.' '.$filter),0,__LINE__,__FILE__);
+            }
             if(!$sr){
                 msg("LDAP: Reading group memberships failed",-1);
-                if($this->cnf['debug'])
-                    msg('LDAP group search: '.htmlspecialchars(ldap_error($this->con)),0,__LINE__,__FILE__);
                 return false;
             }
             $result = ldap_get_entries($this->con, $sr);
             ldap_free_result($sr);
 
-            foreach($result as $grp){
+            if(is_array($result)) foreach($result as $grp){
                 if(!empty($grp[$this->cnf['groupkey']][0])){
                     if($this->cnf['debug'])
                         msg('LDAP usergroup: '.htmlspecialchars($grp[$this->cnf['groupkey']][0]),0,__LINE__,__FILE__);
@@ -245,6 +247,65 @@ class auth_ldap extends auth_basic {
             $info['grps'][] = $conf['defaultgroup'];
         }
         return $info;
+    }
+
+    /**
+     * Most values in LDAP are case-insensitive
+     */
+    function isCaseSensitive(){
+        return false;
+    }
+
+    /**
+     * Bulk retrieval of user data
+     *
+     * @author  Dominik Eckelmann <dokuwiki@cosmocode.de>
+     * @param   start     index of first user to be returned
+     * @param   limit     max number of users to be returned
+     * @param   filter    array of field/pattern pairs, null for no filter
+     * @return  array of userinfo (refer getUserData for internal userinfo details)
+     */
+    function retrieveUsers($start=0,$limit=-1,$filter=array()) {
+        if(!$this->_openLDAP()) return false;
+
+        if (!isset($this->users)) {
+            // Perform the search and grab all their details
+            if(!empty($this->cnf['userfilter'])) {
+                $all_filter = str_replace('%{user}', '*', $this->cnf['userfilter']);
+            } else {
+                $all_filter = "(ObjectClass=*)";
+            }
+            $sr=ldap_search($this->con,$this->cnf['usertree'],$all_filter);
+            $entries = ldap_get_entries($this->con, $sr);
+            $users_array = array();
+            for ($i=0; $i<$entries["count"]; $i++){
+                array_push($users_array, $entries[$i]["uid"][0]);
+            }
+            asort($users_array);
+            $result = $users_array;
+            if (!$result) return array();
+            $this->users = array_fill_keys($result, false);
+        }
+        $i = 0;
+        $count = 0;
+        $this->_constructPattern($filter);
+        $result = array();
+
+        foreach ($this->users as $user => &$info) {
+            if ($i++ < $start) {
+                continue;
+            }
+            if ($info === false) {
+                $info = $this->getUserData($user);
+            }
+            if ($this->_filter($user, $info)) {
+                $result[$user] = $info;
+                if (($limit >= 0) && (++$count >= $limit)) break;
+            }
+        }
+        return $result;
+
+
     }
 
     /**
@@ -273,6 +334,32 @@ class auth_ldap extends auth_basic {
             $filter = str_replace('%{'.$match.'}', $value, $filter);
         }
         return $filter;
+    }
+
+    /**
+     * return 1 if $user + $info match $filter criteria, 0 otherwise
+     *
+     * @author   Chris Smith <chris@jalakai.co.uk>
+     */
+    function _filter($user, $info) {
+        foreach ($this->_pattern as $item => $pattern) {
+            if ($item == 'user') {
+                if (!preg_match($pattern, $user)) return 0;
+            } else if ($item == 'grps') {
+                if (!count(preg_grep($pattern, $info['grps']))) return 0;
+            } else {
+                if (!preg_match($pattern, $info[$item])) return 0;
+            }
+        }
+        return 1;
+    }
+
+    function _constructPattern($filter) {
+        $this->_pattern = array();
+        foreach ($filter as $item => $pattern) {
+//          $this->_pattern[$item] = '/'.preg_quote($pattern,"/").'/i';          // don't allow regex characters
+            $this->_pattern[$item] = '/'.str_replace('/','\/',$pattern).'/i';    // allow regex characters
+        }
     }
 
     /**
@@ -343,7 +430,30 @@ class auth_ldap extends auth_basic {
             }
         }
 
+        $this->canDo['getUsers'] = true;
         return true;
+    }
+
+    /**
+     * Wraps around ldap_search, ldap_list or ldap_read depending on $scope
+     *
+     * @param  $scope string - can be 'base', 'one' or 'sub'
+     * @author Andreas Gohr <andi@splitbrain.org>
+     */
+    function _ldapsearch($link_identifier, $base_dn, $filter, $scope='sub', $attributes=null,
+                         $attrsonly=0, $sizelimit=0, $timelimit=0, $deref=LDAP_DEREF_NEVER){
+        if(is_null($attributes)) $attributes = array();
+
+        if($scope == 'base'){
+            return @ldap_read($link_identifier, $base_dn, $filter, $attributes,
+                             $attrsonly, $sizelimit, $timelimit, $deref);
+        }elseif($scope == 'one'){
+            return @ldap_list($link_identifier, $base_dn, $filter, $attributes,
+                             $attrsonly, $sizelimit, $timelimit, $deref);
+        }else{
+            return @ldap_search($link_identifier, $base_dn, $filter, $attributes,
+                                $attrsonly, $sizelimit, $timelimit, $deref);
+        }
     }
 }
 

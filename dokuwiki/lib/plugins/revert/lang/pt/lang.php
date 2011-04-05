@@ -3,6 +3,9 @@
  * Portuguese language file
  *
  * @author José Monteiro <Jose.Monteiro@DoWeDo-IT.com>
+ * @author Enrico Nicoletto <liverig@gmail.com>
+ * @author Fil <fil@meteopt.com>
+ * @author André Neves <drakferion@gmail.com>
  */
 $lang['menu']                  = 'Gestor de Reversões';
 $lang['filter']                = 'Pesquisar por páginas "spammy"';

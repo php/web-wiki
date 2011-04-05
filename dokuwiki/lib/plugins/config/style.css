@@ -4,7 +4,7 @@
 #config__manager div.info {
   background-position: 0.5em;
   padding: 0.5em;
-  text-align:center;
+  text-align: center;
 }
 
 #config__manager fieldset {
@@ -30,12 +30,22 @@
 }
 #config__manager fieldset td.value {
     /* fixed data column width */
-    width: 30em;
+    width: 31em;
 }
 
 #config__manager td.label {
     padding: 0.8em 0 0.6em 1em;
     vertical-align: top;
+}
+
+#config__manager td.label label {
+    clear: left;
+    display: block;
+}
+#config__manager td.label img {
+    padding: 0 10px;
+    vertical-align: middle;
+    float: right;
 }
 
 #config__manager td.label span.outkey {
@@ -47,10 +57,15 @@
     color: __text_neu__;
     float: left;
     padding: 0 0.1em;
+    position: relative;
+    z-index: 1;
 }
 
 #config__manager td input.edit {
     width: 30em;
+}
+#config__manager td .input {
+    width: 30.8em;
 }
 #config__manager td select.edit { }
 #config__manager td textarea.edit {
@@ -84,7 +99,7 @@
   color: #000 !important;
 }
 
-#config__manager td.error  { background-color: red; color: #000;}
+#config__manager td.error  { background-color: red; color: #000; }
 
 #config__manager .selection {
   width: 14.8em;

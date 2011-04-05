@@ -7,7 +7,7 @@
  * You should leave the doctype at the very top - It should
  * always be the very first line of a document.
  *
- * @link   http://wiki.splitbrain.org/wiki:tpl:templates
+ * @link   http://dokuwiki.org/templates
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
@@ -45,10 +45,7 @@ if (!defined('DOKU_INC')) die();
 
     <div class="img_detail">
       <p class="img_caption">
-        <?php print nl2br(hsc(tpl_img_getTag(array('IPTC.Caption',
-                                               'EXIF.UserComment',
-                                               'EXIF.TIFFImageDescription',
-                                               'EXIF.TIFFUserComment')))); ?>
+        <?php print nl2br(hsc(tpl_img_getTag('simple.title'))); ?>
       </p>
 
       <p>&larr; <?php echo $lang['img_backto']?> <?php tpl_pagelink($ID)?></p>
@@ -56,7 +53,7 @@ if (!defined('DOKU_INC')) die();
       <dl class="img_tags">
         <?php
           $t = tpl_img_getTag('Date.EarliestTime');
-          if($t) print '<dt>'.$lang['img_date'].':</dt><dd>'.strftime($conf['dformat'],$t).'</dd>';
+          if($t) print '<dt>'.$lang['img_date'].':</dt><dd>'.dformat($t).'</dd>';
 
           $t = tpl_img_getTag('File.Name');
           if($t) print '<dt>'.$lang['img_fname'].':</dt><dd>'.hsc($t).'</dd>';
@@ -76,7 +73,7 @@ if (!defined('DOKU_INC')) die();
           $t = tpl_img_getTag('Simple.Camera');
           if($t) print '<dt>'.$lang['img_camera'].':</dt><dd>'.hsc($t).'</dd>';
 
-          $t = tpl_img_getTag(array('IPTC.Keywords','IPTC.Category'));
+          $t = tpl_img_getTag(array('IPTC.Keywords','IPTC.Category','xmp.dc:subject'));
           if($t) print '<dt>'.$lang['img_keywords'].':</dt><dd>'.hsc($t).'</dd>';
 
         ?>

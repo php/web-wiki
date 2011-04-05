@@ -6,8 +6,6 @@
  * @author     Andreas Goetz <cpuidle@gmx.de>
  */
 
-if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../').'/');
-require_once(DOKU_CONF.'dokuwiki.php');
 
 define('HTTP_NL',"\r\n");
 
@@ -31,12 +29,36 @@ class DokuHTTPClient extends HTTPClient {
         $this->HTTPClient();
 
         // set some values from the config
-        $this->proxy_host = $conf['proxy']['host'];
-        $this->proxy_port = $conf['proxy']['port'];
-        $this->proxy_user = $conf['proxy']['user'];
-        $this->proxy_pass = $conf['proxy']['pass'];
-        $this->proxy_ssl  = $conf['proxy']['ssl'];
+        $this->proxy_host   = $conf['proxy']['host'];
+        $this->proxy_port   = $conf['proxy']['port'];
+        $this->proxy_user   = $conf['proxy']['user'];
+        $this->proxy_pass   = conf_decodeString($conf['proxy']['pass']);
+        $this->proxy_ssl    = $conf['proxy']['ssl'];
+        $this->proxy_except = $conf['proxy']['except'];
     }
+
+
+    /**
+     * Wraps an event around the parent function
+     *
+     * @triggers HTTPCLIENT_REQUEST_SEND
+     * @author   Andreas Gohr <andi@splitbrain.org>
+     */
+    function sendRequest($url,$data='',$method='GET'){
+        $httpdata = array('url'    => $url,
+                          'data'   => $data,
+                          'method' => $method);
+        $evt = new Doku_Event('HTTPCLIENT_REQUEST_SEND',$httpdata);
+        if($evt->advise_before()){
+            $url    = $httpdata['url'];
+            $data   = $httpdata['data'];
+            $method = $httpdata['method'];
+        }
+        $evt->advise_after();
+        unset($evt);
+        return parent::sendRequest($url,$data,$method);
+    }
+
 }
 
 /**
@@ -58,7 +80,8 @@ class HTTPClient {
     var $cookies;
     var $referer;
     var $max_redirect;
-    var $max_bodysize;  // abort if the response body is bigger than this
+    var $max_bodysize;
+    var $max_bodysize_abort = true;  // if set, abort if the response body is bigger than max_bodysize
     var $header_regexp; // if set this RE must match against the headers, else abort
     var $headers;
     var $debug;
@@ -83,6 +106,10 @@ class HTTPClient {
     var $proxy_user;
     var $proxy_pass;
     var $proxy_ssl; //boolean set to true if your proxy needs SSL
+    var $proxy_except; // regexp of URLs to exclude from proxy
+
+    // what we use as boundary on multipart/form-data posts
+    var $boundary = '---DokuWikiHTTPClient--4523452351';
 
     /**
      * Constructor.
@@ -121,8 +148,31 @@ class HTTPClient {
     function get($url,$sloppy304=false){
         if(!$this->sendRequest($url)) return false;
         if($this->status == 304 && $sloppy304) return $this->resp_body;
-        if($this->status != 200) return false;
+        if($this->status < 200 || $this->status > 206) return false;
         return $this->resp_body;
+    }
+
+    /**
+     * Simple function to do a GET request with given parameters
+     *
+     * Returns the wanted page or false on an error.
+     *
+     * This is a convenience wrapper around get(). The given parameters
+     * will be correctly encoded and added to the given base URL.
+     *
+     * @param  string $url       The URL to fetch
+     * @param  array  $data      Associative array of parameters
+     * @param  bool   $sloppy304 Return body on 304 not modified
+     * @author Andreas Gohr <andi@splitbrain.org>
+     */
+    function dget($url,$data,$sloppy304=false){
+        if(strpos($url,'?')){
+            $url .= '&';
+        }else{
+            $url .= '?';
+        }
+        $url .= $this->_postEncode($data);
+        return $this->get($url,$sloppy304);
     }
 
     /**
@@ -134,7 +184,7 @@ class HTTPClient {
      */
     function post($url,$data){
         if(!$this->sendRequest($url,$data,'POST')) return false;
-        if($this->status != 200) return false;
+        if($this->status < 200 || $this->status > 206) return false;
         return $this->resp_body;
     }
 
@@ -159,6 +209,13 @@ class HTTPClient {
         $this->error  = '';
         $this->status = 0;
 
+        // don't accept gzip if truncated bodies might occur
+        if($this->max_bodysize &&
+           !$this->max_bodysize_abort &&
+           $this->headers['Accept-encoding'] == 'gzip'){
+            unset($this->headers['Accept-encoding']);
+        }
+
         // parse URL into bits
         $uri = parse_url($url);
         $server = $uri['host'];
@@ -166,11 +223,11 @@ class HTTPClient {
         if(empty($path)) $path = '/';
         if(!empty($uri['query'])) $path .= '?'.$uri['query'];
         $port = $uri['port'];
-        if($uri['user']) $this->user = $uri['user'];
-        if($uri['pass']) $this->pass = $uri['pass'];
+        if(isset($uri['user'])) $this->user = $uri['user'];
+        if(isset($uri['pass'])) $this->pass = $uri['pass'];
 
         // proxy setup
-        if($this->proxy_host){
+        if($this->proxy_host && (!$this->proxy_except || !preg_match('/'.$this->proxy_except.'/i',$url)) ){
             $request_url = $url;
             $server      = $this->proxy_host;
             $port        = $this->proxy_port;
@@ -187,13 +244,19 @@ class HTTPClient {
         // prepare headers
         $headers               = $this->headers;
         $headers['Host']       = $uri['host'];
+        if($uri['port']) $headers['Host'].= ':'.$uri['port'];
         $headers['User-Agent'] = $this->agent;
         $headers['Referer']    = $this->referer;
         $headers['Connection'] = 'Close';
         if($method == 'POST'){
             if(is_array($data)){
-                $headers['Content-Type']   = 'application/x-www-form-urlencoded';
-                $data = $this->_postEncode($data);
+                if($headers['Content-Type'] == 'multipart/form-data'){
+                    $headers['Content-Type']   = 'multipart/form-data; boundary='.$this->boundary;
+                    $data = $this->_postMultipartEncode($data);
+                }else{
+                    $headers['Content-Type']   = 'application/x-www-form-urlencoded';
+                    $data = $this->_postEncode($data);
+                }
             }
             $headers['Content-Length'] = strlen($data);
             $rmethod = 'POST';
@@ -213,7 +276,7 @@ class HTTPClient {
         // open socket
         $socket = @fsockopen($server,$port,$errno, $errstr, $this->timeout);
         if (!$socket){
-            $resp->status = '-100';
+            $this->status = -100;
             $this->error = "Could not connect to $server:$port\n$errstr ($errno)";
             return false;
         }
@@ -230,7 +293,18 @@ class HTTPClient {
         $this->_debug('request',$request);
 
         // send request
-        fputs($socket, $request);
+        $towrite = strlen($request);
+        $written = 0;
+        while($written < $towrite){
+            $ret = fwrite($socket, substr($request,$written));
+            if($ret === false){
+                $this->status = -100;
+                $this->error = 'Failed writing to socket';
+                return false;
+            }
+            $written += $ret;
+        }
+
         // read headers from socket
         $r_headers = '';
         do{
@@ -252,7 +326,8 @@ class HTTPClient {
         if($this->max_bodysize && preg_match('/\r?\nContent-Length:\s*(\d+)\r?\n/i',$r_headers,$match)){
             if($match[1] > $this->max_bodysize){
                 $this->error = 'Reported content length exceeds allowed response size';
-                return false;
+                if ($this->max_bodysize_abort)
+                    return false;
             }
         }
 
@@ -266,9 +341,17 @@ class HTTPClient {
         // handle headers and cookies
         $this->resp_headers = $this->_parseHeaders($r_headers);
         if(isset($this->resp_headers['set-cookie'])){
-            foreach ((array) $this->resp_headers['set-cookie'] as $c){
-                list($key, $value, $foo) = split('=', $cookie);
-                $this->cookies[$key] = $value;
+            foreach ((array) $this->resp_headers['set-cookie'] as $cookie){
+                list($cookie)   = explode(';',$cookie,2);
+                list($key,$val) = explode('=',$cookie,2);
+                $key = trim($key);
+                if($val == 'deleted'){
+                    if(isset($this->cookies[$key])){
+                        unset($this->cookies[$key]);
+                    }
+                }elseif($key){
+                    $this->cookies[$key] = $val;
+                }
             }
         }
 
@@ -285,9 +368,15 @@ class HTTPClient {
             }else{
                 $this->redirect_count++;
                 $this->referer = $url;
+                // handle non-RFC-compliant relative redirects
                 if (!preg_match('/^http/i', $this->resp_headers['location'])){
-                    $this->resp_headers['location'] = $uri['scheme'].'://'.$uri['host'].
-                                                      $this->resp_headers['location'];
+                    if($this->resp_headers['location'][0] != '/'){
+                        $this->resp_headers['location'] = $uri['scheme'].'://'.$uri['host'].':'.$uri['port'].
+                                                          dirname($uri['path']).'/'.$this->resp_headers['location'];
+                    }else{
+                        $this->resp_headers['location'] = $uri['scheme'].'://'.$uri['host'].':'.$uri['port'].
+                                                          $this->resp_headers['location'];
+                    }
                 }
                 // perform redirected request, always via GET (required by RFC)
                 return $this->sendRequest($this->resp_headers['location'],array(),'GET');
@@ -302,7 +391,7 @@ class HTTPClient {
 
         //read body (with chunked encoding if needed)
         $r_body    = '';
-        if(preg_match('/transfer\-(en)?coding:\s*chunked\r\n/i',$r_header)){
+        if(preg_match('/transfer\-(en)?coding:\s*chunked\r\n/i',$r_headers)){
             do {
                 unset($chunk_size);
                 do {
@@ -321,13 +410,18 @@ class HTTPClient {
 
                 $byte = fread($socket,1);     // readtrailing \n
                 $chunk_size = hexdec($chunk_size);
-                $this_chunk = fread($socket,$chunk_size);
-                $r_body    .= $this_chunk;
-                if ($chunk_size) $byte = fread($socket,2); // read trailing \r\n
+                if ($chunk_size) {
+                    $this_chunk = fread($socket,$chunk_size);
+                    $r_body    .= $this_chunk;
+                    $byte = fread($socket,2); // read trailing \r\n
+                }
 
                 if($this->max_bodysize && strlen($r_body) > $this->max_bodysize){
                     $this->error = 'Allowed response size exceeded';
-                    return false;
+                    if ($this->max_bodysize_abort)
+                        return false;
+                    else
+                        break;
                 }
             } while ($chunk_size);
         }else{
@@ -342,9 +436,13 @@ class HTTPClient {
                 $r_size = strlen($r_body);
                 if($this->max_bodysize && $r_size > $this->max_bodysize){
                     $this->error = 'Allowed response size exceeded';
-                    return false;
+                    if ($this->max_bodysize_abort)
+                        return false;
+                    else
+                        break;
                 }
-                if($this->resp_headers['content-length'] && !$this->resp_headers['transfer-encoding'] &&
+                if(isset($this->resp_headers['content-length']) &&
+                   !isset($this->resp_headers['transfer-encoding']) &&
                    $this->resp_headers['content-length'] == $r_size){
                     // we read the content-length, finish here
                     break;
@@ -357,8 +455,14 @@ class HTTPClient {
         fclose($socket);
 
         // decode gzip if needed
-        if($this->resp_headers['content-encoding'] == 'gzip'){
-            $this->resp_body = gzinflate(substr($r_body, 10));
+        if(isset($this->resp_headers['content-encoding']) &&
+           $this->resp_headers['content-encoding'] == 'gzip' &&
+           strlen($r_body) > 10 && substr($r_body,0,3)=="\x1f\x8b\x08"){
+            $this->resp_body = @gzinflate(substr($r_body, 10));
+            if($this->resp_body === false){
+                $this->error = 'Failed to decompress gzip encoded content';
+                $this->resp_body = $r_body;
+            }
         }else{
             $this->resp_body = $r_body;
         }
@@ -441,28 +545,59 @@ class HTTPClient {
      * @author Andreas Goetz <cpuidle@gmx.de>
      */
     function _getCookies(){
+        $headers = '';
         foreach ($this->cookies as $key => $val){
-            if ($headers) $headers .= '; ';
-            $headers .= $key.'='.$val;
+            $headers .= "$key=$val; ";
         }
-
-        if ($headers) $headers = "Cookie: $headers".HTTP_NL;
+        $headers = substr($headers, 0, -2);
+        if ($headers !== '') $headers = "Cookie: $headers".HTTP_NL;
         return $headers;
     }
 
     /**
      * Encode data for posting
      *
-     * @todo handle mixed encoding for file upoads
      * @author Andreas Gohr <andi@splitbrain.org>
      */
     function _postEncode($data){
+        $url = '';
         foreach($data as $key => $val){
             if($url) $url .= '&';
-            $url .= $key.'='.urlencode($val);
+            $url .= urlencode($key).'='.urlencode($val);
         }
         return $url;
     }
+
+    /**
+     * Encode data for posting using multipart encoding
+     *
+     * @fixme use of urlencode might be wrong here
+     * @author Andreas Gohr <andi@splitbrain.org>
+     */
+    function _postMultipartEncode($data){
+        $boundary = '--'.$this->boundary;
+        $out = '';
+        foreach($data as $key => $val){
+            $out .= $boundary.HTTP_NL;
+            if(!is_array($val)){
+                $out .= 'Content-Disposition: form-data; name="'.urlencode($key).'"'.HTTP_NL;
+                $out .= HTTP_NL; // end of headers
+                $out .= $val;
+                $out .= HTTP_NL;
+            }else{
+                $out .= 'Content-Disposition: form-data; name="'.urlencode($key).'"';
+                if($val['filename']) $out .= '; filename="'.urlencode($val['filename']).'"';
+                $out .= HTTP_NL;
+                if($val['mimetype']) $out .= 'Content-Type: '.$val['mimetype'].HTTP_NL;
+                $out .= HTTP_NL; // end of headers
+                $out .= $val['body'];
+                $out .= HTTP_NL;
+            }
+        }
+        $out .= "$boundary--".HTTP_NL;
+        return $out;
+    }
+
 }
 
 //Setup VIM: ex: et ts=4 enc=utf-8 :

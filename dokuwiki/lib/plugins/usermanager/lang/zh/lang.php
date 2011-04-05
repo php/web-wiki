@@ -3,6 +3,13 @@
  * English language file
  *
  * @author ZDYX <zhangduyixiong@gmail.com>
+ * @author http://www.chinese-tools.com/tools/converter-tradsimp.html
+ * @author George Sheraton guxd@163.com
+ * @author Simon zhan <simonzhan@21cn.com>
+ * @author mr.jinyi@gmail.com
+ * @author ben <ben@livetom.com>
+ * @author lainme <lainme993@gmail.com>
+ * @author caii <zhoucaiqi@gmail.com>
  */
 $lang['menu']                  = '用户管理器';
 $lang['noauth']                = '（用户认证不可用）';
@@ -40,6 +47,7 @@ $lang['edit_usermissing']      = '您指定的用户没有找到，可能用户�
 $lang['user_notify']           = '通知用户';
 $lang['note_notify']           = '通知邮件只有在用户获得新密码时才会发送。';
 $lang['note_group']            = '* 如果没有指定组，新用户将被添加到默认的组（%s）中。';
+$lang['note_pass']             = '如果输入框留空则自动生成口令，并会通知用户。';
 $lang['add_ok']                = '用户添加成功';
 $lang['add_fail']              = '用户添加失败';
 $lang['notify_ok']             = '通知邮件已发送';

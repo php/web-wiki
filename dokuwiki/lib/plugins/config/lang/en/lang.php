@@ -17,6 +17,10 @@ $lang['nochoice']   = '(no other choices available)';
 $lang['locked']     = 'The settings file can not be updated, if this is unintentional, <br />
                        ensure the local settings file name and permissions are correct.';
 
+$lang['danger']     = 'Danger: Changing this option could make your wiki and the configuration menu inaccessible.';
+$lang['warning']    = 'Warning: Changing this option could cause unintended behaviour.';
+$lang['security']   = 'Security Warning: Changing this option could present a security risk.';
+
 /* --- Config Setting Headers --- */
 $lang['_configuration_manager'] = 'Configuration Manager'; //same as heading in intro.txt
 $lang['_header_dokuwiki'] = 'DokuWiki Settings';
@@ -50,13 +54,14 @@ $lang['_msg_setting_no_default'] = 'No default value.';
 
 $lang['fmode']       = 'File creation mode';
 $lang['dmode']       = 'Directory creation mode';
-$lang['lang']        = 'Language';
-$lang['basedir']     = 'Base directory';
-$lang['baseurl']     = 'Base URL';
+$lang['lang']        = 'Interface language';
+$lang['basedir']     = 'Server path (eg. <code>/dokuwiki/</code>). Leave blank for autodetection.';
+$lang['baseurl']     = 'Server URL (eg. <code>http://www.yourserver.com</code>). Leave blank for autodetection.';
 $lang['savedir']     = 'Directory for saving data';
 $lang['start']       = 'Start page name';
 $lang['title']       = 'Wiki title';
 $lang['template']    = 'Template';
+$lang['license']     = 'Under which license should your content be released?';
 $lang['fullpath']    = 'Reveal full path of pages in the footer';
 $lang['recent']      = 'Recent changes';
 $lang['breadcrumbs'] = 'Number of breadcrumbs';
@@ -67,6 +72,7 @@ $lang['phpok']       = 'Allow embedded PHP';
 $lang['dformat']     = 'Date format (see PHP\'s <a href="http://www.php.net/strftime">strftime</a> function)';
 $lang['signature']   = 'Signature';
 $lang['toptoclevel'] = 'Top level for table of contents';
+$lang['tocminheads'] = 'Minimum amount of headlines that determines whether the TOC is built';
 $lang['maxtoclevel'] = 'Maximum level for table of contents';
 $lang['maxseclevel'] = 'Maximum section edit level';
 $lang['camelcase']   = 'Use CamelCase for links';
@@ -81,6 +87,7 @@ $lang['indexdelay']  = 'Time delay before indexing (sec)';
 $lang['relnofollow'] = 'Use rel="nofollow" on external links';
 $lang['mailguard']   = 'Obfuscate email addresses';
 $lang['iexssprotect']= 'Check uploaded files for possibly malicious JavaScript or HTML code';
+$lang['showuseras']  = 'What to display when showing the user that last edited a page';
 
 /* Authentication Options */
 $lang['useacl']      = 'Use access control lists';
@@ -94,11 +101,13 @@ $lang['profileconfirm'] = 'Confirm profile changes with password';
 $lang['disableactions'] = 'Disable DokuWiki actions';
 $lang['disableactions_check'] = 'Check';
 $lang['disableactions_subscription'] = 'Subscribe/Unsubscribe';
-$lang['disableactions_nssubscription'] = 'Namespace Subscribe /Unsubscribe';
 $lang['disableactions_wikicode'] = 'View source/Export Raw';
 $lang['disableactions_other'] = 'Other actions (comma separated)';
 $lang['sneaky_index'] = 'By default, DokuWiki will show all namespaces in the index view. Enabling this option will hide those where the user doesn\'t have read permissions. This might result in hiding of accessable subnamespaces. This may make the index unusable with certain ACL setups.';
 $lang['auth_security_timeout'] = 'Authentication Security Timeout (seconds)';
+$lang['securecookie'] = 'Should cookies set via HTTPS only be sent via HTTPS by the browser? Disable this option when only the login of your wiki is secured with SSL but browsing the wiki is done unsecured.';
+$lang['xmlrpc']      = 'Enable/disable XML-RPC interface.';
+$lang['xmlrpcuser']  = 'Restrict XML-RPC access to the comma separated groups or users given here. Leave empty to give access to everyone.';
 
 /* Advanced Options */
 $lang['updatecheck'] = 'Check for updates and security warnings? DokuWiki needs to contact splitbrain.org for this feature.';
@@ -107,6 +116,7 @@ $lang['useslash']    = 'Use slash as namespace separator in URLs';
 $lang['usedraft']    = 'Automatically save a draft while editing';
 $lang['sepchar']     = 'Page name word separator';
 $lang['canonical']   = 'Use fully canonical URLs';
+$lang['fnencode']    = 'Method for encoding non-ASCII filenames.';
 $lang['autoplural']  = 'Check for plural forms in links';
 $lang['compression'] = 'Compression method for attic files';
 $lang['cachetime']   = 'Maximum age for cache (sec)';
@@ -120,16 +130,17 @@ $lang['gdlib']       = 'GD Lib version';
 $lang['im_convert']  = 'Path to ImageMagick\'s convert tool';
 $lang['jpg_quality'] = 'JPG compression quality (0-100)';
 $lang['subscribers'] = 'Enable page subscription support';
+$lang['subscribe_time'] = 'Time after which subscription lists and digests are sent (sec); This should be smaller than the time specified in recent_days.';
 $lang['compress']    = 'Compact CSS and javascript output';
 $lang['hidepages']   = 'Hide matching pages (regular expressions)';
 $lang['send404']     = 'Send "HTTP 404/Page Not Found" for non existing pages';
 $lang['sitemap']     = 'Generate Google sitemap (days)';
 $lang['broken_iua']  = 'Is the ignore_user_abort function broken on your system? This could cause a non working search index. IIS+PHP/CGI is known to be broken. See <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a> for more info.';
 $lang['xsendfile']   = 'Use the X-Sendfile header to let the webserver deliver static files? Your webserver needs to support this.';
-$lang['xmlrpc']      = 'Enable/disable XML-RPC interface.';
 $lang['renderer_xhtml']   = 'Renderer to use for main (xhtml) wiki output';
 $lang['renderer__core']   = '%s (dokuwiki core)';
 $lang['renderer__plugin'] = '%s (plugin)';
+$lang['rememberme'] = 'Allow permanent login cookies (remember me)';
 
 $lang['rss_type']    = 'XML feed type';
 $lang['rss_linkto']  = 'XML feed links to';
@@ -146,11 +157,12 @@ $lang['target____media']     = 'Target window for media links';
 $lang['target____windows']   = 'Target window for windows links';
 
 /* Proxy Options */
-$lang['proxy____host'] = 'Proxy servername';
-$lang['proxy____port'] = 'Proxy port';
-$lang['proxy____user'] = 'Proxy user name';
-$lang['proxy____pass'] = 'Proxy password';
-$lang['proxy____ssl']  = 'Use ssl to connect to Proxy';
+$lang['proxy____host']    = 'Proxy servername';
+$lang['proxy____port']    = 'Proxy port';
+$lang['proxy____user']    = 'Proxy user name';
+$lang['proxy____pass']    = 'Proxy password';
+$lang['proxy____ssl']     = 'Use SSL to connect to proxy';
+$lang['proxy____except']  = 'Regular expression to match URLs for which the proxy should be skipped for.';
 
 /* Safemode Hack */
 $lang['safemodehack'] = 'Enable safemode hack';
@@ -160,10 +172,12 @@ $lang['ftp____user'] = 'FTP user name for safemode hack';
 $lang['ftp____pass'] = 'FTP password for safemode hack';
 $lang['ftp____root'] = 'FTP root directory for safemode hack';
 
+$lang['license_o_'] = 'None chosen';
+
 /* typography options */
 $lang['typography_o_0'] = 'none';
-$lang['typography_o_1'] = 'Double quotes only';
-$lang['typography_o_2'] = 'All quotes (might not always work)';
+$lang['typography_o_1'] = 'excluding single quotes';
+$lang['typography_o_2'] = 'including single quotes (might not always work)';
 
 /* userewrite options */
 $lang['userewrite_o_0'] = 'none';
@@ -209,3 +223,17 @@ $lang['xsendfile_o_0'] = "don't use";
 $lang['xsendfile_o_1'] = 'Proprietary lighttpd header (before release 1.5)';
 $lang['xsendfile_o_2'] = 'Standard X-Sendfile header';
 $lang['xsendfile_o_3'] = 'Proprietary Nginx X-Accel-Redirect header';
+
+/* Display user info */
+$lang['showuseras_o_loginname']  = 'Login name';
+$lang['showuseras_o_username']   = "User's full name";
+$lang['showuseras_o_email']      = "User's e-mail addresss (obfuscated according to mailguard setting)";
+$lang['showuseras_o_email_link'] = "User's e-mail addresss as a mailto: link";
+
+/* useheading options */
+$lang['useheading_o_0'] = 'Never';
+$lang['useheading_o_navigation'] = 'Navigation Only';
+$lang['useheading_o_content'] = 'Wiki Content Only';
+$lang['useheading_o_1'] = 'Always';
+
+$lang['readdircache'] = 'Maximum age for readdir cache (sec)';

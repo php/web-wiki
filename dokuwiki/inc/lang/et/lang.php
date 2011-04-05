@@ -111,7 +111,7 @@ $lang['i_enableacl'] = 'Kas lubada kasutajate haldus (soovitatav)';
 $lang['i_superuser'] = 'Superkasutaja';
 $lang['i_problems'] = 'Paigaldaja leidis mõned vead, mis on allpool välja toodud. Enne vigade eemaldamist ei saa jätkata.';
 $lang['i_modified'] = 'Õnnetuste vältimiseks läheb see skript käima ainult värskelt paigaldatud ja muutmata Dokuwiki peal.
-                       Sa peaksid ilmselt kogu koodi uuesti lahti pakkima. Vaata ka <a href="http://wiki.splitbrain.org/wiki:install">Dokuwiki installeerimis juhendit</a>';
+                       Sa peaksid ilmselt kogu koodi uuesti lahti pakkima. Vaata ka <a href="http://dokuwiki.org/install">Dokuwiki installeerimis juhendit</a>';
 $lang['i_funcna'] = 'PHP funktsiooni <code>%s</code> ei ole olemas.võibolla sinu serveri hooldaja on selle mingil põhjusel keelanud?';
 $lang['i_permfail'] = 'Dokuwiki ei saa kirjutada faili <code>%s</code>. Kontrolli serveris failide õigused üle.';
 $lang['i_confexists'] = '<code>%s</code> on juba olemas';
@@ -137,9 +137,9 @@ $lang['badlogin']   = 'Oops, Sinu kasutajanimi või parool oli vale.';
 $lang['regmissing'] = 'Kõik väljad tuleb ära täita.';
 $lang['reguexists'] = 'Tegelikult on sellise nimega kasutaja juba olemas.';
 $lang['regsuccess'] = 'Kasutaja sai tehtud. Parool saadeti Sulle e-posti aadressil.';
-$lang['regmailfail']= 'Ilmselt tekkis e-posti teel parooli saatmisel mingi tõrge. Palun suhtle sel teemal 
+$lang['regmailfail']= 'Ilmselt tekkis e-posti teel parooli saatmisel mingi tõrge. Palun suhtle sel teemal
 oma serveri administraatoriga!';
-$lang['regbadmail'] = 'Tundub, et Sinu antud e-posti aadress ei toimi - kui Sa arvad, et tegemist on 
+$lang['regbadmail'] = 'Tundub, et Sinu antud e-posti aadress ei toimi - kui Sa arvad, et tegemist on
 ekstitusega, suhtle oma serveri administraatoriga';
 $lang['regpwmail']  = 'Sinu DokuWiki parool';
 $lang['reghere']    = 'Sul ei olegi veel kasutajakontot? No aga tekita see siis endale!';
@@ -150,14 +150,14 @@ $lang['lockedby']     = 'Praegu on selle lukustanud';
 $lang['lockexpire']   = 'Lukustus aegub';
 $lang['willexpire']   = 'Teie lukustus selle lehe toimetamisele aegub umbes minuti pärast.\nIgasugu  probleemide vältimiseks kasuta eelvaate nuppu, et lukustusarvesti taas tööle panna.';
 
-$lang['notsavedyet'] = 'Sul on seal salvestamata muudatusi, mis kohe kõige kaduva teed lähevad.\nKas Sa ikka tahad edasi liikuda?'; 
+$lang['js']['notsavedyet'] = "Sul on seal salvestamata muudatusi, mis kohe kõige kaduva teed lähevad.\nKas Sa ikka tahad edasi liikuda?";
 $lang['rssfailed']   = 'Sinu soovitud info ammutamisel tekkis viga: ';
 $lang['nothingfound']= 'Oops, aga mitte muhvigi ei leitud.';
 
 $lang['mediaselect'] = 'Hunnik faile';
 $lang['fileupload']  = 'Faili üleslaadimine';
 $lang['uploadsucc']  = 'Üleslaadimine läks ootuspäraselt hästi';
-$lang['uploadfail']  = 'Üleslaadimine läks nässu. Äkki pole Sa selleks lihtsalt piisavalt võimukas tegija?'; 
+$lang['uploadfail']  = 'Üleslaadimine läks nässu. Äkki pole Sa selleks lihtsalt piisavalt võimukas tegija?';
 $lang['uploadwrong'] = 'Ei saa Sa midagi üles laadida. Oops, aga seda tüüpi faili sul lihtsalt ei lubata üles laadida';
 $lang['namespaces']  = 'Alajaotus';
 $lang['mediafiles']  = 'Failid on Sulle kättesaadavad';
@@ -180,10 +180,9 @@ $lang['summary']    = 'kokkuvõte muudatustest';
 $lang['mail_newpage'] = 'leht lisatud:';
 $lang['mail_changed'] = 'leht muudetud';
 
-$lang['nosmblinks'] = 'Windowsis võrguarvutiga ühendamine toimib ainult Internet Exploreris ja 
+$lang['nosmblinks'] = 'Windowsis võrguarvutiga ühendamine toimib ainult Internet Exploreris ja
 sisevõrgus.\nAga Sa saad õnneks omale lingi kopeerida ja hiljem kuhugi kleepida.';
 
-$lang['qb_alert']   = 'Sisesta palun tekst, mida Sa tahad kujundada.\nSee lisatakse dokumendi lõppu..'; 
 $lang['qb_bold']    = 'Rasvane kiri';
 $lang['qb_italic']  = 'Kaldkiri';
 $lang['qb_underl']  = 'Alajoonega kiri';
@@ -204,7 +203,7 @@ $lang['qb_sig']     = 'Lisa allkiri!';
 $lang['authmodfailed'] = 'Vigane kasutajate autentimise konfiguratsioon. Palun teavita sellest serveri haldajat.';
 $lang['authtempfail'] = 'Kasutajate autentimine on ajutiselt rivist väljas. Kui see olukord mõne aja jooksul ei parane, siis teavita sellest serveri haldajat.';
 
-$lang['del_confirm']= 'Kas kustutame selle kirje?';
+$lang['js']['del_confirm']= 'Kas kustutame selle kirje?';
 
 #$lang['subscribe_success'] = '';
 #$lang['subscribe_error'] = '';

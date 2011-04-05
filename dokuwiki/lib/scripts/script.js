@@ -9,57 +9,12 @@ var clientPC  = navigator.userAgent.toLowerCase(); // Get client info
 var is_macos  = navigator.appVersion.indexOf('Mac') != -1;
 var is_gecko  = ((clientPC.indexOf('gecko')!=-1) && (clientPC.indexOf('spoofer')==-1) &&
                 (clientPC.indexOf('khtml') == -1) && (clientPC.indexOf('netscape/7.0')==-1));
-var is_safari = ((clientPC.indexOf('AppleWebKit')!=-1) && (clientPC.indexOf('spoofer')==-1));
+var is_safari = ((clientPC.indexOf('applewebkit')!=-1) && (clientPC.indexOf('spoofer')==-1));
 var is_khtml  = (navigator.vendor == 'KDE' || ( document.childNodes && !document.all && !navigator.taintEnabled ));
 if (clientPC.indexOf('opera')!=-1) {
     var is_opera = true;
     var is_opera_preseven = (window.opera && !document.childNodes);
     var is_opera_seven = (window.opera && document.childNodes);
-}
-
-// prepare empty toolbar for checks by lazy plugins
-var toolbar = '';
-
-/**
- * Rewrite the accesskey tooltips to be more browser and OS specific.
- *
- * Accesskey tooltips are still only a best-guess of what will work
- * on well known systems.
- *
- * @author Ben Coburn <btcoburn@silicodon.net>
- */
-function updateAccessKeyTooltip() {
-  // determin tooltip text (order matters)
-  var tip = 'ALT+'; //default
-  if (is_macos) { tip = 'CTRL+'; }
-  if (is_opera) { tip = 'SHIFT+ESC '; }
-  // add other cases here...
-
-  // do tooltip update
-  if (tip=='ALT+') { return; }
-  var exp = /\[ALT\+/i;
-  var rep = '['+tip;
-
-  var elements = document.getElementsByTagName('a');
-  for (var i=0; i<elements.length; i++) {
-    if (elements[i].accessKey.length==1 && elements[i].title.length>0) {
-      elements[i].title = elements[i].title.replace(exp, rep);
-    }
-  }
-
-  elements = document.getElementsByTagName('input');
-  for (var i=0; i<elements.length; i++) {
-    if (elements[i].accessKey.length==1 && elements[i].title.length>0) {
-      elements[i].title = elements[i].title.replace(exp, rep);
-    }
-  }
-
-  elements = document.getElementsByTagName('button');
-  for (var i=0; i<elements.length; i++) {
-    if (elements[i].accessKey.length==1 && elements[i].title.length>0) {
-      elements[i].title = elements[i].title.replace(exp, rep);
-    }
-  }
 }
 
 /**
@@ -111,7 +66,7 @@ function getElementsByClass(searchClass,node,tag) {
     var els = node.getElementsByTagName(tag);
     var elsLen = els.length;
     var pattern = new RegExp("(^|\\s)"+searchClass+"(\\s|$)");
-    for (i = 0, j = 0; i < elsLen; i++) {
+    for (var i = 0, j = 0; i < elsLen; i++) {
         if ( pattern.test(els[i].className) ) {
             classElements[j] = els[i];
             j++;
@@ -123,16 +78,15 @@ function getElementsByClass(searchClass,node,tag) {
 /**
  * Get the X offset of the top left corner of the given object
  *
- * @link http://www.quirksmode.org/index.html?/js/findpos.html
+ * @link http://www.quirksmode.org/js/findpos.html
  */
 function findPosX(object){
   var curleft = 0;
   var obj = $(object);
   if (obj.offsetParent){
-    while (obj.offsetParent){
+    do {
       curleft += obj.offsetLeft;
-      obj = obj.offsetParent;
-    }
+    } while (obj = obj.offsetParent);
   }
   else if (obj.x){
     curleft += obj.x;
@@ -143,16 +97,15 @@ function findPosX(object){
 /**
  * Get the Y offset of the top left corner of the given object
  *
- * @link http://www.quirksmode.org/index.html?/js/findpos.html
+ * @link http://www.quirksmode.org/js/findpos.html
  */
 function findPosY(object){
   var curtop = 0;
   var obj = $(object);
   if (obj.offsetParent){
-    while (obj.offsetParent){
+    do {
       curtop += obj.offsetTop;
-      obj = obj.offsetParent;
-    }
+    } while (obj = obj.offsetParent);
   }
   else if (obj.y){
     curtop += obj.y;
@@ -245,19 +198,22 @@ function addTocToggle() {
     if(!document.getElementById) return;
     var header = $('toc__header');
     if(!header) return;
+    var toc = $('toc__inside');
 
     var obj          = document.createElement('span');
     obj.id           = 'toc__toggle';
-    obj.innerHTML    = '<span>&minus;</span>';
-    obj.className    = 'toc_close';
     obj.style.cursor = 'pointer';
+    if (toc && toc.style.display == 'none') {
+        obj.innerHTML    = '<span>+</span>';
+        obj.className    = 'toc_open';
+    } else {
+        obj.innerHTML    = '<span>&minus;</span>';
+        obj.className    = 'toc_close';
+    }
 
     prependChild(header,obj);
     obj.parentNode.onclick = toggleToc;
-    try {
-       obj.parentNode.style.cursor = 'pointer';
-       obj.parentNode.style.cursor = 'hand';
-    }catch(e){}
+    obj.parentNode.style.cursor = 'pointer';
 }
 
 /**
@@ -278,26 +234,38 @@ function toggleToc() {
 }
 
 /**
- * This enables/disables checkboxes for acl-administration
- *
- * @author Frank Schubert <frank@schokilade.de>
+ * Create JavaScript mouseover popup
  */
-function checkAclLevel(){
-  if(document.getElementById) {
-    var scope = $('acl_scope').value;
+function insitu_popup(target, popup_id) {
 
-    //check for namespace
-    if( (scope.indexOf(":*") > 0) || (scope == "*") ){
-      document.getElementsByName('acl_checkbox[4]')[0].disabled=false;
-      document.getElementsByName('acl_checkbox[8]')[0].disabled=false;
-    }else{
-      document.getElementsByName('acl_checkbox[4]')[0].checked=false;
-      document.getElementsByName('acl_checkbox[8]')[0].checked=false;
+    // get or create the popup div
+    var fndiv = $(popup_id);
+    if(!fndiv){
+        fndiv = document.createElement('div');
+        fndiv.id        = popup_id;
+        fndiv.className = 'insitu-footnote JSpopup dokuwiki';
 
-      document.getElementsByName('acl_checkbox[4]')[0].disabled=true;
-      document.getElementsByName('acl_checkbox[8]')[0].disabled=true;
+        // autoclose on mouseout - ignoring bubbled up events
+        addEvent(fndiv,'mouseout',function(e){
+            var p = e.relatedTarget || e.toElement;
+            while (p && p !== this) {
+                p = p.parentNode;
+            }
+            if (p === this) {
+                return;
+            }
+            // okay, hide it
+            this.style.display='none';
+        });
+        getElementsByClass('dokuwiki', document.body, 'div')[0].appendChild(fndiv);
     }
-  }
+
+    // position the div and make it visible
+    fndiv.style.position = 'absolute';
+    fndiv.style.left = findPosX(target)+'px';
+    fndiv.style.top  = (findPosY(target)+target.offsetHeight * 1.5) + 'px';
+    fndiv.style.display = '';
+    return fndiv;
 }
 
 /**
@@ -307,79 +275,24 @@ function checkAclLevel(){
  * @author Chris Smith <chris@jalakai.co.uk>
  */
 function footnote(e){
-    var obj = e.target;
-    var id = obj.id.substr(5);
-
-    // get or create the footnote popup div
-    var fndiv = $('insitu__fn');
-    if(!fndiv){
-        fndiv = document.createElement('div');
-        fndiv.id        = 'insitu__fn';
-        fndiv.className = 'insitu-footnote JSpopup dokuwiki';
-
-        // autoclose on mouseout - ignoring bubbled up events
-        addEvent(fndiv,'mouseout',function(e){
-            if(e.target != fndiv){
-                e.stopPropagation();
-                return;
-            }
-            // check if the element was really left
-            if(e.pageX){        // Mozilla
-                var bx1 = findPosX(fndiv);
-                var bx2 = bx1 + fndiv.offsetWidth;
-                var by1 = findPosY(fndiv);
-                var by2 = by1 + fndiv.offsetHeight;
-                var x = e.pageX;
-                var y = e.pageY;
-                if(x > bx1 && x < bx2 && y > by1 && y < by2){
-                    // we're still inside boundaries
-                    e.stopPropagation();
-                    return;
-                }
-            }else{              // IE
-                if(e.offsetX > 0 && e.offsetX < fndiv.offsetWidth-1 &&
-                   e.offsetY > 0 && e.offsetY < fndiv.offsetHeight-1){
-                    // we're still inside boundaries
-                    e.stopPropagation();
-                    return;
-                }
-            }
-            // okay, hide it
-            fndiv.style.display='none';
-        });
-        document.body.appendChild(fndiv);
-    }
+    var fndiv = insitu_popup(e.target, 'insitu__fn');
 
     // locate the footnote anchor element
-    var a = $( "fn__"+id );
+    var a = $("fn__" + e.target.id.substr(5));
     if (!a){ return; }
 
     // anchor parent is the footnote container, get its innerHTML
     var content = new String (a.parentNode.parentNode.innerHTML);
 
     // strip the leading content anchors and their comma separators
-    content = content.replace(/<a\s.*?href=\".*\#fnt__\d+\".*?<\/a>/gi, '');
+    content = content.replace(/<sup>.*<\/sup>/gi, '');
     content = content.replace(/^\s+(,\s+)+/,'');
 
     // prefix ids on any elements with "insitu__" to ensure they remain unique
-    content = content.replace(/\bid=\"(.*?)\"/gi,'id="insitu__$1');
+    content = content.replace(/\bid=(['"])([^"']+)\1/gi,'id="insitu__$2');
 
     // now put the content into the wrapper
     fndiv.innerHTML = content;
-
-    // position the div and make it visible
-    var x; var y;
-    if(e.pageX){        // Mozilla
-        x = e.pageX;
-        y = e.pageY;
-    }else{              // IE
-        x = e.offsetX;
-        y = e.offsetY;
-    }
-    fndiv.style.position = 'absolute';
-    fndiv.style.left = (x+2)+'px';
-    fndiv.style.top  = (y+2)+'px';
-    fndiv.style.display = '';
 }
 
 /**
@@ -411,6 +324,11 @@ function initSizeCtl(ctlid,edid){
       textarea.style.height = '300px';
     }
 
+    var wrp = DokuCookie.getValue('wrapCtl');
+    if(wrp){
+      setWrap(textarea, wrp);
+    } // else use default value
+
     var l = document.createElement('img');
     var s = document.createElement('img');
     var w = document.createElement('img');
@@ -439,25 +357,35 @@ function sizeCtl(edid,val){
 
 /**
  * Toggle the wrapping mode of a textarea
- *
- * @author Fluffy Convict <fluffyconvict@hotmail.com>
- * @link   http://news.hping.org/comp.lang.javascript.archive/12265.html
- * @author <shutdown@flashmail.com>
- * @link   https://bugzilla.mozilla.org/show_bug.cgi?id=302710#c2
  */
 function toggleWrap(edid){
-    var txtarea = $(edid);
-    var wrap = txtarea.getAttribute('wrap');
+    var textarea = $(edid);
+    var wrap = textarea.getAttribute('wrap');
     if(wrap && wrap.toLowerCase() == 'off'){
-        txtarea.setAttribute('wrap', 'soft');
+        setWrap(textarea, 'soft');
     }else{
-        txtarea.setAttribute('wrap', 'off');
+        setWrap(textarea, 'off');
     }
+
+    DokuCookie.setValue('wrapCtl',textarea.getAttribute('wrap'));
+}
+
+/**
+ * Set the wrapping mode of a textarea
+ *
+ * @author Fluffy Convict <fluffyconvict@hotmail.com>
+ * @author <shutdown@flashmail.com>
+ * @link   http://news.hping.org/comp.lang.javascript.archive/12265.html
+ * @link   https://bugzilla.mozilla.org/show_bug.cgi?id=41464
+ */
+function setWrap(textarea, wrapAttrValue){
+    textarea.setAttribute('wrap', wrapAttrValue);
+
     // Fix display for mozilla
-    var parNod = txtarea.parentNode;
-    var nxtSib = txtarea.nextSibling;
-    parNod.removeChild(txtarea);
-    parNod.insertBefore(txtarea, nxtSib);
+    var parNod = textarea.parentNode;
+    var nxtSib = textarea.nextSibling;
+    parNod.removeChild(textarea);
+    parNod.insertBefore(textarea, nxtSib);
 }
 
 /**
@@ -501,3 +429,112 @@ function cleanMsgArea(){
         }
     }
 }
+
+/**
+ * disable multiple revisions checkboxes if two are checked
+ *
+ * @author Anika Henke <anika@selfthinker.org>
+ */
+addInitEvent(function(){
+    var revForm = $('page__revisions');
+    if (!revForm) return;
+    var elems = revForm.elements;
+    var countTicks = 0;
+    for (var i=0; i<elems.length; i++) {
+        var input1 = elems[i];
+        if (input1.type=='checkbox') {
+            addEvent(input1,'click',function(e){
+                if (this.checked) countTicks++;
+                else countTicks--;
+                for (var j=0; j<elems.length; j++) {
+                    var input2 = elems[j];
+                    if (countTicks >= 2) input2.disabled = (input2.type=='checkbox' && !input2.checked);
+                    else input2.disabled = (input2.type!='checkbox');
+                }
+            });
+            input1.checked = false; // chrome reselects on back button which messes up the logic
+        } else if(input1.type=='submit'){
+            input1.disabled = true;
+        }
+    }
+});
+
+/**
+ * Add the event handler to the actiondropdown
+ *
+ * @author Andreas Gohr <andi@splitbrain.org>
+ */
+addInitEvent(function(){
+    var selector = $('action__selector');
+    if(!selector) return;
+
+    addEvent(selector,'change',function(e){
+        this.form.submit();
+    });
+
+    $('action__selectorbtn').style.display = 'none';
+});
+
+/**
+ * Display error for Windows Shares on browsers other than IE
+ *
+ * @author Michael Klier <chi@chimeric.de>
+ */
+function checkWindowsShares() {
+    if(!LANG['nosmblinks']) return true;
+    if(document.all != null) return true;
+
+    var elems = getElementsByClass('windows',document,'a');
+    if(elems){
+        for(var i=0; i<elems.length; i++){
+            var share = elems[i];
+            addEvent(share,'click',function(){
+                alert(LANG['nosmblinks']);
+            });
+        }
+    }
+}
+
+/**
+ * Add the event handler for the Windows Shares check
+ *
+ * @author Michael Klier <chi@chimeric.de>
+ */
+addInitEvent(function(){
+    checkWindowsShares();
+});
+
+/**
+ * Highlight the section when hovering over the appropriate section edit button
+ *
+ * @author Andreas Gohr <andi@splitbrain.org>
+ */
+addInitEvent(function(){
+    var btns = getElementsByClass('btn_secedit',document,'form');
+    for(var i=0; i<btns.length; i++){
+        addEvent(btns[i],'mouseover',function(e){
+            var tgt = this.parentNode;
+            var nr = tgt.className.match(/(\s+|^)editbutton_(\d+)(\s+|$)/)[2];
+            do {
+                tgt = tgt.previousSibling;
+            } while (tgt !== null && typeof tgt.tagName === 'undefined');
+            if (tgt === null) return;
+            while(typeof tgt.className === 'undefined' ||
+                  tgt.className.match('(\\s+|^)sectionedit' + nr + '(\\s+|$)') === null) {
+                if (typeof tgt.className !== 'undefined') {
+                    tgt.className += ' section_highlight';
+                }
+                tgt = (tgt.previousSibling !== null) ? tgt.previousSibling : tgt.parentNode;
+            }
+            if (typeof tgt.className !== 'undefined') tgt.className += ' section_highlight';
+        });
+
+        addEvent(btns[i],'mouseout',function(e){
+            var secs = getElementsByClass('section_highlight');
+            for(var j=0; j<secs.length; j++){
+                secs[j].className = secs[j].className.replace(/section_highlight/g,'');
+            }
+        });
+    }
+});
+

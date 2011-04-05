@@ -4,11 +4,13 @@
  *
  * @author Ondrej Végh <ov@vsieti.sk>
  * @author Michal Mesko <michal.mesko@gmail.com>
+ * @author exusik@gmail.com
+ * @author Martin Michalek <michalek.dev@gmail.com>
  */
-$lang['menu']                  = 'Správa užívateľov';
+$lang['menu']                  = 'Správa používateľov';
 $lang['noauth']                = '(autentifikácia užívateľov nie je dostupná)';
 $lang['nosupport']             = '(správa užívateľov nie je podporovaná)';
-$lang['badauth']               = 'vadný autorizačný mechanizmus';
+$lang['badauth']               = 'neplatný autorizačný mechanizmus';
 $lang['user_id']               = 'Užívateľ';
 $lang['user_pass']             = 'Heslo';
 $lang['user_name']             = 'Skutočné meno';
@@ -37,10 +39,11 @@ $lang['start']                 = 'prvé';
 $lang['prev']                  = 'predošlé';
 $lang['next']                  = 'ďalšie';
 $lang['last']                  = 'posledné';
-$lang['edit_usermissing']      = 'Vybraný užívateľ nebol nájdený, mohol byť zmazaný, alebo zmenený iným spôsobom.';
+$lang['edit_usermissing']      = 'Vybraný užívateľ nebol nájdený, mohol byť zmazaný alebo zmenený iným spôsobom.';
 $lang['user_notify']           = 'Upozorniť užívateľa';
 $lang['note_notify']           = 'Notifikačné e-maily iba vtedy, ak dostane užívateľ nové heslo';
-$lang['note_group']            = 'Noví užívatelia budú pridaní do východej skupiny (%s), ak nie je pre nich špecifikovaná iná skupina.';
+$lang['note_group']            = 'Noví užívatelia budú pridaní do východzej skupiny (%s), ak nie je pre nich špecifikovaná iná skupina.';
+$lang['note_pass']             = 'Heslo bude vygenerované automaticky, ak bude pole prázdne a je zapnutá notifikácia používateľa.';
 $lang['add_ok']                = 'Používateľ úspešne pridaný';
 $lang['add_fail']              = 'Pridávanie užívateľa nebolo úspešné';
 $lang['notify_ok']             = 'Notifikačný e-mail bol poslaný';

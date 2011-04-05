@@ -1,4 +1,4 @@
-Se ha subido un fichero a tu DokuWuki. Detalles del fichero:
+Se ha subido un fichero a tu DokuWuki. Estos son los detalles:
 
 Archivo : @MEDIA@
 Fecha : @DATE@
@@ -9,6 +9,6 @@ Tamaño : @SIZE@
 MIME Type : @MIME@
 Usuario : @USER@
 
---
-Correo generado por DokuWiki en
+-- 
+Este correo fue generado por DokuWiki en
 @DOKUWIKIURL@

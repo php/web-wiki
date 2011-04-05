@@ -5,6 +5,7 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author mubaidillah <mubaidillah@gmail.com>
  * @author Irwan Butar Butar <irwansah.putra@gmail.com>
+ * @author Yustinus Waruwu <juswaruwu@gmail.com>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -85,7 +86,7 @@ $lang['txt_overwrt']           = 'File yang telah ada akan ditindih';
 $lang['lockedby']              = 'Sedang dikunci oleh';
 $lang['lockexpire']            = 'Penguncian artikel sampai dengan';
 $lang['willexpire']            = 'Halaman yang sedang Anda kunci akan berakhir dalam waktu kurang lebih satu menit.\nUntuk menghindari konflik, gunakan tombol Preview untuk me-reset timer pengunci.';
-$lang['notsavedyet']           = 'Perubahan yang belum disimpan akan hilang.\nYakin akan dilanjutkan?';
+$lang['js']['notsavedyet']     = "Perubahan yang belum disimpan akan hilang.\nYakin akan dilanjutkan?";
 $lang['rssfailed']             = 'Error terjadi saat mengambil feed: ';
 $lang['nothingfound']          = 'Tidak menemukan samasekali.';
 $lang['mediaselect']           = 'Pilihan Mediafile';
@@ -133,8 +134,7 @@ $lang['mail_newpage']          = 'Halaman ditambahkan:';
 $lang['mail_changed']          = 'Halaman diubah:';
 $lang['mail_new_user']         = 'User baru:';
 $lang['mail_upload']           = 'Berkas di-upload:';
-$lang['nosmblinks']            = 'Link ke share Windows hanya bekerja di Microsoft Internet Explorer.\nAnda masih dapat mengcopy and paste linknya.';
-$lang['qb_alert']              = 'Masukkan text yang akan diformat.\n Text ini akan ditambahkan di akhir dokumen.';
+$lang['js']['nosmblinks']            = "Link ke share Windows hanya bekerja di Microsoft Internet Explorer.\nAnda masih dapat mengcopy and paste linknya.";
 $lang['qb_bold']               = 'Tebal';
 $lang['qb_italic']             = 'Miring';
 $lang['qb_underl']             = 'Garis Bawah';
@@ -154,7 +154,7 @@ $lang['qb_media']              = 'Tambahkan gambar atau file lain';
 $lang['qb_sig']                = 'Sisipkan tanda tangan';
 $lang['qb_smileys']            = 'Smileys';
 $lang['qb_chars']              = 'Karakter Khusus';
-$lang['del_confirm']           = 'Hapus tulisan ini?';
+$lang['js']['del_confirm']           = 'Hapus tulisan ini?';
 $lang['admin_register']        = 'Tambah user baru';
 $lang['metaedit']              = 'Edit Metadata';
 $lang['metasaveerr']           = 'Gagal menulis metadata';
@@ -182,7 +182,7 @@ $lang['i_installer']           = 'Instalasi DokuWiki';
 $lang['i_wikiname']            = 'Nama Wiki';
 $lang['i_enableacl']           = 'Aktifkan ACL (disarankan)';
 $lang['i_problems']            = 'Terdapat beberapa kesalahan seperti berikut. Anda tidak dapat melanjutkan sampai kesalahan tersebut diperbaiki.';
-$lang['i_modified']            = 'Untuk alasan keamanan, skrip ini hanya dapat dijalankan pada instalasi DikuWiki baru dan belum di modifikasi. Silahkan meng-ekstrak kembali berkasi dari halaman dowload, atau lihat   <a href="http://wiki.splitbrain.org/wiki:install">Dokuwiki installation instructions</a> ';
+$lang['i_modified']            = 'Untuk alasan keamanan, skrip ini hanya dapat dijalankan pada instalasi DikuWiki baru dan belum di modifikasi. Silahkan meng-ekstrak kembali berkasi dari halaman dowload, atau lihat   <a href="http://dokuwiki.org/install">Dokuwiki installation instructions</a> ';
 $lang['i_funcna']              = 'Fungsi PHP <code>%s</code> tidak tersedia. Mungkin dinonaktifkan oleh layanan hosting Anda?';
 $lang['i_phpver']              = 'Versi PHP Anda <code>%s</code> lebih rendah dari yang dibutuhkan <code>%s</code>. Mohon melakukan upgrade.';
 $lang['i_permfail']            = '<code>%s</code> tidak dapat ditulis oleh DokuWiki. Anda harus memperbaiki konfigurasi hak akses untuk direktori tersebut.';
@@ -197,3 +197,14 @@ $lang['i_pol0']                = 'Wiki Terbuka (baca, tulis, upload untuk semua 
 $lang['i_pol1']                = 'Wiki Publik (baca untuk semua orang, tulis dan upload untuk pengguna terdaftar)';
 $lang['i_pol2']                = 'Wiki Privat (baca, tulis dan upload hanya untuk pengguna terdaftar)';
 $lang['i_retry']               = 'Coba Lagi';
+$lang['mu_gridname']           = 'Nama file';
+$lang['mu_gridsize']           = 'Ukuran';
+$lang['mu_gridstat']           = 'Status';
+$lang['mu_namespace']          = 'Namaspace';
+$lang['mu_browse']             = 'Jelajah';
+$lang['mu_ready']              = 'Siap untuk uplod';
+$lang['mu_done']               = 'Selesai';
+$lang['mu_fail']               = 'Gagal';
+$lang['mu_authfail']           = 'sesi habis';
+$lang['mu_progress']           = '@PCT@% uploaded';
+$lang['mu_filetypes']          = 'Izinkan tipe file';

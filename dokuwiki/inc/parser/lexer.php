@@ -13,7 +13,7 @@
 /**
 * Init path constant
 */
-if(!defined('DOKU_INC')) define('DOKU_INC',fullpath(dirname(__FILE__).'/../../').'/');
+if(!defined('DOKU_INC')) die('meh.');
 
 /**#@+
  * lexer mode constant
@@ -136,10 +136,9 @@ class Doku_LexerParallelRegex {
         }
 
         $idx = count($matches)-2;
-
         list($pre, $post) = preg_split($this->_patterns[$idx].$this->_getPerlMatchingFlags(), $subject, 2);
-
         $split = array($pre, $matches[0], $post);
+
         return isset($this->_labels[$idx]) ? $this->_labels[$idx] : true;
     }
 
@@ -157,11 +156,11 @@ class Doku_LexerParallelRegex {
             for ($i = 0; $i < $cnt; $i++) {
 
                 /*
-                 * decompose the input pattern into "(", "(?", ")", 
-                 * "[...]", "[]..]", "[^]..]", "[...[:...:]..]", "\x"... 
+                 * decompose the input pattern into "(", "(?", ")",
+                 * "[...]", "[]..]", "[^]..]", "[...[:...:]..]", "\x"...
                  * elements.
-                 */ 
-                preg_match_all('/\\\\.|' . 
+                 */
+                preg_match_all('/\\\\.|' .
                                '\(\?|' .
                                '[()]|' .
                                '\[\^?\]?(?:\\\\.|\[:[^]]*:\]|[^]\\\\])*\]|' .
@@ -172,7 +171,7 @@ class Doku_LexerParallelRegex {
 
                 foreach ($elts[0] as $elt) {
                     /*
-                     * for "(", ")" remember the nesting level, add "\" 
+                     * for "(", ")" remember the nesting level, add "\"
                      * only to the non-"(?" ones.
                      */
 
@@ -296,7 +295,7 @@ class Doku_Lexer {
         $this->_case = $case;
         $this->_regexes = array();
         $this->_parser = &$parser;
-        $this->_mode = &new Doku_LexerStateStack($start);
+        $this->_mode = new Doku_LexerStateStack($start);
         $this->_mode_handlers = array();
     }
 
@@ -514,7 +513,7 @@ class Doku_Lexer {
         // modes starting with plugin_ are all handled by the same
         // handler but with an additional parameter
         if(substr($handler,0,7)=='plugin_'){
-          list($handler,$plugin) = split('_',$handler,2);
+          list($handler,$plugin) = explode('_',$handler,2);
               return $this->_parser->$handler($content, $is_match, $pos, $plugin);
         }
 

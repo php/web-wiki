@@ -6,8 +6,13 @@
  * @author Felipe Castro <fefcas@gmail.com>
  * @author Felipe Castro <fefcas (cxe) gmail (punkto) com>
  * @author Felipo Kastro <fefcas@gmail.com>
+ * @author Robert Bogenschneider <robog@gmx.de>
+ * @author Erik Pedersen <erik pedersen@shaw.ca>
+ * @author Erik Pedersen <erik.pedersen@shaw.ca>
+ * @author Robert Bogenschneider <robog@GMX.de>
+ * @author Robert BOGENSCHNEIDER <robog@gmx.de>
  */
-$lang['menu']                  = 'Administrado de Restarigo';
+$lang['menu']                  = 'Administrado de restarigo';
 $lang['filter']                = 'Serĉi spamecajn paĝojn';
 $lang['revert']                = 'Restarigi la elektitajn paĝojn';
 $lang['reverted']              = '%s estas restarigita al revizio %s';

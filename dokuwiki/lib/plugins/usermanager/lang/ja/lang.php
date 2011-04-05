@@ -3,6 +3,9 @@
  * japanese language file
  * @author Yuji Takenaka <webmaster@davilin.com>
  * @author Chris Smith <chris@jalakai.co.uk>
+ * @author Ikuo Obataya <i.obataya@gmail.com>
+ * @author Daniel Dupriest <kououken@gmail.com>
+ * @author Kazutaka Miyasaka <kazmiya@gmail.com>
  */
 $lang['menu']                  = 'ユーザー管理';
 $lang['noauth']                = '（ユーザー認証が無効です）';
@@ -40,6 +43,7 @@ $lang['edit_usermissing']      = '選択したユーザーは見つかりませ�
 $lang['user_notify']           = '通知するユーザー';
 $lang['note_notify']           = 'ユーザーが新しいパスワードを設定した場合のみ、通知メールが送信されます。';
 $lang['note_group']            = 'グループを指定しない場合は、既定のグループ（%s）に登録されいます。';
+$lang['note_pass']             = 'パスワードを空欄とした場合は、パスワードを自動的に生成します。この場合、ユーザーへの通知が有効となります。';
 $lang['add_ok']                = 'ユーザーを登録しました';
 $lang['add_fail']              = 'ユーザーの登録に失敗しました';
 $lang['notify_ok']             = '通知メールを送信しました';

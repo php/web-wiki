@@ -2,8 +2,11 @@
 /**
  * Hungarian language file
  *
- * @author Sandor TIHANYI <stihanyi@gmail.com>
- * @author SandorTIHANYI <stihanyi@gmail.com>
+ * @author Sandor TIHANYI <stihanyi+dw@gmail.com>
+ * @author Siaynoq Mage <siaynoqmage@gmail.com>
+ * @author schilling.janos@gmail.com
+ * @author Szabó Dávid (szabo.david@gyumolcstarhely.hu)
+ * @author Szabó Dávid <szabo.david@gyumolcstarhely.hu>
  */
 $lang['menu']                  = 'Beállító Központ';
 $lang['error']                 = 'Helytelen érték miatt a módosítások nem mentődtek. Nézd át a módosításokat, és ments újra.
@@ -12,6 +15,9 @@ $lang['updated']               = 'A módosítások sikeresen beállítva.';
 $lang['nochoice']              = '(nincs egyéb lehetőség)';
 $lang['locked']                = 'A beállításokat tartalmazó fájlt nem tudtam frissíteni.<br />
 Nézd meg, hogy a fájl neve és jogosultságai helyesen vannak-e beállítva!';
+$lang['danger']                = 'Figyelem: ezt a beállítást megváltoztatva a konfigurációs menü hozzáférhetetlenné válhat.';
+$lang['warning']               = 'Figyelmeztetés: a beállítás megváltoztatása nem kívánt viselkedést okozhat.';
+$lang['security']              = 'Biztonsági figyelmeztetés: a beállítás megváltoztatása biztonsági veszélyforrást okozhat.';
 $lang['_configuration_manager'] = 'Beállító Központ';
 $lang['_header_dokuwiki']      = 'DokuWiki beállítások';
 $lang['_header_plugin']        = 'Bővítmények beállításai';
@@ -20,7 +26,7 @@ $lang['_header_undefined']     = 'Nem definiált értékek';
 $lang['_basic']                = 'Alap beállítások';
 $lang['_display']              = 'Megjelenítés beállításai';
 $lang['_authentication']       = 'Azonosítás beállításai';
-$lang['_anti_spam']            = 'Annti-Spam beállítások';
+$lang['_anti_spam']            = 'Anti-Spam beállítások';
 $lang['_editing']              = 'Szerkesztési beállítások';
 $lang['_links']                = 'Link beállítások';
 $lang['_media']                = 'Media beállítások';
@@ -40,6 +46,7 @@ $lang['savedir']               = 'Könyvtár az adatok mentésére';
 $lang['start']                 = 'Kezdőoldal neve';
 $lang['title']                 = 'Wiki címe';
 $lang['template']              = 'Sablon';
+$lang['license']               = 'Milyen licenc alatt érhető el a tartalom?';
 $lang['fullpath']              = 'Az oldalak teljes útvonalának mutatása a láblécben';
 $lang['recent']                = 'Utolsó változatok száma';
 $lang['breadcrumbs']           = 'Nyomvonal elemszám';
@@ -50,6 +57,7 @@ $lang['phpok']                 = 'Beágyazott PHP engedélyezése';
 $lang['dformat']               = 'Dátum formázás (lásd a PHP <a href="http://www.php.net/strftime">strftime</a> függvényt)';
 $lang['signature']             = 'Aláírás';
 $lang['toptoclevel']           = 'A tartalomjegyzék felső szintje';
+$lang['tocminheads']           = 'Legalább ennyi címsor hatására generálódjon tartalomjegyzék';
 $lang['maxtoclevel']           = 'A tartalomjegyzék mélysége';
 $lang['maxseclevel']           = 'A szakasz-szerkesztés maximális szintje';
 $lang['camelcase']             = 'CamelCase használata hivatkozásként';
@@ -63,6 +71,7 @@ $lang['indexdelay']            = 'Várakozás indexelés előtt (másodperc)';
 $lang['relnofollow']           = 'rel="nofollow" beállítás használata külső hivatkozásokra';
 $lang['mailguard']             = 'Email címek olvashatatlanná tétele címgyűjtők számára';
 $lang['iexssprotect']          = 'Feltöltött fájlok ellenőrzése kártékony JavaScript vagy HTML kód elkerülésére';
+$lang['showuseras']            = 'A felhasználó melyik adatát mutassunk az utolsó változtatás adatainál?';
 $lang['useacl']                = 'Hozzáférési listák (ACL) használata';
 $lang['autopasswd']            = 'Jelszavak automatikus generálása';
 $lang['authtype']              = 'Authentikációs háttérrendszer';
@@ -74,17 +83,20 @@ $lang['profileconfirm']        = 'Beállítások változtatásának megerősít�
 $lang['disableactions']        = 'Bizonyos DokuWiki tevékenységek (action) tiltása';
 $lang['disableactions_check']  = 'Ellenőrzés';
 $lang['disableactions_subscription'] = 'Feliratkozás/Leiratkozás';
-$lang['disableactions_nssubscription'] = 'Névtér feliratkozás/Leiratkozás';
 $lang['disableactions_wikicode'] = 'Forrás megtekintése/Nyers adat exportja';
 $lang['disableactions_other']  = 'Egyéb tevékenységek (vesszővel elválasztva)';
 $lang['sneaky_index']          = 'Alapértelmezetten minden névtér látszik a DokuWiki áttekintő (index) oldalán. Ezen opció bekapcsolása után azok nem jelennek meg, melyekhez a felhasználónak nincs olvasás joga. De ezzel eltakarhatunk egyébként elérhető al-névtereket is, így bizonyos ACL beállításoknál használhatatlan indexet eredményez ez a beállítás.';
 $lang['auth_security_timeout'] = 'Authentikációs biztonsági időablak (másodperc)';
+$lang['securecookie']          = 'A böngészők a HTTPS felett beállított sütijüket csak HTTPS felett küldhetik? Kapcsoljuk ki ezt az opciót, ha csak a bejelentkezést védjük SSL-lel, a wiki tartalmának böngészése nyílt forgalommal történik.';
+$lang['xmlrpc']                = 'XML-RPC interfész engedélyezése/tiltása';
+$lang['xmlrpcuser']            = 'Korlátozza XML-RPC hozzáférést az itt megadott vesszővel elválasztott csoportok vagy felhasználók számára. Hagyja üresen, ha mindenki számára biztosítja a hozzáférést.';
 $lang['updatecheck']           = 'Frissítések és biztonsági figyelmeztetések figyelése. Ehhez a DokuWikinek kapcsolatba kell lépnie a splitbrain.org-gal.';
 $lang['userewrite']            = 'Szép URL-ek használata';
 $lang['useslash']              = 'Per-jel használata névtér-elválasztóként az URL-ekben';
 $lang['usedraft']              = 'Piszkozat automatikus mentése szerkesztés alatt';
 $lang['sepchar']               = 'Szó elválasztó az oldalnevekben';
 $lang['canonical']             = 'Teljesen kanonikus URL-ek használata';
+$lang['fnencode']              = 'A nem ASCII fájlnevek dekódolási módja';
 $lang['autoplural']            = 'Többes szám ellenőrzés a hivatkozásokban (angol)';
 $lang['compression']           = 'Tömörítés használata a törölt lapokhoz';
 $lang['cachetime']             = 'A gyorsítótár maximális élettartama (másodperc)';
@@ -98,16 +110,17 @@ $lang['gdlib']                 = 'GD Lib verzió';
 $lang['im_convert']            = 'Útvonal az ImageMagick csomag convert parancsához';
 $lang['jpg_quality']           = 'JPG tömörítés minősége (0-100)';
 $lang['subscribers']           = 'Oldalváltozás-listára feliratkozás engedélyezése';
+$lang['subscribe_time']        = 'Az értesítések kiküldésének késleltetése (másodperc); Érdemes kisebbet választani, mint a változások megőrzésének maximális ideje.';
 $lang['compress']              = 'CSS és JavaScript fájlok tömörítése';
-$lang['hidepages']             = 'Az itt megadott oldalak elrejtése (regularis kifejezés)';
+$lang['hidepages']             = 'Az itt megadott oldalak elrejtése (reguláris kifejezés)';
 $lang['send404']               = '"HTTP 404/Page Not Found" küldése nemlétező oldalak esetén';
 $lang['sitemap']               = 'Hány naponként generáljunk Google sitemap-ot?';
 $lang['broken_iua']            = 'Az ignore_user_abort függvény hibát dob a rendszereden? Ez nem működő keresési indexet eredményezhet. Az IIS+PHP/CGI összeállításról tudjuk, hogy hibát dob. Lásd a <a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a> oldalt a további infóért.';
 $lang['xsendfile']             = 'Használjuk az X-Sendfile fejlécet, hogy a webszerver statikus állományokat tudjon küldeni? A webszervernek is támogatnia kell ezt a funkciót.';
-$lang['xmlrpc']                = 'XML-RPC interfész engedélyezése/tiltása';
 $lang['renderer_xhtml']        = 'Az elsődleges (xhtml) wiki kimenet generálója';
 $lang['renderer__core']        = '%s (dokuwiki mag)';
 $lang['renderer__plugin']      = '%s (bővítmény)';
+$lang['rememberme']            = 'Állandó sütik engedélyezése (az "emlékezz rám" funkcióhoz)';
 $lang['rss_type']              = 'XML hírfolyam típus';
 $lang['rss_linkto']            = 'XML hírfolyam hivatkozás';
 $lang['rss_content']           = 'Mit mutassunk az XML hírfolyam elemekben?';
@@ -124,12 +137,14 @@ $lang['proxy____port']         = 'Proxy port';
 $lang['proxy____user']         = 'Proxy felhasználó név';
 $lang['proxy____pass']         = 'Proxy jelszó';
 $lang['proxy____ssl']          = 'SSL használata a proxyhoz csatlakozáskor';
-$lang['safemodehack']          = 'safemode hack engedélyezése';
-$lang['ftp____host']           = 'FTP szerver a safemode hack-hez';
-$lang['ftp____port']           = 'FTP port a safemode hack-hez';
-$lang['ftp____user']           = 'FTP felhasználó név a safemode hack-hez';
-$lang['ftp____pass']           = 'FTP jelszó a safemode hack-hez';
-$lang['ftp____root']           = 'FTP gyökérkönyvtár a safemode hack-hez';
+$lang['proxy____except']       = 'URL szabály azokra a webcímekre, amit szeretnél, hogy ne kezeljen a proxy.';
+$lang['safemodehack']          = 'A PHP safemode beállítás megkerülésének engedélyezése';
+$lang['ftp____host']           = 'FTP szerver a safemode megkerüléshez';
+$lang['ftp____port']           = 'FTP port a safemode megkerüléshez';
+$lang['ftp____user']           = 'FTP felhasználó név a safemode megkerüléshez';
+$lang['ftp____pass']           = 'FTP jelszó a safemode megkerüléshez';
+$lang['ftp____root']           = 'FTP gyökérkönyvtár a safemode megkerüléshez';
+$lang['license_o_']            = 'Nincs kiválasztva';
 $lang['typography_o_0']        = 'nem';
 $lang['typography_o_1']        = 'Csak a dupla idézőjelet';
 $lang['typography_o_2']        = 'Minden idézőjelet (előfordulhat, hogy nem mindig működik)';
@@ -162,3 +177,12 @@ $lang['xsendfile_o_0']         = 'nincs használatban';
 $lang['xsendfile_o_1']         = 'lighttpd saját fejléc (1.5-ös verzió előtti)';
 $lang['xsendfile_o_2']         = 'Standard X-Sendfile fejléc';
 $lang['xsendfile_o_3']         = 'Nginx saját X-Accel-Redirect fejléce';
+$lang['showuseras_o_loginname'] = 'Azonosító';
+$lang['showuseras_o_username'] = 'Teljes név';
+$lang['showuseras_o_email']    = 'E-mail cím (olvashatatlanná téve az e-mailcím védelem beállítása szerint)';
+$lang['showuseras_o_email_link'] = 'E-mail cím mailto: linkként';
+$lang['useheading_o_0']        = 'Soha';
+$lang['useheading_o_navigation'] = 'Csak navigációhoz';
+$lang['useheading_o_content']  = 'Csak Wiki tartalomhoz';
+$lang['useheading_o_1']        = 'Mindig';
+$lang['readdircache']          = 'A könyvtár olvasás gyorsítótárának maximális tárolási ideje (másodperc)';

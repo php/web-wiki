@@ -136,6 +136,7 @@ class IXR_Message {
     var $_value;
     var $_currentTag;
     var $_currentTagContents;
+    var $_lastseen;
     // The XML parser
     var $_parser;
     function IXR_Message ($message) {
@@ -144,6 +145,13 @@ class IXR_Message {
     function parse() {
         // first remove the XML declaration
         $this->message = preg_replace('/<\?xml(.*)?\?'.'>/', '', $this->message);
+        // workaround for a bug in PHP/libxml2, see http://bugs.php.net/bug.php?id=45996
+        $this->message = str_replace('&lt;', '&#60;', $this->message);
+        $this->message = str_replace('&gt;', '&#62;', $this->message);
+        $this->message = str_replace('&amp;', '&#38;', $this->message);
+        $this->message = str_replace('&apos;', '&#39;', $this->message);
+        $this->message = str_replace('&quot;', '&#34;', $this->message);
+        $this->message = str_replace("\x0b", ' ', $this->message); //vertical tab
         if (trim($this->message) == '') {
             return false;
         }
@@ -170,6 +178,7 @@ class IXR_Message {
     }
     function tag_open($parser, $tag, $attr) {
         $this->currentTag = $tag;
+        $this->_currentTagContents = '';
         switch($tag) {
             case 'methodCall':
             case 'methodResponse':
@@ -186,6 +195,7 @@ class IXR_Message {
                 $this->_arraystructs[] = array();
                 break;
         }
+        $this->_lastseen = $tag;
     }
     function cdata($parser, $cdata) {
         $this->_currentTagContents .= $cdata;
@@ -205,7 +215,7 @@ class IXR_Message {
                 $valueFlag = true;
                 break;
             case 'string':
-                $value = (string)trim($this->_currentTagContents);
+                $value = (string)$this->_currentTagContents;
                 $this->_currentTagContents = '';
                 $valueFlag = true;
                 break;
@@ -217,7 +227,7 @@ class IXR_Message {
                 break;
             case 'value':
                 // "If no type is indicated, the type is string."
-                if (trim($this->_currentTagContents) != '') {
+                if($this->_lastseen == 'value'){
                     $value = (string)$this->_currentTagContents;
                     $this->_currentTagContents = '';
                     $valueFlag = true;
@@ -272,6 +282,7 @@ class IXR_Message {
                 $this->params[] = $value;
             }
         }
+        $this->_lastseen = $tag;
     }
 }
 
@@ -293,7 +304,7 @@ class IXR_Server {
         if (!$data) {
             global $HTTP_RAW_POST_DATA;
             if (!$HTTP_RAW_POST_DATA) {
-               die('XML-RPC server accepts POST requests only.');
+                die('XML-RPC server accepts POST requests only.');
             }
             $data = $HTTP_RAW_POST_DATA;
         }
@@ -335,14 +346,16 @@ EOD;
         $method = $this->callbacks[$methodname];
         // Perform the callback and send the response
 
-# Removed for DokuWiki to have a more consistent interface
-#        if (count($args) == 1) {
-#            // If only one paramater just send that instead of the whole array
-#            $args = $args[0];
-#        }
+        # Removed for DokuWiki to have a more consistent interface
+        #        if (count($args) == 1) {
+        #            // If only one paramater just send that instead of the whole array
+        #            $args = $args[0];
+        #        }
 
+        # Adjusted for DokuWiki to use call_user_func_array
 
-# Adjusted for DokuWiki to use call_user_func_array
+        // args need to be an array
+        $args = (array) $args;
 
         // Are we dealing with a function or a method?
         if (substr($method, 0, 5) == 'this:') {
@@ -354,6 +367,14 @@ EOD;
             // Call the method
             #$result = $this->$method($args);
             $result = call_user_func_array(array(&$this,$method),$args);
+        } elseif (substr($method, 0, 7) == 'plugin:') {
+            list($pluginname, $callback) = explode(':', substr($method, 7), 2);
+            if(!plugin_isdisabled($pluginname)) {
+                $plugin = plugin_load('action', $pluginname);
+                return call_user_func_array(array($plugin, $callback), $args);
+            } else {
+                return new IXR_Error(-99999, 'server error');
+            }
         } else {
             // It's a function - does it exist?
             if (!function_exists($method)) {
@@ -506,16 +527,22 @@ class IXR_Client extends DokuHTTPClient {
             return false;
         }
 
+        // Check HTTP Response code
+        if($this->status < 200 || $this->status > 206){
+            $this->xmlerror = new IXR_Error(-32300, 'transport error - HTTP status '.$this->status);
+            return false;
+        }
+
         // Now parse what we've got back
         $this->message = new IXR_Message($this->resp_body);
         if (!$this->message->parse()) {
             // XML error
-            $this->error = new IXR_Error(-32700, 'parse error. not well formed');
+            $this->xmlerror = new IXR_Error(-32700, 'parse error. not well formed');
             return false;
         }
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
-            $this->error = new IXR_Error($this->message->faultCode, $this->message->faultString);
+            $this->xmlerror = new IXR_Error($this->message->faultCode, $this->message->faultString);
             return false;
         }
         // Message must be OK
@@ -585,29 +612,31 @@ class IXR_Date {
         }
     }
     function parseTimestamp($timestamp) {
-        $this->year = date('Y', $timestamp);
-        $this->month = date('m', $timestamp);
-        $this->day = date('d', $timestamp);
-        $this->hour = date('H', $timestamp);
-        $this->minute = date('i', $timestamp);
-        $this->second = date('s', $timestamp);
+        $this->year = gmdate('Y', $timestamp);
+        $this->month = gmdate('m', $timestamp);
+        $this->day = gmdate('d', $timestamp);
+        $this->hour = gmdate('H', $timestamp);
+        $this->minute = gmdate('i', $timestamp);
+        $this->second = gmdate('s', $timestamp);
     }
     function parseIso($iso) {
-        $this->year = substr($iso, 0, 4);
-        $this->month = substr($iso, 4, 2);
-        $this->day = substr($iso, 6, 2);
-        $this->hour = substr($iso, 9, 2);
-        $this->minute = substr($iso, 12, 2);
-        $this->second = substr($iso, 15, 2);
+        if(preg_match('/^(\d\d\d\d)-?(\d\d)-?(\d\d)([T ](\d\d):(\d\d)(:(\d\d))?)?/',$iso,$match)){
+            $this->year   = (int) $match[1];
+            $this->month  = (int) $match[2];
+            $this->day    = (int) $match[3];
+            $this->hour   = (int) $match[5];
+            $this->minute = (int) $match[6];
+            $this->second = (int) $match[8];
+        }
     }
     function getIso() {
-        return $this->year.'-'.$this->month.'-'.$this->day.'T'.$this->hour.':'.$this->minute.':'.$this->second;
+        return $this->year.$this->month.$this->day.'T'.$this->hour.':'.$this->minute.':'.$this->second;
     }
     function getXml() {
         return '<dateTime.iso8601>'.$this->getIso().'</dateTime.iso8601>';
     }
     function getTimestamp() {
-        return mktime($this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year);
+        return gmmktime($this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year);
     }
 }
 
@@ -790,4 +819,3 @@ class IXR_ClientMulticall extends IXR_Client {
     }
 }
 
-?>

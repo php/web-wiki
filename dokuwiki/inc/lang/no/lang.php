@@ -10,6 +10,12 @@
  * @author Arild Burud <arildb@met.no>
  * @author Torkill Bruland <torkar-b@online.no>
  * @author Rune M. Andersen <rune.andersen@gmail.com>
+ * @author Jakob Vad Nielsen (me@jakobnielsen.net)
+ * @author Kjell Tore Næsgaard  <kjell.t.nasgaard@ntnu.no>
+ * @author Knut Staring <knutst@gmail.com>
+ * @author Lisa Ditlefsen <lisa@vervesearch.com>
+ * @author Erik Pedersen <erik.pedersen@shaw.ca>
+ * @author Erik Bjørn Pedersen <erik.pedersen@shaw.ca>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -40,7 +46,7 @@ $lang['btn_admin']             = 'Admin';
 $lang['btn_update']            = 'Oppdater';
 $lang['btn_delete']            = 'Slett';
 $lang['btn_back']              = 'Tilbake';
-$lang['btn_backlink']          = 'Tilbakelinker';
+$lang['btn_backlink']          = 'Tilbakelenker';
 $lang['btn_backtomedia']       = 'Tilbake til valg av mediafil';
 $lang['btn_subscribe']         = 'Abonner på endringer';
 $lang['btn_unsubscribe']       = 'Ikke abonner på endringer';
@@ -52,6 +58,7 @@ $lang['btn_resendpwd']         = 'Send nytt passord';
 $lang['btn_draft']             = 'Rediger kladd';
 $lang['btn_recover']           = 'Gjennvinn kladd';
 $lang['btn_draftdel']          = 'Slett kladd';
+$lang['btn_revert']            = 'Gjenopprette';
 $lang['loggedinas']            = 'Innlogget som';
 $lang['user']                  = 'Brukernavn';
 $lang['pass']                  = 'Passord';
@@ -66,6 +73,7 @@ $lang['profile']               = 'Brukerprofil';
 $lang['badlogin']              = 'Ugyldig brukernavn og/eller passord.';
 $lang['minoredit']             = 'Mindre endringer';
 $lang['draftdate']             = 'Kladd autolagret';
+$lang['nosecedit']             = 'Siden ble endret i mellomtiden, seksjonsinfo har blitt foreldet - lastet full side istedet.';
 $lang['regmissing']            = 'Vennligst fyll ut alle felt.';
 $lang['reguexists']            = 'Det finnes allerede en konto med dette brukernavnet.';
 $lang['regsuccess']            = 'Brukerkonto har blitt laget og passord har blitt sendt via e-post.';
@@ -87,13 +95,17 @@ $lang['resendpwdnouser']       = 'Beklager, vi kan ikke finne denne brukeren i v
 $lang['resendpwdbadauth']      = 'Beklager, denne autorisasjonskoden er ikke gyldig. Sjekk at du brukte hele bekreftelseslenken.';
 $lang['resendpwdconfirm']      = 'En bekreftelseslenke er blitt sendt på e-post.';
 $lang['resendpwdsuccess']      = 'Ditt nye passord er blitt sendt på e-post.';
+$lang['license']               = 'Der annet ikke er særskilt beskrevet, er innholdet på denne wiki regulert av følgende lisens:';
+$lang['licenseok']             = 'Merk: Ved å endre på denne siden godtar du at ditt innhold blir regulert av følgende lisens:';
+$lang['searchmedia']           = 'Søk filnavn';
+$lang['searchmedia_in']        = 'Søk i %s';
 $lang['txt_upload']            = 'Velg fil som skal lastes opp';
 $lang['txt_filename']          = 'Skriv inn wikinavn (alternativt)';
 $lang['txt_overwrt']           = 'Overskriv eksisterende fil';
 $lang['lockedby']              = 'Stengt av';
 $lang['lockexpire']            = 'Avstengningen opphører';
 $lang['willexpire']            = 'Din redigeringslås for dette dokumentet kommer snart til å opphøre.\nFor å unngå versjonskonflikter bør du forhåndsvise dokumentet ditt for å forlenge redigeringslåsen.';
-$lang['notsavedyet']           = 'Ulagrede endringer vil gå tapt.\nVil du fortsette?';
+$lang['js']['notsavedyet']     = "Ulagrede endringer vil gå tapt.\nVil du fortsette?";
 $lang['rssfailed']             = 'En feil oppstod da denne kilden skulle hentes:';
 $lang['nothingfound']          = 'Ingen data funnet.';
 $lang['mediaselect']           = 'Valg av mediafil';
@@ -105,13 +117,21 @@ $lang['uploadexist']           = 'Filen eksisterer. Ingenting har blitt gjort.';
 $lang['uploadbadcontent']      = 'Det opplastede innholdet passer ikke til filendelsen %s.';
 $lang['uploadspam']            = 'Opplastingen ble blokkert av svartelisten for spam.';
 $lang['uploadxss']             = 'Opplastingen ble blokkert på grunn av mulig skadelig innhold.';
+$lang['uploadsize']            = 'Den opplastede filen var for stor. (max. %s)';
 $lang['deletesucc']            = 'Filen "%s" har blitt slettet.';
 $lang['deletefail']            = '"%s" kunne ikke slettes - sjekk rettighetene.';
 $lang['mediainuse']            = 'Filen "%s" har ikke biltt slettet - den er fortsatt i bruk.';
 $lang['namespaces']            = 'Navnerom';
 $lang['mediafiles']            = 'Tilgjengelige filer i';
+$lang['js']['searchmedia']     = 'Søk for filer';
 $lang['js']['keepopen']        = 'Hold vindu åpent ved valg';
 $lang['js']['hidedetails']     = 'Skjul detaljer';
+$lang['js']['nosmblinks']      = 'Lenker til Windows-ressurser fungerer bare i Microsoft sin Internet Explorer.
+Du kan fortsatt kopiere og lime inn lenken.';
+$lang['js']['linkwiz']         = 'guide til lenker';
+$lang['js']['linkto']          = 'Lenke til:';
+$lang['js']['del_confirm']     = 'Slett denne oppføringen?';
+$lang['js']['mu_btn']          = 'Last opp flere filer samtidig';
 $lang['mediausage']            = 'Bruk følgende syntaks til å refferer til denne filen:';
 $lang['mediaview']             = 'Vis original fil';
 $lang['mediaroot']             = 'rot';
@@ -137,12 +157,12 @@ $lang['created']               = 'opprettet';
 $lang['restored']              = 'gjenopprettet til en tidligere versjon';
 $lang['external_edit']         = 'ekstern redigering';
 $lang['summary']               = 'Redigeringskommentar';
+$lang['noflash']               = 'For at dette innholdet skal vises må du ha <a href="http://www.adobe.com/products/flashplayer/">Adobe Flash Plugin</a>.';
+$lang['download']              = 'Last ned utdraget';
 $lang['mail_newpage']          = 'side lagt til:';
 $lang['mail_changed']          = 'side endret:';
 $lang['mail_new_user']         = 'ny bruker:';
 $lang['mail_upload']           = 'fil opplastet:';
-$lang['nosmblinks']            = 'Lenker til Windows-ressurser fungerer bare i Microsoft sin Internet Explorer.\nDu kan fortsatt kopiere og lime inn lenken.';
-$lang['qb_alert']              = 'Vennligst skriv inn teksten du ønsker å formatere.\nDen vil bli lagt til mot slutten av dokumentet.';
 $lang['qb_bold']               = 'Fet tekst';
 $lang['qb_italic']             = 'Kursiv tekst';
 $lang['qb_underl']             = 'Understreket tekst';
@@ -153,6 +173,11 @@ $lang['qb_h2']                 = 'Overskrift nivå 2';
 $lang['qb_h3']                 = 'Overskrift nivå 3';
 $lang['qb_h4']                 = 'Overskrift nivå 4';
 $lang['qb_h5']                 = 'Overskrift nivå 5';
+$lang['qb_h']                  = 'Overskrift';
+$lang['qb_hs']                 = 'Velg overskrift';
+$lang['qb_hplus']              = 'Høyere overskrift';
+$lang['qb_hminus']             = 'Lavere overskrift';
+$lang['qb_hequal']             = 'Overskrift på samme nivå';
 $lang['qb_link']               = 'Intern lenke';
 $lang['qb_extlink']            = 'Ekstern lenke';
 $lang['qb_hr']                 = 'Horisontal linje';
@@ -162,7 +187,7 @@ $lang['qb_media']              = 'Legg til bilder og andre filer';
 $lang['qb_sig']                = 'Føy til signatur';
 $lang['qb_smileys']            = 'Smilefjes';
 $lang['qb_chars']              = 'Spesialtegn';
-$lang['del_confirm']           = 'Slett denne oppføringen?';
+$lang['upperns']               = 'gå til overordnet navnerom';
 $lang['admin_register']        = 'Legg til ny bruker';
 $lang['metaedit']              = 'Rediger metadata';
 $lang['metasaveerr']           = 'Skriving av metadata feilet';
@@ -193,7 +218,7 @@ $lang['i_superuser']           = 'Superbruker';
 $lang['i_problems']            = 'Installasjonen oppdaget noen problemer, disse listes nedenfor. Du kan ikke fortsett før du har løst disse.';
 $lang['i_modified']            = 'For sikkerhets skyld vil dette skriptet bare virke med en ny og uendret Dokuwiki-installsjon.
                          Du bør enten pakke ut filene på nytt fra den nedlastede pakken, eller konsultere den komplette
-                         <a href="http://wiki.splitbrain.org/wiki:install">Dokuwiki-installasjonsinstruksen</a>';
+                         <a href="http://dokuwiki.org/install">Dokuwiki-installasjonsinstruksen</a>';
 $lang['i_funcna']              = 'PHP-funksjonen <code>%s</code> er ikke tilgjengelig. Kanskje din leverandør har deaktivert den av noen grunn?';
 $lang['i_phpver']              = 'Your PHP version <code>%s</code> is lower than the needed <code>%s</code>. You need to upgrade your PHP install.';
 $lang['i_permfail']            = '<code>%s</code> er ikke skrivbar for DokuWiki. Du må fikse rettighetene for denne mappen!';
@@ -210,3 +235,26 @@ $lang['i_pol0']                = 'Åpen Wiki (les, skriv og opplasting for alle)
 $lang['i_pol1']                = 'Offentlig Wiki (les for alle, skriving og opplasting bare for registrerte brukere)';
 $lang['i_pol2']                = 'Lukket Wiki (les, skriv og opplasting bare for registrerte brukere)';
 $lang['i_retry']               = 'Prøv igjen';
+$lang['mu_intro']              = 'Her kan du laste opp flere filer samtidig. Klikk på utforsk-knappen for å legge dem til i køen. Klikk på "last opp" når du er ferdig med å velge filene. ';
+$lang['mu_gridname']           = 'Filnavn';
+$lang['mu_gridsize']           = 'Størrelse';
+$lang['mu_gridstat']           = 'Status';
+$lang['mu_namespace']          = 'Navnerom (Namespace)';
+$lang['mu_browse']             = 'Utforsk';
+$lang['mu_toobig']             = 'for stor';
+$lang['mu_ready']              = 'klar for opplasting';
+$lang['mu_done']               = 'komplett';
+$lang['mu_fail']               = 'feilet';
+$lang['mu_authfail']           = 'sesjonen har utløpt';
+$lang['mu_progress']           = '@PCT@% lastet opp';
+$lang['mu_filetypes']          = 'Tillatte filtyper';
+$lang['mu_info']               = 'filer lastet opp.';
+$lang['mu_lasterr']            = 'Siste feilen:';
+$lang['recent_global']         = 'Du ser nå på endringene i navnerommet <b>%s</b>. Du kan også<a href="%s">se på nylig foretatte endringer for hele wikien</a>.';
+$lang['years']                 = '%d år siden';
+$lang['months']                = '%d måneder siden';
+$lang['weeks']                 = '%d uker siden';
+$lang['days']                  = '%d dager siden';
+$lang['hours']                 = '%d timer siden';
+$lang['minutes']               = '%d minutter siden';
+$lang['seconds']               = '%d sekunder siden';

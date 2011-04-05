@@ -7,21 +7,6 @@
  * @author     Chris Smith <chris@jalakai.co.uk>
  */
 
-define('DOKU_AUTH', dirname(__FILE__));
-require_once(DOKU_AUTH.'/basic.class.php');
-
-define('AUTH_USERFILE',DOKU_CONF.'users.auth.php');
-
-// we only accept page ids for auth_plain
-if(isset($_REQUEST['u']))
-  $_REQUEST['u'] = cleanID($_REQUEST['u']);
-if(isset($_REQUEST['acl_user']))
-  $_REQUEST['acl_user'] = cleanID($_REQUEST['acl_user']);
-// the same goes for password reset requests
-if(isset($_POST['login'])){
-  $_POST['login'] = cleanID($_POST['login']);
-}
-
 class auth_plain extends auth_basic {
 
     var $users = null;
@@ -36,10 +21,12 @@ class auth_plain extends auth_basic {
      * @author  Christopher Smith <chris@jalakai.co.uk>
      */
     function auth_plain() {
-      if (!@is_readable(AUTH_USERFILE)){
+      global $config_cascade;
+
+      if (!@is_readable($config_cascade['plainauth.users']['default'])){
         $this->success = false;
       }else{
-        if(@is_writable(AUTH_USERFILE)){
+        if(@is_writable($config_cascade['plainauth.users']['default'])){
           $this->cando['addUser']      = true;
           $this->cando['delUser']      = true;
           $this->cando['modLogin']     = true;
@@ -102,6 +89,7 @@ class auth_plain extends auth_basic {
      */
     function createUser($user,$pwd,$name,$mail,$grps=null){
       global $conf;
+      global $config_cascade;
 
       // user mustn't already exist
       if ($this->getUserData($user) !== false) return false;
@@ -115,12 +103,13 @@ class auth_plain extends auth_basic {
       $groups = join(',',$grps);
       $userline = join(':',array($user,$pass,$name,$mail,$groups))."\n";
 
-      if (io_saveFile(AUTH_USERFILE,$userline,true)) {
+      if (io_saveFile($config_cascade['plainauth.users']['default'],$userline,true)) {
         $this->users[$user] = compact('pass','name','mail','grps');
         return $pwd;
       }
 
-      msg('The '.AUTH_USERFILE.' file is not writable. Please inform the Wiki-Admin',-1);
+      msg('The '.$config_cascade['plainauth.users']['default'].
+          ' file is not writable. Please inform the Wiki-Admin',-1);
       return null;
     }
 
@@ -136,6 +125,7 @@ class auth_plain extends auth_basic {
       global $conf;
       global $ACT;
       global $INFO;
+      global $config_cascade;
 
       // sanity checks, user must already exist and there must be something to change
       if (($userinfo = $this->getUserData($user)) === false) return false;
@@ -160,7 +150,7 @@ class auth_plain extends auth_basic {
         return false;
       }
 
-      if (!io_saveFile(AUTH_USERFILE,$userline,true)) {
+      if (!io_saveFile($config_cascade['plainauth.users']['default'],$userline,true)) {
         msg('There was an error modifying your user data. You should register again.',-1);
         // FIXME, user has been deleted but not recreated, should force a logout and redirect to login page
         $ACT == 'register';
@@ -179,6 +169,7 @@ class auth_plain extends auth_basic {
      *  @return  int             the number of users deleted
      */
     function deleteUsers($users) {
+      global $config_cascade;
 
       if (!is_array($users) || empty($users)) return 0;
 
@@ -193,7 +184,7 @@ class auth_plain extends auth_basic {
 
       $pattern = '/^('.join('|',$deleted).'):/';
 
-      if (io_deleteFromFile(AUTH_USERFILE,$pattern,true)) {
+      if (io_deleteFromFile($config_cascade['plainauth.users']['default'],$pattern,true)) {
         foreach ($deleted as $user) unset($this->users[$user]);
         return count($deleted);
       }
@@ -261,6 +252,22 @@ class auth_plain extends auth_basic {
     }
 
     /**
+     * Only valid pageid's (no namespaces) for usernames
+     */
+    function cleanUser($user){
+        global $conf;
+        return cleanID(str_replace(':',$conf['sepchar'],$user));
+    }
+
+    /**
+     * Only valid pageid's (no namespaces) for groupnames
+     */
+    function cleanGroup($group){
+        global $conf;
+        return cleanID(str_replace(':',$conf['sepchar'],$group));
+    }
+
+    /**
      * Load all user data
      *
      * loads the user file into a datastructure
@@ -268,18 +275,20 @@ class auth_plain extends auth_basic {
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
     function _loadUserData(){
+      global $config_cascade;
+
       $this->users = array();
 
-      if(!@file_exists(AUTH_USERFILE)) return;
+      if(!@file_exists($config_cascade['plainauth.users']['default'])) return;
 
-      $lines = file(AUTH_USERFILE);
+      $lines = file($config_cascade['plainauth.users']['default']);
       foreach($lines as $line){
         $line = preg_replace('/#.*$/','',$line); //ignore comments
         $line = trim($line);
         if(empty($line)) continue;
 
-        $row    = split(":",$line,5);
-        $groups = split(",",$row[4]);
+        $row    = explode(":",$line,5);
+        $groups = array_values(array_filter(explode(",",$row[4])));
 
         $this->users[$row[0]]['pass'] = $row[1];
         $this->users[$row[0]]['name'] = urldecode($row[2]);

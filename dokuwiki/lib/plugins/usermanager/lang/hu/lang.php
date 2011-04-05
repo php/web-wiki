@@ -2,13 +2,16 @@
 /**
  * Hungarian language file
  *
- * @author Sandor TIHANYI <stihanyi@gmail.com>
- * @author SandorTIHANYI <stihanyi@gmail.com>
+ * @author Sandor TIHANYI <stihanyi+dw@gmail.com>
+ * @author Siaynoq Mage <siaynoqmage@gmail.com>
+ * @author schilling.janos@gmail.com
+ * @author Szabó Dávid (szabo.david@gyumolcstarhely.hu)
+ * @author Szabó Dávid <szabo.david@gyumolcstarhely.hu>
  */
 $lang['menu']                  = 'Felhasználók kezelése';
 $lang['noauth']                = '(A felhasználói azonosítás nem működik.)';
 $lang['nosupport']             = '(A felhasználók kezelése nem támogatott.)';
-$lang['badauth']               = 'nem érvényes authentikációs technika';
+$lang['badauth']               = 'nem érvényes autentikációs technika';
 $lang['user_id']               = 'Felhasználó azonosító';
 $lang['user_pass']             = 'Jelszó';
 $lang['user_name']             = 'Név';
@@ -41,6 +44,7 @@ $lang['edit_usermissing']      = 'A kiválasztott felhasználót nem találom, a
 $lang['user_notify']           = 'Felhasználó értesítése';
 $lang['note_notify']           = 'Csak akkor küld értesítő e-mailt, ha a felhasználó új jelszót kapott.';
 $lang['note_group']            = 'Ha nincs csoport meghatározva, az új felhasználó az alapértelmezett csoportba (%s) kerül.';
+$lang['note_pass']             = 'Ha a baloldali mező üres, és a felhasználó értesítés aktív, akkor generált jelszó lesz.';
 $lang['add_ok']                = 'A felhasználó sikeresen hozzáadva.';
 $lang['add_fail']              = 'A felhasználó hozzáadása nem sikerült.';
 $lang['notify_ok']             = 'Értesítő levél elküldve.';

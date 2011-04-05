@@ -12,6 +12,5 @@ IP-адрес    : @IPADDRESS@
 @DIFF@
 
 
---
-Tова писмо е генерирано от DokuWiki на:
-@DOKUWIKIURL@
+-- 
+Това писмо е генерирано от DokuWiki на адрес @DOKUWIKIURL@

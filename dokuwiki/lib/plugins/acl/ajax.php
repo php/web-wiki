@@ -13,17 +13,14 @@ if(!count($_POST) && $HTTP_RAW_POST_DATA){
 
 if(!defined('DOKU_INC')) define('DOKU_INC',dirname(__FILE__).'/../../../');
 require_once(DOKU_INC.'inc/init.php');
-require_once(DOKU_INC.'inc/common.php');
-require_once(DOKU_INC.'inc/pageutils.php');
-require_once(DOKU_INC.'inc/auth.php');
-//close sesseion
+//close session
 session_write_close();
+
+if(!auth_isadmin()) die('for admins only');
+if(!checkSecurityToken()) die('CRSF Attack');
 
 $ID    = getID();
 
-if(!auth_isadmin) die('for admins only');
-require_once(DOKU_INC.'inc/pluginutils.php');
-require_once(DOKU_INC.'inc/html.php');
 $acl = plugin_load('admin','acl');
 $acl->handle();
 
@@ -33,7 +30,6 @@ header('Content-Type: text/html; charset=utf-8');
 if($ajax == 'info'){
     $acl->_html_info();
 }elseif($ajax == 'tree'){
-    require_once(DOKU_INC.'inc/search.php');
     global $conf;
     global $ID;
 
@@ -42,11 +38,11 @@ if($ajax == 'info'){
     if($ns == '*'){
         $ns ='';
     }
+    $ns  = cleanID($ns);
     $lvl = count(explode(':',$ns));
     $ns  = utf8_encodeFN(str_replace(':','/',$ns));
 
-    $data = array();
-    search($data,$conf['datadir'],'search_index',array('ns' => $ns),$ns);
+    $data = $acl->_get_tree($ns,$ns);
 
     foreach($data as $item){
         $item['level'] = $lvl+1;

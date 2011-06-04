@@ -1,0 +1,9 @@
+div.dokuwiki table.inline td.okay {
+  background-color: #afa;
+  text-align: center;
+}
+
+div.dokuwiki table.inline td.notokay {
+  background-color: #fcc;
+  text-align: center;
+}

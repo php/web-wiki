@@ -27,7 +27,7 @@ class  syntax_plugin_phpbugid extends DokuWiki_Syntax_Plugin {
         'date'   => '2008-06-20',
         'name'   => 'PHP Bug id',
         'desc'   => 'Add a short syntax to link to php bugs',
-        'url'    => 'http://cvs.php.net/viewvc.cgi/php-wiki-web/dokuwiki/lib/plugins/phpbugid/syntax.php?view=markup',
+        'url'    => 'http://svn.php.net/viewvc/web/php-wiki/trunk/dokuwiki/lib/plugins/phpbugid/',
       );
     }
 

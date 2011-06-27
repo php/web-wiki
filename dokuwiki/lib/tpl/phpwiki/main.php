@@ -30,12 +30,12 @@ if (!defined('DOKU_INC')) die();
   <?php tpl_metaheaders()?>
 
  <style type="text/css" media="all">
-  @import url("http://static.php.net/www.php.net/styles/site.css");
-  @import url("http://static.php.net/www.php.net/styles/phpnet.css");
+  @import url("https://static.php.net/www.php.net/styles/site.css");
+  @import url("https://static.php.net/www.php.net/styles/phpnet.css");
  </style>
  <!--[if IE]><![if gte IE 6]><![endif]-->
   <style type="text/css" media="print">
-   @import url("http://static.php.net/www.php.net/styles/print.css");
+   @import url("https://static.php.net/www.php.net/styles/print.css");
   </style>
  <!--[if IE]><![endif]><![endif]-->
   <style type="text/css">
@@ -44,9 +44,9 @@ if (!defined('DOKU_INC')) die();
   }
   </style>
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
- <link rel="shortcut icon" href="http://static.php.net/www.php.net/favicon.ico" />
+ <link rel="shortcut icon" href="https://static.php.net/www.php.net/favicon.ico" />
  <link rel="search" type="application/opensearchdescription+xml" href="http://www.php.net/phpnetimprovedsearch.src" title="Add PHP.net search" />
- <script type="text/javascript" src="http://static.php.net/www.php.net/userprefs.js"></script>
+ <script type="text/javascript" src="https://static.php.net/www.php.net/userprefs.js"></script>
  <script type="text/javascript">
 function installSummaryEnforcement()
 {
@@ -87,7 +87,7 @@ addInitEvent(function(){installSummaryEnforcement();});
 
 <div id="headnav">
  <a href="http://php.net">
-  <img src="http://static.php.net/www.php.net/images/php.gif" alt="PHP" width="120" height="67" />
+  <img src="https://static.php.net/www.php.net/images/php.gif" alt="PHP" width="120" height="67" />
  </a>
  <div id="headmenu">
   <a href="http://php.net/downloads.php">downloads</a> |

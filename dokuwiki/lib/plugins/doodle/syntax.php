@@ -199,9 +199,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
         //FIXME: count($choices) may be different from number of choices in $doodle data!
 
+        $can_vote = false;
+        if (count(array_intersect(array('admin', 'phpcvs', 'voting'), $INFO['userinfo']['grps'])) > 0) {
+            $can_vote = true;
+        }
+
         // ----- FORM ACTIONS (only allowed when showing the page, not when editing) -----
         $formId =  'doodle__form__'.cleanID($this->params['title']);
-        if ($ACT == 'show' && $_REQUEST['formId'] == $formId ) {
+        if ($ACT == 'show' && $_REQUEST['formId'] == $formId && $can_vote) {
             // ---- cast new vote
             if (!empty($_REQUEST['cast__vote'])) {
                 $this->castVote();
@@ -291,7 +296,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
 
         // ---- calculates if user is allowed to vote
-        $this->template['inputTR'] = $this->getInputTR();
+        $this->template['inputTR'] = ($can_vote?$this->getInputTR():'');
         
         // ----- I am using PHP as a templating enginge here.
         //debout("Template", $this->template);

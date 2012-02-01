@@ -24,7 +24,7 @@ $cache = new cache($key, '.feed');
 // prepare cache depends
 $depends['files'] = getConfigFiles('main');
 $depends['age']   = $conf['rss_update'];
-$depends['purge'] = ($_REQUEST['purge']) ? true : false;
+$depends['purge'] = isset($_REQUEST['purge']);
 
 // check cacheage and deliver if nothing has changed since last
 // time or the update interval has not passed, also handles conditional requests
@@ -50,23 +50,25 @@ $rss->cssStyleSheet  = DOKU_URL.'lib/exe/css.php?s=feed';
 
 $image = new FeedImage();
 $image->title = $conf['title'];
-$image->url = DOKU_URL."lib/images/favicon.ico";
+$image->url = tpl_getFavicon(true);
 $image->link = DOKU_URL;
 $rss->image = $image;
 
 $data = null;
-if($opt['feed_mode'] == 'list'){
-    $data = rssListNamespace($opt);
-}elseif($opt['feed_mode'] == 'search'){
-    $data = rssSearch($opt);
-}else{
+$modes = array('list'   => 'rssListNamespace',
+               'search' => 'rssSearch',
+               'recent' => 'rssRecentChanges');
+if (isset($modes[$opt['feed_mode']])) {
+    $data = $modes[$opt['feed_mode']]($opt);
+} else {
     $eventData = array(
         'opt'  => &$opt,
         'data' => &$data,
     );
     $event = new Doku_Event('FEED_MODE_UNKNOWN', $eventData);
     if ($event->advise_before(true)) {
-        $data = rssRecentChanges($opt);
+        echo sprintf('<error>Unknown feed mode %s</error>', hsc($opt['feed_mode']));
+        exit;
     }
     $event->advise_after();
 }
@@ -83,29 +85,55 @@ print $feed;
 // ---------------------------------------------------------------- //
 
 /**
- * Get URL parameters and config options and return a initialized option array
+ * Get URL parameters and config options and return an initialized option array
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function rss_parseOptions(){
     global $conf;
 
-    $opt['items']        = (int) $_REQUEST['num'];
-    $opt['feed_type']    = $_REQUEST['type'];
-    $opt['feed_mode']    = $_REQUEST['mode'];
-    $opt['show_minor']   = $_REQUEST['minor'];
-    $opt['namespace']    = $_REQUEST['ns'];
-    $opt['link_to']      = $_REQUEST['linkto'];
-    $opt['item_content'] = $_REQUEST['content'];
-    $opt['search_query'] = $_REQUEST['q'];
+    $opt = array();
 
-    if(!$opt['feed_type'])    $opt['feed_type']    = $conf['rss_type'];
-    if(!$opt['item_content']) $opt['item_content'] = $conf['rss_content'];
-    if(!$opt['link_to'])      $opt['link_to']      = $conf['rss_linkto'];
-    if(!$opt['items'])        $opt['items']        = $conf['recent'];
+    foreach(array(
+                  // Basic feed properties
+                  // Plugins may probably want to add new values to these
+                  // properties for implementing own feeds
+
+                  // One of: list, search, recent
+                  'feed_mode'    => array('mode', 'recent'),
+                  // One of: diff, page, rev, current
+                  'link_to'      => array('linkto', $conf['rss_linkto']),
+                  // One of: abstract, diff, htmldiff, html
+                  'item_content' => array('content', $conf['rss_content']),
+
+                  // Special feed properties
+                  // These are only used by certain feed_modes
+
+                  // String, used for feed title, in list and rc mode
+                  'namespace'    => array('ns', null),
+                  // Positive integer, only used in rc mode
+                  'items'        => array('num', $conf['recent']),
+                  // Boolean, only used in rc mode
+                  'show_minor'   => array('minor', false),
+                  // String, only used in search mode
+                  'search_query' => array('q', null),
+                // One of: pages, media, both
+                  'content_type' => array('view', 'both')
+
+                 ) as $name => $val) {
+        $opt[$name] = (isset($_REQUEST[$val[0]]) && !empty($_REQUEST[$val[0]]))
+                      ? $_REQUEST[$val[0]] : $val[1];
+    }
+
+    $opt['items']        = max(0, (int)  $opt['items']);
+    $opt['show_minor']   = (bool) $opt['show_minor'];
+
     $opt['guardmail']  = ($conf['mailguard'] != '' && $conf['mailguard'] != 'none');
 
-    switch ($opt['feed_type']){
+    $type = valid_input_set('type', array('rss','rss2','atom','atom1','rss1',
+                                          'default' => $conf['rss_type']),
+                            $_REQUEST);
+    switch ($type){
         case 'rss':
             $opt['feed_type'] = 'RSS0.91';
             $opt['mime_type'] = 'text/xml';
@@ -162,7 +190,9 @@ function rss_buildItems(&$rss,&$data,$opt){
 
             $item = new FeedItem();
             $id   = $ditem['id'];
-            $meta = p_get_metadata($id);
+            if(!$ditem['media']) {
+                $meta = p_get_metadata($id);
+            }
 
             // add date
             if($ditem['date']){
@@ -187,62 +217,134 @@ function rss_buildItems(&$rss,&$data,$opt){
             // add item link
             switch ($opt['link_to']){
                 case 'page':
-                    $item->link = wl($id,'rev='.$date,true,'&');
+                    if ($ditem['media']) {
+                        $item->link = media_managerURL(array('image' => $id,
+                            'ns' => getNS($id),
+                            'rev' => $date), '&', true);
+                    } else {
+                        $item->link = wl($id,'rev='.$date,true,'&', true);
+                    }
                     break;
                 case 'rev':
-                    $item->link = wl($id,'do=revisions&rev='.$date,true,'&');
+                    if ($ditem['media']) {
+                        $item->link = media_managerURL(array('image' => $id,
+                            'ns' => getNS($id),
+                            'rev' => $date,
+                            'tab_details' => 'history'), '&', true);
+                    } else {
+                        $item->link = wl($id,'do=revisions&rev='.$date,true,'&');
+                    }
                     break;
                 case 'current':
-                    $item->link = wl($id, '', true,'&');
+                    if ($ditem['media']) {
+                        $item->link = media_managerURL(array('image' => $id,
+                            'ns' => getNS($id)), '&', true);
+                    } else {
+                        $item->link = wl($id, '', true,'&');
+                    }
                     break;
                 case 'diff':
                 default:
-                    $item->link = wl($id,'rev='.$date.'&do=diff',true,'&');
+                    if ($ditem['media']) {
+                        $item->link = media_managerURL(array('image' => $id,
+                            'ns' => getNS($id),
+                            'rev' => $date,
+                            'tab_details' => 'history',
+                            'mediado' => 'diff'), '&', true);
+                    } else {
+                        $item->link = wl($id,'rev='.$date.'&do=diff',true,'&');
+                    }
             }
 
             // add item content
             switch ($opt['item_content']){
                 case 'diff':
                 case 'htmldiff':
-                    require_once(DOKU_INC.'inc/DifferenceEngine.php');
-                    $revs = getRevisions($id, 0, 1);
-                    $rev = $revs[0];
+                    if ($ditem['media']) {
+                        $revs = getRevisions($id, 0, 1, 8192, true);
+                        $rev = $revs[0];
+                        $src_r = '';
+                        $src_l = '';
 
-                    if($rev){
-                        $df  = new Diff(explode("\n",htmlspecialchars(rawWiki($id,$rev))),
-                                        explode("\n",htmlspecialchars(rawWiki($id,''))));
-                    }else{
-                        $df  = new Diff(array(''),
-                                        explode("\n",htmlspecialchars(rawWiki($id,''))));
-                    }
+                        if ($size = media_image_preview_size($id, false, new JpegMeta(mediaFN($id)), 300)) {
+                            $more = 'w='.$size[0].'&h='.$size[1].'t='.@filemtime(mediaFN($id));
+                            $src_r = ml($id, $more);
+                        }
+                        if ($rev && $size = media_image_preview_size($id, $rev, new JpegMeta(mediaFN($id, $rev)), 300)){
+                            $more = 'rev='.$rev.'&w='.$size[0].'&h='.$size[1];
+                            $src_l = ml($id, $more);
+                        }
+                        $content = '';
+                        if ($src_r) {
+                            $content  = '<table>';
+                            $content .= '<tr><th width="50%">'.$rev.'</th>';
+                            $content .= '<th width="50%">'.$lang['current'].'</th></tr>';
+                            $content .= '<tr align="center"><td><img src="'.$src_l.'" alt="" /></td><td>';
+                            $content .= '<img src="'.$src_r.'" alt="'.$id.'" /></td></tr>';
+                            $content .= '</table>';
+                        }
 
-                    if($opt['item_content'] == 'htmldiff'){
-                        $tdf = new TableDiffFormatter();
-                        $content  = '<table>';
-                        $content .= '<tr><th colspan="2" width="50%">'.$rev.'</th>';
-                        $content .= '<th colspan="2" width="50%">'.$lang['current'].'</th></tr>';
-                        $content .= $tdf->format($df);
-                        $content .= '</table>';
-                    }else{
-                        $udf = new UnifiedDiffFormatter();
-                        $content = "<pre>\n".$udf->format($df)."\n</pre>";
+                    } else {
+                        require_once(DOKU_INC.'inc/DifferenceEngine.php');
+                        $revs = getRevisions($id, 0, 1);
+                        $rev = $revs[0];
+
+                        if($rev){
+                            $df  = new Diff(explode("\n",htmlspecialchars(rawWiki($id,$rev))),
+                                            explode("\n",htmlspecialchars(rawWiki($id,''))));
+                        }else{
+                            $df  = new Diff(array(''),
+                                            explode("\n",htmlspecialchars(rawWiki($id,''))));
+                        }
+
+                        if($opt['item_content'] == 'htmldiff'){
+                            $tdf = new TableDiffFormatter();
+                            $content  = '<table>';
+                            $content .= '<tr><th colspan="2" width="50%">'.$rev.'</th>';
+                            $content .= '<th colspan="2" width="50%">'.$lang['current'].'</th></tr>';
+                            $content .= $tdf->format($df);
+                            $content .= '</table>';
+                        }else{
+                            $udf = new UnifiedDiffFormatter();
+                            $content = "<pre>\n".$udf->format($df)."\n</pre>";
+                        }
                     }
                     break;
                 case 'html':
-                    $content = p_wiki_xhtml($id,$date,false);
-                    // no TOC in feeds
-                    $content = preg_replace('/(<!-- TOC START -->).*(<!-- TOC END -->)/s','',$content);
+                    if ($ditem['media']) {
+                        if ($size = media_image_preview_size($id, false, new JpegMeta(mediaFN($id)))) {
+                            $more = 'w='.$size[0].'&h='.$size[1].'t='.@filemtime(mediaFN($id));
+                            $src = ml($id, $more);
+                            $content = '<img src="'.$src.'" alt="'.$id.'" />';
+                        } else {
+                            $content = '';
+                        }
+                    } else {
+                        $content = p_wiki_xhtml($id,$date,false);
+                        // no TOC in feeds
+                        $content = preg_replace('/(<!-- TOC START -->).*(<!-- TOC END -->)/s','',$content);
 
-                    // make URLs work when canonical is not set, regexp instead of rerendering!
-                    if(!$conf['canonical']){
-                        $base = preg_quote(DOKU_REL,'/');
-                        $content = preg_replace('/(<a href|<img src)="('.$base.')/s','$1="'.DOKU_URL,$content);
+                        // make URLs work when canonical is not set, regexp instead of rerendering!
+                        if(!$conf['canonical']){
+                            $base = preg_quote(DOKU_REL,'/');
+                            $content = preg_replace('/(<a href|<img src)="('.$base.')/s','$1="'.DOKU_URL,$content);
+                        }
                     }
 
                     break;
                 case 'abstract':
                 default:
-                    $content = $meta['description']['abstract'];
+                    if ($ditem['media']) {
+                        if ($size = media_image_preview_size($id, false, new JpegMeta(mediaFN($id)))) {
+                            $more = 'w='.$size[0].'&h='.$size[1].'t='.@filemtime(mediaFN($id));
+                            $src = ml($id, $more);
+                            $content = '<img src="'.$src.'" alt="'.$id.'" />';
+                        } else {
+                            $content = '';
+                        }
+                    } else {
+                        $content = $meta['description']['abstract'];
+                    }
             }
             $item->description = $content; //FIXME a plugin hook here could be senseful
 
@@ -279,7 +381,7 @@ function rss_buildItems(&$rss,&$data,$opt){
             }
 
             // add category
-            if($meta['subject']){
+            if(isset($meta['subject'])) {
                 $item->category = $meta['subject'];
             }else{
                 $cat = getNS($id);
@@ -308,8 +410,11 @@ function rss_buildItems(&$rss,&$data,$opt){
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function rssRecentChanges($opt){
+    global $conf;
     $flags = RECENTS_SKIP_DELETED;
     if(!$opt['show_minor']) $flags += RECENTS_SKIP_MINORS;
+    if($opt['content_type'] == 'media' && $conf['mediarevisions']) $flags += RECENTS_MEDIA_CHANGES;
+    if($opt['content_type'] == 'both' && $conf['mediarevisions']) $flags += RECENTS_MEDIA_PAGES_MIXED;
 
     $recents = getRecents(0,$opt['items'],$opt['namespace'],$flags);
     return $recents;
@@ -349,4 +454,4 @@ function rssSearch($opt){
     return $data;
 }
 
-//Setup VIM: ex: et ts=4 enc=utf-8 :
+//Setup VIM: ex: et ts=4 :

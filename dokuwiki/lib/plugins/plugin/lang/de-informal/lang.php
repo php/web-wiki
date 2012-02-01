@@ -6,6 +6,8 @@
  * @author Juergen Schwarzer <jschwarzer@freenet.de>
  * @author Marcel Metz <marcel_metz@gmx.de>
  * @author Matthias Schulte <post@lupo49.de>
+ * @author Christian Wichmann <nospam@zone0.de>
+ * @author Pierre Corell <info@joomla-praxis.de>
  */
 $lang['menu']                  = 'Plugins verwalten';
 $lang['download']              = 'Herunterladen und installieren einer neuen Erweiterung';
@@ -51,3 +53,4 @@ $lang['enabled']               = 'Erweiterung %s aktiviert.';
 $lang['notenabled']            = 'Erweiterung %s konnte nicht aktiviert werden. Überprüfen sie die Zugriffsberechtigung der Datei.';
 $lang['disabled']              = 'Erweiterung %s deaktiviert.';
 $lang['notdisabled']           = 'Erweiterung %s konnte nicht deaktiviert werden - überprüfe Dateiberechtigungen';
+$lang['packageinstalled']      = 'Plugin-Paket (%d Plugin(s): %s) erfolgreich installiert.';

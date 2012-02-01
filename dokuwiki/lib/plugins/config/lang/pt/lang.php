@@ -6,6 +6,7 @@
  * @author Enrico Nicoletto <liverig@gmail.com>
  * @author Fil <fil@meteopt.com>
  * @author André Neves <drakferion@gmail.com>
+ * @author José Campos zecarlosdecampos@gmail.com
  */
 $lang['menu']                  = 'Configuração';
 $lang['error']                 = 'Parâmetros de Configuração não actualizados devido a valores inválidos. Por favor, reveja as modificações que pretende efectuar antes de re-submetê-las.<br /> Os valores incorrectos serão mostrados dentro de uma "moldura" vermelha.';
@@ -103,6 +104,7 @@ $lang['fetchsize']             = 'Tamanho máximo (bytes) que o fetch.php pode t
 $lang['notify']                = 'Enviar notificações de mudanças para este endereço de email';
 $lang['registernotify']        = 'Enviar informações de utilizadores registados para este endereço de email';
 $lang['mailfrom']              = 'Endereço de email a ser utilizado para mensagens automáticas';
+$lang['mailprefix']            = 'Prefixo de email a ser utilizado para mensagens automáticas';
 $lang['gzip_output']           = 'Usar "Content-Encoding" do gzip para o código xhtml';
 $lang['gdlib']                 = 'Versão GD Lib';
 $lang['im_convert']            = 'Caminho para a ferramenta "convert" do ImageMagick';
@@ -110,6 +112,7 @@ $lang['jpg_quality']           = 'Compressão/Qualidade JPG (0-100)';
 $lang['subscribers']           = 'Habilitar o suporte a subscrição de páginas ';
 $lang['subscribe_time']        = 'Tempo após o qual as listas de subscrição e "digests" são enviados (seg.); Isto deve ser inferior ao tempo especificado em recent_days.';
 $lang['compress']              = 'Compactar as saídas de CSS e JavaScript';
+$lang['cssdatauri']            = 'Tamanho em bytes até ao qual as imagens referenciadas em ficheiros CSS devem ser embutidas diretamente no CSS para reduzir a carga de pedidos HTTP extra. Esta técnica não funciona em IE 7 e abaixo! <code>400</code> a <code>600</code> bytes é um bom valor. Escolher <code>0</code> para desativar.';
 $lang['hidepages']             = 'Esconder páginas correspondentes (expressões regulares)';
 $lang['send404']               = 'Enviar "HTTP 404/Página não encontrada" para páginas não existentes';
 $lang['sitemap']               = 'Gerar Sitemap Google (dias)';

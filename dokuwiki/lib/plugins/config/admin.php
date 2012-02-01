@@ -32,21 +32,6 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     var $_session_started = false;
     var $_localised_prompts = false;
 
-    /**
-     * return some info
-     */
-    function getInfo(){
-
-      return array(
-        'author' => 'Christopher Smith',
-        'email'  => 'chris@jalakai.co.uk',
-        'date'   => '2007-08-05',
-        'name'   => 'Configuration Manager',
-        'desc'   => "Manage Dokuwiki's Configuration Settings",
-        'url'    => 'http://dokuwiki.org/plugin:config',
-      );
-    }
-
     function getMenuSort() { return 100; }
 
     /**
@@ -113,7 +98,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
       // rewrite config is broken. Add $ID as hidden field to remember
       // current ID in most cases.
       ptln('<form action="'.script().'" method="post">');
-      ptln('<input type="hidden" name="id" value="'.$ID.'" />');
+      ptln('<div class="no"><input type="hidden" name="id" value="'.$ID.'" /></div>');
       formSecurityToken();
       $this->_print_h1('dokuwiki_settings', $this->getLang('_header_dokuwiki'));
 

@@ -28,8 +28,7 @@ if (!defined('DOKU_INC')) die();
   </title>
 
   <?php tpl_metaheaders()?>
-
-  <link rel="shortcut icon" href="<?php echo DOKU_TPL?>images/favicon.ico" />
+  <?php echo tpl_favicon(array('favicon', 'mobile')) ?>
 
   <?php /*old includehook*/ @include(dirname(__FILE__).'/meta.html')?>
 </head>
@@ -92,7 +91,7 @@ if (!defined('DOKU_INC')) die();
     <!-- wikipage stop -->
   </div>
 
-  <div class="clearer">&nbsp;</div>
+  <div class="clearer"></div>
 
   <?php tpl_flush()?>
 
@@ -117,6 +116,7 @@ if (!defined('DOKU_INC')) die();
       </div>
       <div class="bar-right" id="bar__bottomright">
         <?php tpl_button('subscribe')?>
+        <?php tpl_button('media')?>
         <?php tpl_button('admin')?>
         <?php tpl_button('profile')?>
         <?php tpl_button('login')?>

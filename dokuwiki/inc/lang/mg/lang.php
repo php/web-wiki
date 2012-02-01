@@ -28,6 +28,7 @@ $lang['btn_update'] = 'Update';
 $lang['btn_delete'] = 'Fafao';
 $lang['btn_back']   = 'Miverina';
 $lang['btn_backtomedia'] = 'Fitsongana fichier Media';
+$lang['btn_register'] = 'Hisoratra';
 
 $lang['loggedinas'] = 'Anaranao:';
 $lang['user']       = 'Anarana';
@@ -36,7 +37,6 @@ $lang['passchk']    = 'Ataovy indray';
 $lang['remember']   = 'Tsarovy';
 $lang['fullname']   = 'Anarana feno';
 $lang['email']      = 'Imailaka';
-$lang['register']   = 'Hisoratra';
 $lang['badlogin']   = 'Miala tsiny fa misy diso ny anarana na ny alahidy.';
 
 $lang['regmissing'] = 'Tsy maintsy fenoina ny saha rehetra.';
@@ -54,7 +54,7 @@ $lang['txt_filename'] = 'Ampidiro ny anaran\'ny wiki (tsy voatery)';
 $lang['txt_overwrt']  = 'Fafana izay rakitra efa misy?';
 $lang['lockedby']     = 'Mbola voahidin\'i';
 $lang['lockexpire']   = 'Afaka ny hidy amin\'ny';
-$lang['willexpire']   = 'Efa ho lany fotoana afaka iray minitra ny hidy ahafahanao manova ny pejy.\nMba hialana amin\'ny conflit dia ampiasao ny bokotra topi-maso hamerenana ny timer-n\'ny hidy.';
+$lang['js']['willexpire']   = 'Efa ho lany fotoana afaka iray minitra ny hidy ahafahanao manova ny pejy.\nMba hialana amin\'ny conflit dia ampiasao ny bokotra topi-maso hamerenana ny timer-n\'ny hidy.';
 
 $lang['js']['notsavedyet'] = "Misy fiovana tsy voarakitra, ho very izany ireo.\nAzo antoka fa hotohizana?";
 $lang['rssfailed']   = 'An error occured while fetching this feed: ';
@@ -132,4 +132,4 @@ $lang['acl_perm8']  = 'Mandefa rakitra';
 $lang['acl_perm16'] = 'Mamafa';
 $lang['acl_new']    = 'Ampio andalana vaovao';
 
-//Setup VIM: ex: et ts=2 enc=utf-8 :
+//Setup VIM: ex: et ts=2 :

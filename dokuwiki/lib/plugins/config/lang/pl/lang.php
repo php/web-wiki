@@ -12,6 +12,8 @@
  * @author Leszek Stachowski <shazarre@gmail.com>
  * @author maros <dobrimaros@yahoo.pl>
  * @author Grzegorz Widła <dzesdzes@gmail.com>
+ * @author Łukasz Chmaj <teachmeter@gmail.com>
+ * @author Begina Felicysym <begina.felicysym@wp.eu>
  */
 $lang['menu']                  = 'Ustawienia';
 $lang['error']                 = 'Ustawienia nie zostały zapisane z powodu błędnych wartości, przejrzyj je i ponów próbę zapisu. <br/> Niepoprawne wartości są wyróżnione kolorem czerwonym.';
@@ -46,6 +48,7 @@ $lang['lang']                  = 'Język';
 $lang['basedir']               = 'Katalog główny';
 $lang['baseurl']               = 'Główny URL';
 $lang['savedir']               = 'Katalog z danymi';
+$lang['cookiedir']             = 'Ścieżka plików ciasteczek. Zostaw puste by użyć baseurl.';
 $lang['start']                 = 'Tytuł strony początkowej';
 $lang['title']                 = 'Tytuł wiki';
 $lang['template']              = 'Motyw';
@@ -69,6 +72,7 @@ $lang['useheading']            = 'Pierwszy nagłówek jako tytuł';
 $lang['refcheck']              = 'Sprawdzanie odwołań przed usunięciem pliku';
 $lang['refshow']               = 'Ilość pokazywanych odwołań do pliku';
 $lang['allowdebug']            = 'Debugowanie (niebezpieczne!)';
+$lang['mediarevisions']        = 'Włączyć wersjonowanie multimediów?';
 $lang['usewordblock']          = 'Blokowanie spamu na podstawie słów';
 $lang['indexdelay']            = 'Okres indeksowania w sekundach';
 $lang['relnofollow']           = 'Nagłówek rel="nofollow" dla odnośników zewnętrznych';
@@ -93,7 +97,7 @@ $lang['auth_security_timeout'] = 'Czas wygaśnięcia uwierzytelnienia (w sekunda
 $lang['securecookie']          = 'Czy ciasteczka wysłane do przeglądarki przez HTTPS powinny być przez nią odsyłane też tylko przez HTTPS? Odznacz tę opcję tylko wtedy, gdy logowanie użytkowników jest zabezpieczone SSL, ale przeglądanie stron odbywa się bez zabezpieczenia.';
 $lang['xmlrpc']                = 'Włącz/wyłącz interfejs XML-RPC';
 $lang['xmlrpcuser']            = 'Lista użytkowników i grup, którzy mogą korzystać z protokołu XML-RPC. Nazwy grup i użytkowników rozdziel przecinkami, puste pole oznacza dostęp dla wszystkich.';
-$lang['updatecheck']           = 'Sprawdzanie aktualizacji i bezpieczeństwa. DokuWiki będzie kontaktować się z serwerem splitbrain.org.';
+$lang['updatecheck']           = 'Sprawdzanie aktualizacji i bezpieczeństwa. DokuWiki będzie kontaktować się z serwerem update.dokuwiki.org.';
 $lang['userewrite']            = 'Proste adresy URL';
 $lang['useslash']              = 'Używanie ukośnika jako separatora w adresie URL';
 $lang['usedraft']              = 'Automatyczne zapisywanie szkicu podczas edycji';
@@ -108,13 +112,15 @@ $lang['fetchsize']             = 'Maksymalny rozmiar pliku (w bajtach) jaki moż
 $lang['notify']                = 'Wysyłanie powiadomień na adres e-mail';
 $lang['registernotify']        = 'Prześlij informacje o nowych użytkownikach na adres e-mail';
 $lang['mailfrom']              = 'Adres e-mail tego wiki';
-$lang['gzip_output']           = 'Używaj GZIP dla XHTML';
+$lang['mailprefix']            = 'Prefiks tematu e-mail do automatycznych wiadomości';
+$lang['gzip_output']           = 'Używaj kodowania GZIP dla zawartości XHTML';
 $lang['gdlib']                 = 'Wersja biblioteki GDLib';
 $lang['im_convert']            = 'Ścieżka do programu imagemagick';
 $lang['jpg_quality']           = 'Jakość kompresji JPG (0-100)';
 $lang['subscribers']           = 'Subskrypcja';
 $lang['subscribe_time']        = 'Czas po którym są wysyłane listy subskrypcji i streszczenia (sek.); Powinna być to wartość większa niż podana w zmiennej recent_days.';
 $lang['compress']              = 'Kompresja arkuszy CSS i plików JavaScript';
+$lang['cssdatauri']            = 'Rozmiar w bajtach, poniżej którego odwołania do obrazów w plikach CSS powinny być osadzone bezpośrednio w arkuszu stylów by zmniejszyć ogólne żądania nagłówków HTTP. Technika ta nie działa w IE 7 i poniżej! <code>400</code> do <code>600</code> bajtów jest dobrą wartością. Ustaw <code>0</code> aby wyłączyć.';
 $lang['hidepages']             = 'Ukrywanie stron pasujących do wzorca (wyrażenie regularne)';
 $lang['send404']               = 'Nagłówek "HTTP 404/Page Not Found" dla nieistniejących stron';
 $lang['sitemap']               = 'Okres generowania Google Sitemap (w dniach)';

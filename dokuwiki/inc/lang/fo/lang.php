@@ -4,7 +4,7 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Poul J. Clementsen <poul@diku.dk>
- * @author Einar Petersen einar.petersen@gmail.com
+ * @author Einar Petersen <einar.petersen@gmail.com>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -45,6 +45,7 @@ $lang['btn_draft']             = 'Broyt kladdu';
 $lang['btn_recover']           = 'Endurbygg kladdu';
 $lang['btn_draftdel']          = 'Sletta';
 $lang['btn_revert']            = 'Endurbygg';
+$lang['btn_register']          = 'Melda til';
 $lang['loggedinas']            = 'Ritavur inn sum';
 $lang['user']                  = 'Brúkaranavn';
 $lang['pass']                  = 'Loyniorð';
@@ -54,7 +55,6 @@ $lang['passchk']               = 'Endurtak nýtt loyniorð';
 $lang['remember']              = 'Minst til loyniorðið hjá mær';
 $lang['fullname']              = 'Navn';
 $lang['email']                 = 'T-postur';
-$lang['register']              = 'Melda til';
 $lang['profile']               = 'Brúkara vangamynd';
 $lang['badlogin']              = 'Skeivt brúkaranavn ella loyniorð.';
 $lang['minoredit']             = 'Smærri broytingar';
@@ -90,7 +90,7 @@ $lang['txt_filename']          = 'Sláa inn wikinavn (valfrítt)';
 $lang['txt_overwrt']           = 'Yvurskriva verandi fílu';
 $lang['lockedby']              = 'Fyribils læst av';
 $lang['lockexpire']            = 'Lásið ferð úr gildi kl.';
-$lang['willexpire']            = 'Títt lás á hetta skjalið ferð úr gildi um ein minnutt.\nTrýst á Forskoðan-knappin fyri at sleppa undan trupulleikum.';
+$lang['js']['willexpire']            = 'Títt lás á hetta skjalið ferð úr gildi um ein minnutt.\nTrýst á Forskoðan-knappin fyri at sleppa undan trupulleikum.';
 $lang['js']['notsavedyet']     = 'Tað eru gjørdar broytingar í skjalinum, um tú haldur fram vilja broytingar fara fyri skeytið.
 Ynskir tú at halda fram?';
 $lang['js']['searchmedia']     = 'Leita eftir dátufílum';

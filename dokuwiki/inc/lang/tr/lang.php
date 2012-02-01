@@ -4,11 +4,10 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Selim Farsakoğlu <farsakogluselim@yahoo.de>
- * @author Aydın Coşkuner aydinweb@gmail.com
  * @author Aydın Coşkuner <aydinweb@gmail.com>
- * @author yavuzselim@gmail.com
- * @author Cihan Kahveci kahvecicihan@gmail.com
+ * @author Cihan Kahveci <kahvecicihan@gmail.com>
  * @author Yavuz Selim <yavuzselim@gmail.com>
+ * @author Caleb Maclennan <caleb@alerque.com>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -49,6 +48,7 @@ $lang['btn_draft']             = 'Taslağı düzenle';
 $lang['btn_recover']           = 'Taslağı geri yükle';
 $lang['btn_draftdel']          = 'Taslağı sil';
 $lang['btn_revert']            = 'Geri Yükle';
+$lang['btn_register']          = 'Kayıt ol';
 $lang['loggedinas']            = 'Giriş ismi';
 $lang['user']                  = 'Kullanıcı ismi';
 $lang['pass']                  = 'Parola';
@@ -58,7 +58,6 @@ $lang['passchk']               = 'Bir kez daha girin';
 $lang['remember']              = 'Beni hatırla';
 $lang['fullname']              = 'Tam isim';
 $lang['email']                 = 'E-posta';
-$lang['register']              = 'Kayıt ol';
 $lang['profile']               = 'Kullanıcı Bilgileri';
 $lang['badlogin']              = 'Üzgünüz, Kullanıcı adı veya şifre yanlış oldu.';
 $lang['minoredit']             = 'Küçük Değişiklikler';
@@ -94,7 +93,7 @@ $lang['txt_filename']          = 'Dosya adı (zorunlu değil)';
 $lang['txt_overwrt']           = 'Mevcut dosyanın üstüne yaz';
 $lang['lockedby']              = 'Şu an şunun tarafından kilitli:';
 $lang['lockexpire']            = 'Kilitin açılma tarihi:';
-$lang['willexpire']            = 'Bu sayfayı değiştirme kilidinin süresi yaklaşık bir dakika içinde geçecek.\nÇakışmaları önlemek için önizleme tuşunu kullanarak kilit sayacını sıfırla.';
+$lang['js']['willexpire']            = 'Bu sayfayı değiştirme kilidinin süresi yaklaşık bir dakika içinde geçecek.\nÇakışmaları önlemek için önizleme tuşunu kullanarak kilit sayacını sıfırla.';
 $lang['js']['notsavedyet']     = 'Kaydedilmemiş değişiklikler kaybolacak.
 Devam etmek istiyor musunuz?';
 $lang['js']['searchmedia']     = 'Dosyalar için Ara';
@@ -125,7 +124,6 @@ $lang['js']['nosmblinks']      = 'Windows paylaşımı sadece Microsoft Internet
 $lang['js']['linkwiz']         = 'Bağlantı sihirbazı';
 $lang['js']['linkto']          = 'Bağlantı:';
 $lang['js']['del_confirm']     = 'Bu girişi sil?';
-$lang['js']['mu_btn']          = 'Birden fazla dosyayı bir seferde gönder';
 $lang['rssfailed']             = 'Bu beslemeyi çekerken hata oluştu: ';
 $lang['nothingfound']          = 'Hiçbir şey yok.';
 $lang['mediaselect']           = 'Çokluortam dosyası seçimi';
@@ -186,6 +184,9 @@ $lang['qb_h2']                 = '2. Seviye Başlık';
 $lang['qb_h3']                 = '3. Seviye Başlık';
 $lang['qb_h4']                 = '4. Seviye Başlık';
 $lang['qb_h5']                 = '5. Seviye Başlık';
+$lang['qb_h']                  = 'Başlık';
+$lang['qb_hs']                 = 'Başlığı seç';
+$lang['qb_hplus']              = 'Daha yüksek başlık';
 $lang['qb_link']               = 'İç Bağlantı';
 $lang['qb_extlink']            = 'Dış Bağlantı';
 $lang['qb_hr']                 = 'Yatay Çizgi';
@@ -233,17 +234,4 @@ $lang['i_pol0']                = 'Tamamen Açık Wiki (herkes okuyabilir, yazabi
 $lang['i_pol1']                = 'Açık Wiki (herkes okuyabilir, ancak  sadece üye olanlar yazabilir ve dosya yükleyebilir)';
 $lang['i_pol2']                = 'Kapalı Wiki (sadece üye olanlar okuyabilir, yazabilir ve dosya yükleyebilir)';
 $lang['i_retry']               = 'Tekrar Dene';
-$lang['mu_intro']              = 'Burada birden fazla dosyayı bir seferde yükleyebilirsiniz. Sıraya eklemek için Gözat butonuna tıklayın. Bitince yükleye tıklayın';
-$lang['mu_gridname']           = 'Dosya Adı';
-$lang['mu_gridsize']           = 'Boyutu';
-$lang['mu_gridstat']           = 'Durumu';
-$lang['mu_namespace']          = 'Namespace';
-$lang['mu_browse']             = 'Gözat';
-$lang['mu_toobig']             = 'çok büyük';
-$lang['mu_ready']              = 'yüklenmeye hazır';
-$lang['mu_done']               = 'tamamlandı';
-$lang['mu_fail']               = 'başarısız';
-$lang['mu_authfail']           = 'oturum zaman aşımına uğradı';
-$lang['mu_progress']           = '@PCT@% yüklendi';
-$lang['mu_filetypes']          = 'İzin verilen Dosya Türleri';
 $lang['recent_global']         = '<b>%s</b> namespace\'i içerisinde yapılan değişiklikleri görüntülemektesiniz. Wiki\'deki tüm değişiklikleri de <a href="%s">bu adresten</a> görebilirsiniz. ';

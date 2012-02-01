@@ -55,6 +55,9 @@ class FeedParser_File extends SimplePie_File {
         $this->headers = $this->http->resp_headers;
         $this->body    = $this->http->resp_body;
         $this->error   = $this->http->error;
+
+        $this->method  = SIMPLEPIE_FILE_SOURCE_REMOTE | SIMPLEPIE_FILE_SOURCE_FSOCKOPEN;
+
         return $this->success;
     }
 

@@ -15,6 +15,7 @@ define('RECENTS_SKIP_DELETED',2);
 define('RECENTS_SKIP_MINORS',4);
 define('RECENTS_SKIP_SUBSPACES',8);
 define('RECENTS_MEDIA_CHANGES',16);
+define('RECENTS_MEDIA_PAGES_MIXED',32);
 
 /**
  * Wrapper around htmlspecialchars()
@@ -55,7 +56,7 @@ function stripctl($string){
  * @return  string
  */
 function getSecurityToken(){
-    return md5(auth_cookiesalt().session_id());
+    return md5(auth_cookiesalt().session_id().$_SERVER['REMOTE_USER']);
 }
 
 /**
@@ -242,13 +243,16 @@ function buildURLparams($params, $sep='&amp;'){
  */
 function buildAttributes($params,$skipempty=false){
     $url = '';
+    $white = false;
     foreach($params as $key => $val){
         if($key{0} == '_') continue;
         if($val === '' && $skipempty) continue;
+        if($white) $url .= ' ';
 
         $url .= $key.'="';
         $url .= htmlspecialchars ($val);
-        $url .= '" ';
+        $url .= '"';
+        $white = true;
     }
     return $url;
 }
@@ -281,7 +285,7 @@ function breadcrumbs(){
     $name = noNSorNS($ID);
     if (useHeading('navigation')) {
         // get page title
-        $title = p_get_first_heading($ID,true);
+        $title = p_get_first_heading($ID,METADATA_RENDER_USING_SIMPLE_CACHE);
         if ($title) {
             $name = $title;
         }
@@ -636,7 +640,7 @@ function clientIP($single=false){
     // decide which IP to use, trying to avoid local addresses
     $ip = array_reverse($ip);
     foreach($ip as $i){
-        if(preg_match('/^(127\.|10\.|192\.168\.|172\.((1[6-9])|(2[0-9])|(3[0-1]))\.)/',$i)){
+        if(preg_match('/^(::1|[fF][eE]80:|127\.|10\.|192\.168\.|172\.((1[6-9])|(2[0-9])|(3[0-1]))\.)/',$i)){
             continue;
         }else{
             return $i;
@@ -710,8 +714,8 @@ function checklock($id){
     }
 
     //my own lock
-    $ip = io_readFile($lock);
-    if( ($ip == clientIP()) || ($ip == $_SERVER['REMOTE_USER']) ){
+    list($ip,$session) = explode("\n",io_readFile($lock));
+    if($ip == $_SERVER['REMOTE_USER'] || $ip == clientIP() || $session == session_id()){
         return false;
     }
 
@@ -734,7 +738,7 @@ function lock($id){
     if($_SERVER['REMOTE_USER']){
         io_saveFile($lock,$_SERVER['REMOTE_USER']);
     }else{
-        io_saveFile($lock,clientIP());
+        io_saveFile($lock,clientIP()."\n".session_id());
     }
 }
 
@@ -747,8 +751,8 @@ function lock($id){
 function unlock($id){
     $lock = wikiLockFN($id);
     if(@file_exists($lock)){
-        $ip = io_readFile($lock);
-        if( ($ip == clientIP()) || ($ip == $_SERVER['REMOTE_USER']) ){
+        list($ip,$session) = explode("\n",io_readFile($lock));
+        if($ip == $_SERVER['REMOTE_USER'] || $ip == clientIP() || $session == session_id()){
             @unlink($lock);
             return true;
         }
@@ -801,7 +805,7 @@ function rawWiki($id,$rev=''){
 /**
  * Returns the pagetemplate contents for the ID's namespace
  *
- * @triggers COMMON_PAGE_FROMTEMPLATE
+ * @triggers COMMON_PAGETPL_LOAD
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function pageTemplate($id){
@@ -809,29 +813,50 @@ function pageTemplate($id){
 
     if (is_array($id)) $id = $id[0];
 
-    $path = dirname(wikiFN($id));
-    $tpl = '';
-    if(@file_exists($path.'/_template.txt')){
-        $tpl = io_readFile($path.'/_template.txt');
-    }else{
-        // search upper namespaces for templates
-        $len = strlen(rtrim($conf['datadir'],'/'));
-        while (strlen($path) >= $len){
-            if(@file_exists($path.'/__template.txt')){
-                $tpl = io_readFile($path.'/__template.txt');
-                break;
+    // prepare initial event data
+    $data = array(
+        'id'        => $id,   // the id of the page to be created
+        'tpl'       => '',    // the text used as template
+        'tplfile'   => '',    // the file above text was/should be loaded from
+        'doreplace' => true   // should wildcard replacements be done on the text?
+    );
+
+    $evt = new Doku_Event('COMMON_PAGETPL_LOAD',$data);
+    if($evt->advise_before(true)){
+        // the before event might have loaded the content already
+        if(empty($data['tpl'])){
+            // if the before event did not set a template file, try to find one
+            if(empty($data['tplfile'])){
+                $path = dirname(wikiFN($id));
+                $tpl = '';
+                if(@file_exists($path.'/_template.txt')){
+                    $data['tplfile'] = $path.'/_template.txt';
+                }else{
+                    // search upper namespaces for templates
+                    $len = strlen(rtrim($conf['datadir'],'/'));
+                    while (strlen($path) >= $len){
+                        if(@file_exists($path.'/__template.txt')){
+                            $data['tplfile'] = $path.'/__template.txt';
+                            break;
+                        }
+                        $path = substr($path, 0, strrpos($path, '/'));
+                    }
+                }
             }
-            $path = substr($path, 0, strrpos($path, '/'));
+            // load the content
+            $data['tpl'] = io_readFile($data['tplfile']);
         }
+        if($data['doreplace']) parsePageTemplate($data);
     }
-    $data = compact('tpl', 'id');
-    trigger_event('COMMON_PAGE_FROMTEMPLATE', $data, 'parsePageTemplate', true);
+    $evt->advise_after();
+    unset($evt);
+
     return $data['tpl'];
 }
 
 /**
  * Performs common page template replacements
- * This is the default action for COMMON_PAGE_FROMTEMPLATE
+ * This works on data from COMMON_PAGETPL_LOAD
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
@@ -955,7 +980,7 @@ function saveWikiText($id,$text,$summary,$minor=false){
 
     $file = wikiFN($id);
     $old = @filemtime($file); // from page
-    $wasRemoved = empty($text);
+    $wasRemoved = (trim($text) == ''); // check for empty or whitespace only
     $wasCreated = !@file_exists($file);
     $wasReverted = ($REV==true);
     $newRev = false;
@@ -983,16 +1008,8 @@ function saveWikiText($id,$text,$summary,$minor=false){
         $newRev = saveOldRevision($id);
         // remove empty file
         @unlink($file);
-        // remove old meta info...
-        $mfiles = metaFiles($id);
-        $changelog = metaFN($id, '.changes');
-        $metadata  = metaFN($id, '.meta');
-        $subscribers = metaFN($id, '.mlist');
-        foreach ($mfiles as $mfile) {
-            // but keep per-page changelog to preserve page history, keep subscriber list and keep meta data
-            if (@file_exists($mfile) && $mfile!==$changelog && $mfile!==$metadata && $mfile!==$subscribers) { @unlink($mfile); }
-        }
-        // purge meta data
+        // don't remove old meta info as it should be saved, plugins can use IO_WIKIPAGE_WRITE for removing their metadata...
+        // purge non-persistant meta data
         p_purge_metadata($id);
         $del = true;
         // autoset summary on deletion
@@ -1128,12 +1145,15 @@ function notify($id,$who,$rev='',$summary='',$minor=false,$replace=array()){
         $diff = rawWiki($id);
     }
     $text = str_replace('@DIFF@',$diff,$text);
-    if(utf8_strlen($conf['title']) < 20) {
-        $subject = '['.$conf['title'].'] '.$subject;
+    if(empty($conf['mailprefix'])) {
+        if(utf8_strlen($conf['title']) < 20) {
+            $subject = '['.$conf['title'].'] '.$subject;
+        }else{
+            $subject = '['.utf8_substr($conf['title'], 0, 20).'...] '.$subject;
+        }
     }else{
-        $subject = '['.utf8_substr($conf['title'], 0, 20).'...] '.$subject;
+        $subject = '['.$conf['mailprefix'].'] '.$subject;
     }
-
     mail_send($to,$subject,$text,$conf['mailfrom'],'',$bcc);
 }
 
@@ -1263,6 +1283,21 @@ function dformat($dt=null,$format=''){
 
     $format = str_replace('%f',datetime_h($dt),$format);
     return strftime($format,$dt);
+}
+
+/**
+ * Formats a timestamp as ISO 8601 date
+ *
+ * @author <ungu at terong dot com>
+ * @link http://www.php.net/manual/en/function.date.php#54072
+ */
+function date_iso8601($int_date) {
+   //$int_date: current date in UNIX timestamp
+   $date_mod = date('Y-m-d\TH:i:s', $int_date);
+   $pre_timezone = date('O', $int_date);
+   $time_zone = substr($pre_timezone, 0, 3).":".substr($pre_timezone, 3, 2);
+   $date_mod .= $time_zone;
+   return $date_mod;
 }
 
 /**
@@ -1523,4 +1558,16 @@ function valid_input_set($param, $valid_values, $array, $exc = '') {
     }
 }
 
-//Setup VIM: ex: et ts=2 enc=utf-8 :
+function get_doku_pref($pref, $default) {
+    if (strpos($_COOKIE['DOKU_PREFS'], $pref) !== false) {
+        $parts = explode('#', $_COOKIE['DOKU_PREFS']);
+        for ($i = 0; $i < count($parts); $i+=2){
+            if ($parts[$i] == $pref) {
+                return $parts[$i+1];
+            }
+        }
+    }
+    return $default;
+}
+
+//Setup VIM: ex: et ts=2 :

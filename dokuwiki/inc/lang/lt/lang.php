@@ -7,7 +7,6 @@
  * @author Edmondas Girkantas <eg@zemaitija.net>
  * @author Arūnas Vaitekūnas <aras@fan.lt>
  * @author audrius.klevas@gmail.com
- * @author Arunas Vaitekunas <aras@fan.lt>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -42,14 +41,13 @@ $lang['btn_backlink']          = 'Atgalinės nuorodos';
 $lang['btn_backtomedia']       = 'Atgal į Mediabylos išsirinkimą';
 $lang['btn_subscribe']         = 'Užsisakyti keitimų prenumeratą';
 $lang['btn_unsubscribe']       = 'Atsisakyti keitimų prenumeratos';
-$lang['btn_subscribens']       = 'Užsakyti vardų srities prenumeratą';
-$lang['btn_unsubscribens']     = 'Atsisakyti vardų srities prenumeratos';
 $lang['btn_profile']           = 'Atnaujinti profilį';
 $lang['btn_reset']             = 'Atstata';
 $lang['btn_resendpwd']         = 'Išsiųsti naują slaptažodį';
 $lang['btn_draft']             = 'Redaguoti juodraštį';
 $lang['btn_recover']           = 'Atkurti juodraštį';
 $lang['btn_draftdel']          = 'Šalinti juodraštį';
+$lang['btn_register']          = 'Registruotis';
 $lang['loggedinas']            = 'Prisijungęs kaip';
 $lang['user']                  = 'Vartotojo vardas';
 $lang['pass']                  = 'Slaptažodis';
@@ -59,7 +57,6 @@ $lang['passchk']               = 'dar kartą';
 $lang['remember']              = 'Prisiminti mane';
 $lang['fullname']              = 'Visas vardas';
 $lang['email']                 = 'El. pašto adresas';
-$lang['register']              = 'Registruotis';
 $lang['profile']               = 'Vartotojo profilis';
 $lang['badlogin']              = 'Nurodėte blogą vartotojo vardą arba slaptažodį.';
 $lang['minoredit']             = 'Nedidelis pataisymas';
@@ -93,7 +90,7 @@ $lang['txt_filename']          = 'Įveskite wikivardą (nebūtina)';
 $lang['txt_overwrt']           = 'Perrašyti egzistuojančią bylą';
 $lang['lockedby']              = 'Užrakintas vartotojo';
 $lang['lockexpire']            = 'Užraktas bus nuimtas';
-$lang['willexpire']            = 'Šio puslapio redagavimo užrakto galiojimo laikas baigsis po minutės.\nNorėdami išvengti nesklandumų naudokite peržiūros mygtuką ir užraktas atsinaujins.';
+$lang['js']['willexpire']            = 'Šio puslapio redagavimo užrakto galiojimo laikas baigsis po minutės.\nNorėdami išvengti nesklandumų naudokite peržiūros mygtuką ir užraktas atsinaujins.';
 $lang['js']['notsavedyet']     = "Pakeitimai nebus išsaugoti.\nTikrai tęsti?";
 $lang['rssfailed']             = 'Siunčiant šį feed\'ą įvyko klaida: ';
 $lang['nothingfound']          = 'Paieškos rezultatų nėra.';
@@ -116,7 +113,6 @@ $lang['js']['keepopen']        = 'Pažymėjus palikti langą atvertą';
 $lang['js']['hidedetails']     = 'Paslėpti Detales';
 $lang['js']['nosmblinks']      = 'Nurodos į "Windows shares" veikia tik su Microsoft Internet Explorer naršykle.
 Vis dėlto, jūs galite nukopijuoti šią nuorodą.';
-$lang['js']['mu_btn']          = 'Pateikite kelis failus vienu ypu';
 $lang['mediausage']            = 'Failo nuorodai užrašyti naudokite tokią sintaksę:';
 $lang['mediaview']             = 'Žiūrėti pirminį failą';
 $lang['mediaroot']             = 'pradžia (root)';
@@ -194,14 +190,3 @@ $lang['i_wikiname']            = 'Wiki vardas';
 $lang['i_enableacl']           = 'Įjungti ACL (rekomenduojama)';
 $lang['i_superuser']           = 'Supervartotojas';
 $lang['i_problems']            = 'Instaliavimo metu buvo klaidų, kurios pateiktos žemiau. Tęsti negalima, kol nebus pašalintos priežastys.';
-$lang['mu_gridname']           = 'Failo vardas';
-$lang['mu_gridsize']           = 'Dydis';
-$lang['mu_gridstat']           = 'Statusas';
-$lang['mu_namespace']          = 'Vardų sritis';
-$lang['mu_browse']             = 'Browse';
-$lang['mu_toobig']             = 'perdidelis';
-$lang['mu_ready']              = 'paruošta įkrovimui';
-$lang['mu_done']               = 'užbaigta';
-$lang['mu_fail']               = 'nepavyko';
-$lang['mu_authfail']           = 'sesija nutraukta';
-$lang['mu_filetypes']          = 'Leidžiami failų tipai';

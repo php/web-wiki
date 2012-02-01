@@ -9,6 +9,8 @@
  * @author tomas@valenta.cz
  * @author Marek Sacha <sachamar@fel.cvut.cz>
  * @author Lefty <lefty@multihost.cz>
+ * @author Vojta Beran <xmamut@email.cz>
+ * @author zbynek.krivka@seznam.cz
  */
 $lang['menu']                  = 'Obnova zaspamovaných stránek';
 $lang['filter']                = 'Hledat zaspamované stránky';
@@ -20,5 +22,5 @@ skriptu vyprší čas, budete muset obnovovat po menších blocích
 stránek.';
 $lang['revstop']               = 'Proces obnovy stránek byl úspěšně dokončen.';
 $lang['note1']                 = 'Poznámka: toto vyhledávání je citlivé na velikost písmen';
-$lang['note2']                 = 'Poznámka: tato stránka bude obnovena na poslední verze, která
+$lang['note2']                 = 'Poznámka: tato stránka bude obnovena na poslední verzi, která
 neobsahovala dané spamové slovo <i>%s</i>.';

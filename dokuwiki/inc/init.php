@@ -5,13 +5,12 @@
 
 // start timing Dokuwiki execution
 function delta_time($start=0) {
-    list($usec, $sec) = explode(" ", microtime());
-    return ((float)$usec+(float)$sec)-((float)$start);
+    return microtime(true)-((float)$start);
 }
 define('DOKU_START_TIME', delta_time());
 
 global $config_cascade;
-$config_cascade = '';
+$config_cascade = array();
 
 // if available load a preload config file
 $preload = fullpath(dirname(__FILE__)).'/preload.php';
@@ -31,8 +30,8 @@ if (!defined('DOKU_E_LEVEL') && @file_exists(DOKU_CONF.'report_e_all')) {
     define('DOKU_E_LEVEL', E_ALL);
 }
 if (!defined('DOKU_E_LEVEL')) {
-    if(defined('E_DEPRECATED')){ // since php 5.3
-        error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+    if(defined('E_DEPRECATED')){ // since php 5.3, since php 5.4 E_STRICT is part of E_ALL
+        error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
     }else{
         error_reporting(E_ALL ^ E_NOTICE);
     }
@@ -52,10 +51,9 @@ global $cache_authname;
 global $cache_metadata;
        $cache_metadata = array();
 
-//set the configuration cascade - but only if its not already been set in preload.php
-if (empty($config_cascade)) {
-    include(DOKU_INC.'inc/config_cascade.php');
-}
+// always include 'inc/config_cascade.php'
+// previously in preload.php set fields of $config_cascade will be merged with the defaults
+include(DOKU_INC.'inc/config_cascade.php');
 
 //prepare config array()
 global $conf;
@@ -148,10 +146,11 @@ if ($conf['gzip_output'] &&
 // init session
 if (!headers_sent() && !defined('NOSESSION')){
     session_name("DokuWiki");
+    $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
     if (version_compare(PHP_VERSION, '5.2.0', '>')) {
-        session_set_cookie_params(0,DOKU_REL,'',($conf['securecookie'] && is_ssl()),true);
+        session_set_cookie_params(0,$cookieDir,'',($conf['securecookie'] && is_ssl()),true);
     }else{
-        session_set_cookie_params(0,DOKU_REL,'',($conf['securecookie'] && is_ssl()));
+        session_set_cookie_params(0,$cookieDir,'',($conf['securecookie'] && is_ssl()));
     }
     session_start();
 
@@ -232,7 +231,9 @@ function init_paths(){
     $paths = array('datadir'   => 'pages',
             'olddir'    => 'attic',
             'mediadir'  => 'media',
+            'mediaolddir' => 'media_attic',
             'metadir'   => 'meta',
+            'mediametadir' => 'media_meta',
             'cachedir'  => 'cache',
             'indexdir'  => 'index',
             'lockdir'   => 'locks',
@@ -276,6 +277,7 @@ function init_files(){
     }
 
     # create title index (needs to have same length as page.idx)
+    /*
     $file = $conf['indexdir'].'/title.idx';
     if(!@file_exists($file)){
         $pages = file($conf['indexdir'].'/page.idx');
@@ -290,6 +292,7 @@ function init_files(){
             nice_die("$file is not writable. Check your permissions settings!");
         }
     }
+    */
 }
 
 /**
@@ -419,14 +422,27 @@ function getBaseURL($abs=null){
     if($conf['baseurl']) return rtrim($conf['baseurl'],'/').$dir;
 
     //split hostheader into host and port
-    $addr = explode(':',$_SERVER['HTTP_HOST']);
-    $host = $addr[0];
-    $port = '';
-    if (isset($addr[1])) {
-        $port = $addr[1];
-    } elseif (isset($_SERVER['SERVER_PORT'])) {
+    if(isset($_SERVER['HTTP_HOST'])){
+        $parsed_host = parse_url('http://'.$_SERVER['HTTP_HOST']);
+        $host = $parsed_host['host'];
+        $port = $parsed_host['port'];
+    }elseif(isset($_SERVER['SERVER_NAME'])){
+        $parsed_host = parse_url('http://'.$_SERVER['SERVER_NAME']);
+        $host = $parsed_host['host'];
+        $port = $parsed_host['port'];
+    }else{
+        $host = php_uname('n');
+        $port = '';
+    }
+
+    if(!$port && isset($_SERVER['SERVER_PORT'])) {
         $port = $_SERVER['SERVER_PORT'];
     }
+
+    if(is_null($port)){
+        $port = '';
+    }
+
     if(!is_ssl()){
         $proto = 'http://';
         if ($port == '80') {

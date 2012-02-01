@@ -24,7 +24,7 @@ function checkUpdateMessages(){
     $lm = @filemtime($cf);
 
     // check if new messages needs to be fetched
-    if($lm < time()-(60*60*24) || $lm < @filemtime(DOKU_INC.'doku.php')){
+    if($lm < time()-(60*60*24) || $lm < @filemtime(DOKU_INC.DOKU_SCRIPT)){
         $http = new DokuHTTPClient();
         $http->timeout = 8;
         $data = $http->get(DOKU_MESSAGEURL.$updateVersion);
@@ -66,8 +66,8 @@ function getVersionData(){
             $chunk = fread($fh,2000);
             fclose($fh);
             $chunk = trim($chunk);
-            $chunk = array_pop(explode("\n",$chunk));   //last log line
-            $chunk = array_shift(explode("\t",$chunk)); //strip commit msg
+            $chunk = @array_pop(explode("\n",$chunk));   //last log line
+            $chunk = @array_shift(explode("\t",$chunk)); //strip commit msg
             $chunk = explode(" ",$chunk);
             array_pop($chunk); //strip timezone
             $date = date('Y-m-d',array_pop($chunk));
@@ -175,8 +175,15 @@ function check(){
         msg('Lockdir is not writable',-1);
     }
 
+    if(is_writable(DOKU_CONF)){
+        msg('conf directory is writable',1);
+    }else{
+        msg('conf directory is not writable',-1);
+    }
+
     if($conf['authtype'] == 'plain'){
-        if(is_writable(DOKU_CONF.'users.auth.php')){
+        global $config_cascade;
+        if(is_writable($config_cascade['plainauth.users']['default'])){
             msg('conf/users.auth.php is writable',1);
         }else{
             msg('conf/users.auth.php is not writable',0);
@@ -238,6 +245,36 @@ function check(){
                 Make sure this directory is properly protected
                 (See <a href="http://www.dokuwiki.org/security">security</a>)',-1);
     }
+
+    // Check for corrupted search index
+    $lengths = idx_listIndexLengths();
+    $index_corrupted = false;
+    foreach ($lengths as $length) {
+        if (count(idx_getIndex('w', $length)) != count(idx_getIndex('i', $length))) {
+            $index_corrupted = true;
+            break;
+        }
+    }
+
+    foreach (idx_getIndex('metadata', '') as $index) {
+        if (count(idx_getIndex($index.'_w', '')) != count(idx_getIndex($index.'_i', ''))) {
+            $index_corrupted = true;
+            break;
+        }
+    }
+
+    if ($index_corrupted)
+        msg('The search index is corrupted. It might produce wrong results and most
+                probably needs to be rebuilt. See
+                <a href="http://www.dokuwiki.org/faq:searchindex">faq:searchindex</a>
+                for ways to rebuild the search index.', -1);
+    elseif (!empty($lengths))
+        msg('The search index seems to be working', 1);
+    else
+        msg('The search index is empty. See
+                <a href="http://www.dokuwiki.org/faq:searchindex">faq:searchindex</a>
+                for help on how to fix the search index. If the default indexer
+                isn\'t used or the wiki is actually empty this is normal.');
 }
 
 /**
@@ -258,7 +295,7 @@ function check(){
  * @see    html_msgarea
  */
 function msg($message,$lvl=0,$line='',$file=''){
-    global $MSG;
+    global $MSG, $MSG_shown;
     $errors[-1] = 'error';
     $errors[0]  = 'info';
     $errors[1]  = 'success';
@@ -268,7 +305,7 @@ function msg($message,$lvl=0,$line='',$file=''){
 
     if(!isset($MSG)) $MSG = array();
     $MSG[]=array('lvl' => $errors[$lvl], 'msg' => $message);
-    if(headers_sent()){
+    if(isset($MSG_shown) || headers_sent()){
         if(function_exists('html_msgarea')){
             html_msgarea();
         }else{

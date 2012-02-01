@@ -7,7 +7,7 @@
 * @author Marcus Baker
 * @package Doku
 * @subpackage Lexer
-* @version $Id$
+* @version $Id: lexer.php,v 1.1 2005/03/23 23:14:09 harryf Exp $
 */
 
 /**
@@ -597,4 +597,4 @@ function Doku_Lexer_Escape($str) {
     return preg_replace($chars, $escaped, $str);
 }
 
-//Setup VIM: ex: et ts=4 sw=4 enc=utf-8 :
+//Setup VIM: ex: et ts=4 sw=4 :

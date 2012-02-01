@@ -90,8 +90,8 @@ class ap_manage {
 
             ptln('    <fieldset'.$class.'>');
             ptln('      <legend>'.$plugin.'</legend>');
-            ptln('      <input type="checkbox" class="enable" name="enabled[]" value="'.$plugin.'"'.$checked.$check_disabled.' />');
-            ptln('      <h3 class="legend">'.$plugin.'</h3>');
+            ptln('      <input type="checkbox" class="enable" name="enabled[]" id="dw__p_'.$plugin.'" value="'.$plugin.'"'.$checked.$check_disabled.' />');
+            ptln('      <h3 class="legend"><label for="dw__p_'.$plugin.'">'.$plugin.'</label></h3>');
 
             $this->html_button($plugin, 'info', false, 6);
             if (in_array('settings', $this->manager->functions)) {
@@ -176,7 +176,7 @@ class ap_manage {
     function dir_delete($path) {
         if (!is_string($path) || $path == "") return false;
 
-        if (is_dir($path)) {
+        if (is_dir($path) && !is_link($path)) {
             if (!$dh = @opendir($path)) return false;
 
             while ($f = readdir($dh)) {

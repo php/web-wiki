@@ -14,6 +14,12 @@
  * @author Luis Dantas <luisdantas@gmail.com>
  * @author Sergio Motta sergio@cisne.com.br
  * @author Isaias Masiero Filho <masiero@masiero.org>
+ * @author Balaco Baco <balacobaco@imap.cc>
  */
 $lang['name']                  = 'Retorno de popularidade (pode demorar um pouco para carregar)';
 $lang['submit']                = 'Enviar dados';
+$lang['autosubmit']            = 'Enviar os dados automaticamente uma vez por mês';
+$lang['submissionFailed']      = 'Os dados não puderam ser enviados devido ao seguinte erro:';
+$lang['submitDirectly']        = 'Você pode enviar os dados manualmente, submetendo o formulário baixo.';
+$lang['autosubmitError']       = 'Ocorreu uma falha na última submissão automática, devido ao seguinte erro:';
+$lang['lastSent']              = 'Os dados foram enviados';

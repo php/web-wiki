@@ -43,7 +43,7 @@ require_once(DOKU_INC.'inc/auth.php');
  * require()s their associated php files when an object is instantiated.
  *
  * @author Andreas Gohr <andi@splitbrain.org>
- * @todo   add generic loading of plugins and other generically named classes
+ * @todo   add generic loading of renderers and auth backends
  */
 function load_autoload($name){
     static $classes = null;
@@ -74,6 +74,8 @@ function load_autoload($name){
         'DokuWikiFeedCreator'   => DOKU_INC.'inc/feedcreator.class.php',
         'Doku_Parser_Mode'      => DOKU_INC.'inc/parser/parser.php',
         'SafeFN'                => DOKU_INC.'inc/SafeFN.class.php',
+        'Sitemapper'            => DOKU_INC.'inc/Sitemapper.php',
+        'PassHash'              => DOKU_INC.'inc/PassHash.class.php',
 
         'DokuWiki_Action_Plugin' => DOKU_PLUGIN.'action.php',
         'DokuWiki_Admin_Plugin'  => DOKU_PLUGIN.'admin.php',
@@ -83,6 +85,17 @@ function load_autoload($name){
 
     if(isset($classes[$name])){
         require_once($classes[$name]);
+        return;
+    }
+
+    // Plugin loading
+    if(preg_match('/^(helper|syntax|action|admin|renderer)_plugin_([^_]+)(?:_([^_]+))?$/',
+                  $name, $m)) {
+                //try to load the wanted plugin file
+        // include, but be silent. Maybe some other autoloader has an idea
+        // how to load this class.
+        $c = ((count($m) === 4) ? "/{$m[3]}" : '');
+        @include DOKU_PLUGIN . "{$m[2]}/{$m[1]}$c.php";
         return;
     }
 }

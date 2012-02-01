@@ -11,6 +11,10 @@
  * @author ben <ben@livetom.com>
  * @author lainme <lainme993@gmail.com>
  * @author caii <zhoucaiqi@gmail.com>
+ * @author Hiphen Lee <jacob.b.leung@gmail.com>
+ * @author caii, patent agent in China <zhoucaiqi@gmail.com>
+ * @author lainme993@gmail.com
+ * @author Shuo-Ting Jian <shoting@gmail.com>
  */
 $lang['menu']                  = '配置设置';
 $lang['error']                 = '由于非法参数，设置没有更新。请检查您做的改动并重新提交。
@@ -47,6 +51,7 @@ $lang['lang']                  = '语言';
 $lang['basedir']               = '根目录';
 $lang['baseurl']               = '根路径（URL）';
 $lang['savedir']               = '保存数据的目录';
+$lang['cookiedir']             = 'Cookie 路径。留空以使用 baseurl。';
 $lang['start']                 = '开始页面的名称';
 $lang['title']                 = '维基站点的标题';
 $lang['template']              = '模版';
@@ -109,6 +114,7 @@ $lang['fetchsize']             = 'fetch.php 能从外部下载的最大文件大
 $lang['notify']                = '发送更改通知给这个邮件地址';
 $lang['registernotify']        = '发送新注册用户的信息给这个邮件地址';
 $lang['mailfrom']              = '自动发送邮件时使用的邮件地址';
+$lang['mailprefix']            = '自动发送邮件时使用的邮件地址前缀';
 $lang['gzip_output']           = '对 xhtml 使用 gzip 内容编码';
 $lang['gdlib']                 = 'GD 库版本';
 $lang['im_convert']            = 'ImageMagick 转换工具的路径';
@@ -117,6 +123,7 @@ $lang['subscribers']           = '启用页面订阅支持';
 $lang['subscribe_time']        = '订阅列表和摘要发送的时间间隔（秒）；这应当小于指定的最近更改保留时间（recent_days）。
 ';
 $lang['compress']              = '使 CSS 和 javascript 的输出更紧密';
+$lang['cssdatauri']            = '字节数。CSS 文件引用的图片若小于该字节，则被直接嵌入样式表中来减少 HTTP 请求头的开销。这个技术在 IE 中不起作用。<code>400</code> 到 <code>600</code> 字节是不错的值。设置为 <code>0</code> 则禁用。';
 $lang['hidepages']             = '隐藏匹配的界面（正则表达式）';
 $lang['send404']               = '发送 "HTTP 404/页面没有找到" 错误信息给不存在的页面';
 $lang['sitemap']               = '生成 Google sitemap（天）';

@@ -21,20 +21,6 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
     }
 
     /**
-     * return some info
-     */
-    function getInfo(){
-        return array(
-            'author' => 'Andreas Gohr',
-            'email'  => 'andi@splitbrain.org',
-            'date'   => '2008-12-10',
-            'name'   => 'Revert Manager',
-            'desc'   => 'Allows you to mass revert recent edits',
-            'url'    => 'http://dokuwiki.org/plugin:revert',
-        );
-    }
-
-    /**
      * access for managers
      */
     function forAdminOnly(){
@@ -196,4 +182,4 @@ class admin_plugin_revert extends DokuWiki_Admin_Plugin {
     }
 
 }
-//Setup VIM: ex: et ts=4 enc=utf-8 :
+//Setup VIM: ex: et ts=4 :

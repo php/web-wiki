@@ -3,10 +3,9 @@
  * french language file
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author Guy Brand <gb@isis.u-strasbg.fr>
+ * @author Guy Brand <gb@unistra.fr>
  * @author Delassaux Julien <julien@delassaux.fr>
  * @author Maurice A. LeBlanc <leblancma@cooptel.qc.ca>
- * @author gb@isis.u-strasbg.fr
  * @author stephane.gully@gmail.com
  * @author Guillaume Turri <guillaume.turri@gmail.com>
  * @author Erik Pedersen <erik.pedersen@shaw.ca>
@@ -15,6 +14,9 @@
  * @author Philippe Bajoit <philippe.bajoit@gmail.com>
  * @author Florian Gaub <floriang@floriang.net>
  * @author Samuel Dorsaz samuel.dorsaz@novelion.net
+ * @author Johan Guilbaud <guilbaud.johan@gmail.com>
+ * @author schplurtz@laposte.net
+ * @author skimpax@gmail.com
  */
 $lang['menu']                  = 'Paramètres de configuration';
 $lang['error']                 = 'Paramètres non modifiés en raison d\'une valeur non valide, vérifiez vos réglages et réessayez. <br />Les valeurs erronées sont entourées d\'une bordure rouge.';
@@ -49,6 +51,7 @@ $lang['lang']                  = 'Langue';
 $lang['basedir']               = 'Répertoire de base (ex. : <code>/dokuwiki/</code>). Laisser vide pour une détection automatique.';
 $lang['baseurl']               = 'URL de base. Laisser vide pour une détection automatique.';
 $lang['savedir']               = 'Répertoire de stockage';
+$lang['cookiedir']             = 'Chemin des cookies. Laissez vide pour utiliser l\'URL de base.';
 $lang['start']                 = 'Nom de la page d\'accueil';
 $lang['title']                 = 'Titre du wiki';
 $lang['template']              = 'Modèle';
@@ -60,7 +63,7 @@ $lang['youarehere']            = 'Traces hiérarchiques';
 $lang['typography']            = 'Effectuer des améliorations typographiques';
 $lang['htmlok']                = 'Permettre HTML dans les pages';
 $lang['phpok']                 = 'Permettre PHP dans les pages';
-$lang['dformat']               = 'Format de date (cf. fonction <a href="http://www.php.net/strftime">strftime</a> de PHP)';
+$lang['dformat']               = 'Format de date (cf. fonction <a href="http://fr.php.net/strftime">strftime</a> de PHP)';
 $lang['signature']             = 'Signature';
 $lang['toptoclevel']           = 'Niveau le plus haut à afficher dans la table des matières';
 $lang['tocminheads']           = 'Nombre minimum de titres pour qu\'une table des matières soit construite';
@@ -72,6 +75,7 @@ $lang['useheading']            = 'Utiliser le titre de premier niveau';
 $lang['refcheck']              = 'Vérifier les références de média';
 $lang['refshow']               = 'Nombre de références de média à montrer';
 $lang['allowdebug']            = 'Debug (<strong>Ne l\'activez que si vous en avez besoin !</strong>)';
+$lang['mediarevisions']        = 'Activer les révisions (gestion de versions) des médias';
 $lang['usewordblock']          = 'Bloquer le spam selon les mots utilisés';
 $lang['indexdelay']            = 'Délai avant l\'indexation (en secondes)';
 $lang['relnofollow']           = 'Utiliser rel="nofollow" sur les liens extérieurs';
@@ -96,13 +100,13 @@ $lang['auth_security_timeout'] = 'Délai d\'expiration de sécurité (secondes)'
 $lang['securecookie']          = 'Les cookies mis via HTTPS doivent-ils n\'être envoyé par le navigateur que via HTTPS ? Ne désactivez cette option que si la connexion à votre wiki est sécurisée avec SSL mais que la navigation sur le wiki n\'est pas sécurisée.';
 $lang['xmlrpc']                = 'Activer l\'interface XML-RPC.';
 $lang['xmlrpcuser']            = 'Restreindre l\'accès à XML-RPC aux groupes et utilisateurs indiqués ici. Laisser vide afin que tout le monde y ait accès.';
-$lang['updatecheck']           = 'Vérifier les mises à jour ? DokuWiki doit pouvoir contacter splitbrain.org.';
+$lang['updatecheck']           = 'Vérifier les mises à jour ? DokuWiki doit pouvoir contacter update.dokuwiki.org.';
 $lang['userewrite']            = 'URL esthétiques';
 $lang['useslash']              = 'Utiliser « / » comme séparateur de catégorie dans les URL';
 $lang['usedraft']              = 'Enregistrer automatiquement un brouillon pendant l\'édition';
 $lang['sepchar']               = 'Séparateur de mots dans les noms de page';
 $lang['canonical']             = 'Utiliser des URL canoniques';
-$lang['fnencode']              = 'Méhtode pou r l\'encodage des fichiers non-ASCII';
+$lang['fnencode']              = 'Méthode pour l\'encodage des fichiers non-ASCII';
 $lang['autoplural']            = 'Rechercher les formes plurielles dans les liens';
 $lang['compression']           = 'Méthode de compression pour les fichiers dans attic';
 $lang['cachetime']             = 'Âge maximum d\'un fichier en cache (en secondes)';
@@ -111,6 +115,7 @@ $lang['fetchsize']             = 'Taille maximale (en octets) du fichier que fet
 $lang['notify']                = 'Notifier les modifications à cette adresse de courriel';
 $lang['registernotify']        = 'Envoyer un courriel annonçant les nouveaux utilisateurs enregistrés à cette adresse';
 $lang['mailfrom']              = 'Expéditeur des notifications par courriel du wiki';
+$lang['mailprefix']            = 'Préfixe à utiliser dans les objets des courriels automatiques';
 $lang['gzip_output']           = 'Utiliser Content-Encoding gzip pour XHTML';
 $lang['gdlib']                 = 'Version de GD Lib';
 $lang['im_convert']            = 'Chemin vers l\'outil de conversion d\'ImageMagick';
@@ -118,6 +123,7 @@ $lang['jpg_quality']           = 'Qualité de la compression JPEG (0-100)';
 $lang['subscribers']           = 'Activer l\'abonnement aux pages';
 $lang['subscribe_time']        = 'Délai après lequel les listes d\'abonnement et résumés sont envoyés (en secondes). Devrait être plus petit que le délai précisé dans recent_days.';
 $lang['compress']              = 'Compresser CSS et JavaScript';
+$lang['cssdatauri']            = 'Taille maximale en octets pour inclure dans les feuilles de styles CSS, les images qui y sont référencées. Cette technique minimise les requêtes HTTP. Pour IE, ceci ne fonctionne qu\'à partir de la version 8 !  Valeurs correctes entre <code>400</code> et <code>600</code>. <code>0</code> pour désactiver.';
 $lang['hidepages']             = 'Cacher les pages correspondant à (expression régulière)';
 $lang['send404']               = 'Renvoyer "HTTP 404/Page Non Trouvée" pour les pages introuvables';
 $lang['sitemap']               = 'Fréquence de génération une carte Google du site (en jours)';
@@ -161,7 +167,7 @@ $lang['userewrite_o_2']        = 'Interne à DokuWiki';
 $lang['deaccent_o_0']          = 'off';
 $lang['deaccent_o_1']          = 'supprimer les accents';
 $lang['deaccent_o_2']          = 'convertir en roman';
-$lang['gdlib_o_0']             = 'GD Lib non disponible';
+$lang['gdlib_o_0']             = 'Librairie GD non disponible';
 $lang['gdlib_o_1']             = 'version 1.x';
 $lang['gdlib_o_2']             = 'auto-détectée';
 $lang['rss_type_o_rss']        = 'RSS 0.91';

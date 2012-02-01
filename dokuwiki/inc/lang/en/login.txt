@@ -2,5 +2,3 @@
 
 You are currently not logged in! Enter your authentication credentials below to log in. You need to have cookies enabled to log in.
 
-**Note**: php.net SVN account credentials will work here (username without the @php.net). [[https://master.php.net/forgot.php|Forgotten your SVN password?]]
-

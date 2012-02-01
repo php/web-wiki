@@ -8,7 +8,7 @@
  * lines starting with @author
  *
  * @url http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/languages/messages/MessagesSq.php?view=co
- * @author Leonard Elezi leonard.elezi@depinfo.info
+ * @author Leonard Elezi <leonard.elezi@depinfo.info>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -49,6 +49,7 @@ $lang['btn_draft']             = 'Redakto skicën';
 $lang['btn_recover']           = 'Rekupero skicën';
 $lang['btn_draftdel']          = 'Fshi skicën';
 $lang['btn_revert']            = 'Kthe si më parë';
+$lang['btn_register']          = 'Regjsitrohuni';
 $lang['loggedinas']            = 'Regjistruar si ';
 $lang['user']                  = 'Nofka e përdoruesit:';
 $lang['pass']                  = 'Fjalëkalimi';
@@ -58,7 +59,6 @@ $lang['passchk']               = 'Edhe një herë';
 $lang['remember']              = 'Më mbaj mend';
 $lang['fullname']              = 'Emri i vërtetë';
 $lang['email']                 = 'Adresa e email-it*';
-$lang['register']              = 'Regjsitrohuni';
 $lang['profile']               = 'Profili i përdoruesit';
 $lang['badlogin']              = 'Na vjen keq, emri ose fjalëkalimi është gabim.';
 $lang['minoredit']             = 'Ndryshime të Vogla';
@@ -94,7 +94,7 @@ $lang['txt_filename']          = 'Ngarko si (alternative)';
 $lang['txt_overwrt']           = 'Zëvendëso skedarin ekzistues';
 $lang['lockedby']              = 'Kyçur momentalisht nga';
 $lang['lockexpire']            = 'Kyçi skadon në';
-$lang['willexpire']            = 'Kyçi juaj për redaktimin e kësaj faqeje është duke skaduar.\nPër të shmangur konflikte përdorni butonin Shiko Paraprakisht për të rivendosur kohën e kyçjes.';
+$lang['js']['willexpire']            = 'Kyçi juaj për redaktimin e kësaj faqeje është duke skaduar.\nPër të shmangur konflikte përdorni butonin Shiko Paraprakisht për të rivendosur kohën e kyçjes.';
 $lang['js']['notsavedyet']     = "Ndryshimet e paruajtura do të humbasin.\nVazhdo me të vërtetë?";
 $lang['rssfailed']             = 'Ndoshi një gabim gjatë kapjes së këtij lajmi:';
 $lang['nothingfound']          = 'Nuk u gjet asgjë.';
@@ -120,7 +120,6 @@ $lang['js']['nosmblinks']      = 'Lidhja te Windows shares funksionon vetëm në
 $lang['js']['linkwiz']         = 'Magjistari i Link';
 $lang['js']['linkto']          = 'Lidh tek:';
 $lang['js']['del_confirm']     = 'Fshiji vërtetë objektet e përzgjedhura?';
-$lang['js']['mu_btn']          = 'Ngarko shumë skedarë njëkohësisht';
 $lang['mediausage']            = 'Përdor sintaksën e mëposhtme për të referuar këtë skedar:';
 $lang['mediaview']             = 'Shiko skedarin origjinal';
 $lang['mediaroot']             = 'rrënja';
@@ -233,21 +232,6 @@ $lang['i_pol0']                = 'Wiki i Hapur (lexim, shkrim, ngarkim për këd
 $lang['i_pol1']                = 'Wiki Publike (lexim për këdo, shkrim dhe ngarkim për përdoruesit e regjistruar)';
 $lang['i_pol2']                = 'Wiki e Mbyllur (lexim, shkrim, ngarkim vetëm për përdoruesit e regjistruar)';
 $lang['i_retry']               = 'Provo Përsëri';
-$lang['mu_intro']              = 'Këtu mund të ngarkoni disa skedarë njëkohësisht. Klikoni butonin e shfletuesit për t\'i shtuar ata në radhë. Klikoni Ngarko kur të keni mbaruar.';
-$lang['mu_gridname']           = 'Emri Skedari';
-$lang['mu_gridsize']           = 'Madhësia';
-$lang['mu_gridstat']           = 'Statusi';
-$lang['mu_namespace']          = 'Hapësira Emrit';
-$lang['mu_browse']             = 'Shfleto';
-$lang['mu_toobig']             = 'shumë i/e madhe';
-$lang['mu_ready']              = 'gati për ngarkim';
-$lang['mu_done']               = 'përfundoi';
-$lang['mu_fail']               = 'dështoi';
-$lang['mu_authfail']           = 'sesioni skadoi';
-$lang['mu_progress']           = '@PCT@% u ngarkua';
-$lang['mu_filetypes']          = 'Tipet e Skedarëve të Lejuar';
-$lang['mu_info']               = 'skedarët e ngarkuar';
-$lang['mu_lasterr']            = 'Gabimi i fundit:';
 $lang['recent_global']         = 'Momentalisht jeni duke parë ndryshimet brenda hapësirës së emrit <b>%s</b>. Gjithashtu mund <a href="%s">të shihni ndryshimet më të fundit në të gjithë wiki-n</a>.';
 $lang['years']                 = '%d vite më parë';
 $lang['months']                = '%d muaj më parë';

@@ -4,8 +4,7 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Filip Brcic <brcha@users.sourceforge.net>
- * @author Иван Петровић petrovicivan@ubuntusrbija.org
- * @author Ivan Petrovic <petrovicivan@ubuntusrbija.org>
+ * @author Иван Петровић (Ivan Petrovic) <petrovicivan@ubuntusrbija.org>
  * @author Miroslav Šolti <solti.miroslav@gmail.com>
  */
 $lang['encoding']              = 'utf-8';
@@ -47,6 +46,7 @@ $lang['btn_draft']             = 'Измени нацрт';
 $lang['btn_recover']           = 'Опорави нацрт';
 $lang['btn_draftdel']          = 'Обриши нацрт';
 $lang['btn_revert']            = 'Врати на пређашњу верзију';
+$lang['btn_register']          = 'Региструј се';
 $lang['loggedinas']            = 'Пријављен као';
 $lang['user']                  = 'Корисничко име';
 $lang['pass']                  = 'Лозинка';
@@ -56,7 +56,6 @@ $lang['passchk']               = 'поново';
 $lang['remember']              = 'Запамти ме';
 $lang['fullname']              = 'Име и презиме';
 $lang['email']                 = 'Е-адреса';
-$lang['register']              = 'Региструј се';
 $lang['profile']               = 'Кориснички профил';
 $lang['badlogin']              = 'Извините, није добро корисничко име или шифра.';
 $lang['minoredit']             = 'Мала измена';
@@ -92,7 +91,7 @@ $lang['txt_filename']          = 'Унесите вики-име (опционо
 $lang['txt_overwrt']           = 'Препишите тренутни фајл';
 $lang['lockedby']              = 'Тренутно закључано од стране';
 $lang['lockexpire']            = 'Закључавање истиче';
-$lang['willexpire']            = 'Ваше закључавање за измену ове странице ће да истекне за један минут.\nДа би сте избегли конфликте, искористите дугме за преглед како би сте ресетовали тајмер закључавања.';
+$lang['js']['willexpire']            = 'Ваше закључавање за измену ове странице ће да истекне за један минут.\nДа би сте избегли конфликте, искористите дугме за преглед како би сте ресетовали тајмер закључавања.';
 $lang['js']['notsavedyet']     = 'Несачуване измене ће бити изгубљене.
 Да ли стварно желите да наставите?';
 $lang['js']['searchmedia']     = 'Потражи фајлове';
@@ -124,7 +123,6 @@ $lang['js']['nosmblinks']      = 'Повезивање са Windows дељени
 $lang['js']['linkwiz']         = 'Чаробњак за стварање везе';
 $lang['js']['linkto']          = 'Повежи ка:';
 $lang['js']['del_confirm']     = 'Обриши овај унос?';
-$lang['js']['mu_btn']          = 'Слање више датотека одједном';
 $lang['rssfailed']             = 'Дошло је до грешке приликом преузимања овог довода: ';
 $lang['nothingfound']          = 'Ништа није нађено.';
 $lang['mediaselect']           = 'Избор медијске датотеке';
@@ -256,21 +254,6 @@ $lang['i_pol1']                = 'Јавни вики (читање за све,
 $lang['i_pol2']                = 'Затворени вики (читање, писање и слање датотека само за регистроване кориснике)';
 $lang['i_retry']               = 'Понови';
 $lang['i_license']             = 'Молимо вас, одаберите лиценцу под коју желите да ставите свој садржај:';
-$lang['mu_intro']              = 'Одавде можете послати више датотека одједном. Кликните на дугме Тражи да бисте додали датотеке на листу. Када завршите са одабирањем кликните на Пошаљи.';
-$lang['mu_gridname']           = 'Назив датотеке';
-$lang['mu_gridsize']           = 'Величина';
-$lang['mu_gridstat']           = 'Статус';
-$lang['mu_namespace']          = 'Именски простор';
-$lang['mu_browse']             = 'Тражи';
-$lang['mu_toobig']             = 'превелико';
-$lang['mu_ready']              = 'спремно за слање';
-$lang['mu_done']               = 'завршено';
-$lang['mu_fail']               = 'није успело';
-$lang['mu_authfail']           = 'сесија је истекла';
-$lang['mu_progress']           = '@PCT@% послато';
-$lang['mu_filetypes']          = 'Дозвољени типови датотека';
-$lang['mu_info']               = 'Фајлови послати';
-$lang['mu_lasterr']            = 'Последња грешка:';
 $lang['recent_global']         = 'Тренутно пратите промене у именском простору <b>%s</b>. Такође, можете пратити <a href="%s">прмене на целом викију</a>.';
 $lang['years']                 = 'Пре %d година';
 $lang['months']                = 'Пре %d месеци';

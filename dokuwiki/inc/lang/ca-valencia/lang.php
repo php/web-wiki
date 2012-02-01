@@ -4,7 +4,6 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author Bernat Arlandis i Mañó <berarma@ya.com>
- * @author Bernat Arlandis <berarma@ya.com>
  * @author Bernat Arlandis <berarma@llenguaitecnologia.com>
  */
 $lang['encoding']              = 'utf-8';
@@ -40,8 +39,6 @@ $lang['btn_backlink']          = 'Vínculs remitents';
 $lang['btn_backtomedia']       = 'Tornar a la selecció d\'archius de mijos';
 $lang['btn_subscribe']         = 'Subscriure\'s a la pàgina';
 $lang['btn_unsubscribe']       = 'Desubscriure\'s de la pàgina';
-$lang['btn_subscribens']       = 'Subscriure\'s a l\'espai de noms';
-$lang['btn_unsubscribens']     = 'Desubscriure\'s de l\'espai de noms';
 $lang['btn_profile']           = 'Actualisar perfil';
 $lang['btn_reset']             = 'Reiniciar';
 $lang['btn_resendpwd']         = 'Enviar contrasenya nova';
@@ -49,6 +46,7 @@ $lang['btn_draft']             = 'Editar borrador';
 $lang['btn_recover']           = 'Recuperar borrador';
 $lang['btn_draftdel']          = 'Borrar borrador';
 $lang['btn_revert']            = 'Recuperar';
+$lang['btn_register']          = 'Registrar-se';
 $lang['loggedinas']            = 'Sessió de';
 $lang['user']                  = 'Nom d\'usuari';
 $lang['pass']                  = 'Contrasenya';
@@ -58,7 +56,6 @@ $lang['passchk']               = 'una atra volta';
 $lang['remember']              = 'Recorda\'m';
 $lang['fullname']              = 'Nom complet';
 $lang['email']                 = 'Correu electrònic';
-$lang['register']              = 'Registrar-se';
 $lang['profile']               = 'Perfil d\'usuari';
 $lang['badlogin']              = 'Disculpe, pero el nom d\'usuari o la contrasenya són incorrectes.';
 $lang['minoredit']             = 'Canvis menors';
@@ -94,7 +91,7 @@ $lang['txt_filename']          = 'Enviar com (opcional)';
 $lang['txt_overwrt']           = 'Sobreescriure archius existents';
 $lang['lockedby']              = 'Actualment bloquejat per';
 $lang['lockexpire']            = 'El bloqueig venç a les';
-$lang['willexpire']            = 'El seu bloqueig per a editar esta pàgina vencerà en un minut.\nPer a evitar conflictes utilise el botó de vista prèvia i reiniciarà el contador.';
+$lang['js']['willexpire']            = 'El seu bloqueig per a editar esta pàgina vencerà en un minut.\nPer a evitar conflictes utilise el botó de vista prèvia i reiniciarà el contador.';
 $lang['js']['notsavedyet']     = "Els canvis no guardats es perdran.\n¿Segur que vol continuar?";
 $lang['rssfailed']             = 'Ha ocorregut un erro al solicitar este canal: ';
 $lang['nothingfound']          = 'No s\'ha trobat res.';
@@ -120,7 +117,6 @@ $lang['js']['nosmblinks']      = 'Els vínculs a recursos compartits de Windows 
 $lang['js']['linkwiz']         = 'Assistent de vínculs';
 $lang['js']['linkto']          = 'Vincular a:';
 $lang['js']['del_confirm']     = '¿Realment vol borrar el(s) ítem(s) seleccionat(s)?';
-$lang['js']['mu_btn']          = 'Enviar diversos archius d\'una';
 $lang['mediausage']            = 'Utilise la següent sintaxis per a referenciar est archiu:';
 $lang['mediaview']             = 'Vore l\'archiu original';
 $lang['mediaroot']             = 'base';
@@ -225,21 +221,6 @@ $lang['i_pol0']                = 'Wiki obert (llegir, escriure i enviar tots)';
 $lang['i_pol1']                = 'Wiki públic (llegir tots, escriure i enviar només usuaris registrats)';
 $lang['i_pol2']                = 'Wiki tancat (llegir, escriure i enviar només usuaris registrats)';
 $lang['i_retry']               = 'Reintentar';
-$lang['mu_intro']              = 'Des d\'ací pot enviar diversos archius d\'una volta. Pulse el botó d\'examinar per a afegir-los a la coa. Pulse enviar quan ho tinga.';
-$lang['mu_gridname']           = 'Nom d\'archiu';
-$lang['mu_gridsize']           = 'Tamany';
-$lang['mu_gridstat']           = 'Estat';
-$lang['mu_namespace']          = 'Espai de noms';
-$lang['mu_browse']             = 'Examinar';
-$lang['mu_toobig']             = 'massa gran';
-$lang['mu_ready']              = 'preparat per a enviar';
-$lang['mu_done']               = 'complet';
-$lang['mu_fail']               = 'fallit';
-$lang['mu_authfail']           = 'la sessió ha vençut';
-$lang['mu_progress']           = '@PCT@% enviat';
-$lang['mu_filetypes']          = 'Classes d\'archiu permeses';
-$lang['mu_info']               = 'archius enviats.';
-$lang['mu_lasterr']            = 'Últim erro:';
 $lang['recent_global']         = 'Està veent els canvis dins de l\'espai de noms <b>%s</b>. També pot <a href="%s">vore els canvis recents en el wiki sancer</a>.';
 $lang['years']                 = 'fa %d anys';
 $lang['months']                = 'fa %d mesos';

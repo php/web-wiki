@@ -221,7 +221,7 @@ if (tpl_pagetitle($ID,true) !== 'start') {
 
 <div id="pagefooter">
  <div id="copyright">
-  <a href="http://php.net/copyright.php">Copyright &copy; 2001-2010 The PHP Group</a><br />
+  <a href="http://php.net/copyright.php">Copyright &copy; 2001-<?php echo date('Y');?> The PHP Group</a><br />
   All rights reserved.
  </div>
  <br />

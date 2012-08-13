@@ -248,6 +248,10 @@ function mail_encode_address($string,$header='',$names=true){
  * @return  bool          true if address is valid
  */
 function mail_isvalid($email){
+    // temporary solution for the wiki reg spammer 
+    if ($email == 'sample@email.tst') {
+        return false;
+    }
     $validator = new EmailAddressValidator;
     $validator->allowLocalAddresses = true;
     return $validator->check_email_address($email);

@@ -10,6 +10,7 @@
 *	@phpcvs	16
 *	@user	1
 rfc:*	@rfc	8
+rfc	@rfc	8
 todo:*	@todo	8
 web:*	@web	8
 pear:*	@pear	8

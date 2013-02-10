@@ -15,5 +15,5 @@ todo:*	@todo	8
 web:*	@web	8
 pear:*	@pear	8
 vcs:*	@vcs	8
-internals/windows:*	@wintendo	8
+internals:windows:*	@wintendo	8
 

@@ -711,6 +711,7 @@ function register(){
 
     if( empty($_POST['login']) ||
         empty($_POST['fullname']) ||
+        empty($_POST['spam']) ||
         empty($_POST['email']) ){
         msg($lang['regmissing'],-1);
         return false;
@@ -734,6 +735,13 @@ function register(){
         msg($lang['regbadmail'],-1);
         return false;
     }
+
+    // make sure the secret spam box was filled out correctly
+    if($_POST['spam'] != "hello") {
+        msg("That wasn't the answer we were expecting",-1);
+        return false;
+    }
+
 
     //okay try to create the user
     if(!$auth->triggerUserMod('create', array($_POST['login'],$pass,$_POST['fullname'],$_POST['email']))){

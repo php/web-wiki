@@ -1258,6 +1258,7 @@ function html_register(){
     }
     $form->addElement(form_makeTextField('fullname', $_POST['fullname'], $lang['fullname'], '', 'block', array('size'=>'50')));
     $form->addElement(form_makeTextField('email', $_POST['email'], $lang['email'], '', 'block', array('size'=>'50')));
+    $form->addElement(form_makeTextField('spam', $_POST['spam'], "Please write 'hello' into this box", '', 'block', array('size'=>'50')));
     $form->addElement(form_makeButton('submit', '', $lang['btn_register']));
     $form->endFieldset();
     html_form('register', $form);

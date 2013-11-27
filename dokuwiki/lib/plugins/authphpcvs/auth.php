@@ -1,28 +1,30 @@
 <?php
 /**
- * master.php.net Login backend with dokuwiki Plaintext authentication fallback
+ * DokuWiki Plugin phpcvs (Auth Component)
+ *
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Lukas Smith <smith@pooteeweet.org>
  */
 
-require_once(dirname(__FILE__).'/plain.class.php');
+// must be run within Dokuwiki
+if(!defined('DOKU_INC')) die();
 
-class auth_phpcvs extends auth_plain {
+class auth_plugin_phpcvs extends DokuWiki_Auth_Plugin {
+
+
     /**
-     * Constructor
-     *
-     * Carry out sanity checks to ensure the object is
-     * able to operate. Set capabilities.
-     *
-     * @author  Christopher Smith <chris@jalakai.co.uk>
+     * Constructor.
      */
-    function auth_phpcvs() {
-      parent::auth_plain();
-      global $conf;
-      $this->cnf = $conf['auth']['phpcvs'];
-      $this->cando['external'] = true;
+    public function __construct() {
+        parent::__construct(); // for compatibility
+
+        global $conf;
+        $this->cnf = $conf['auth']['phpcvs'];
+        $this->cando['external'] = true;
+        $this->success = true;
     }
+
 
   function trustExternal($user,$pass,$sticky=false){
       $silent = false;
@@ -165,4 +167,4 @@ class auth_phpcvs extends auth_plain {
     }
 }
 
-//Setup VIM: ex: et ts=2 enc=utf-8 :
+// vim:ts=4:sw=4:et:

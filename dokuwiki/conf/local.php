@@ -10,7 +10,7 @@
 $conf['title'] = 'PHP Wiki';
 $conf['template'] = 'phpwiki';
 $conf['useacl'] = 1;
-$conf['authtype'] = 'phpcvs';
+$conf['authtype'] = 'authphpcvs';
 $conf['superuser'] = '@admin';
 $conf['manager'] = '@phpcvs';
 $conf['registernotify'] = 'webmaster@php.net';

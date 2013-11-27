@@ -86,63 +86,6 @@ function p_wiki_xhtml($id, $rev='', $excuse=true){
 }
 
 /**
- * Returns starting summary for a page (e.g. the first few
- * paragraphs), marked up in XHTML.
- *
- * If $excuse is true an explanation is returned if the file
- * wasn't found
- *
- * @param string wiki page id
- * @param reference populated with page title from heading or page id
- * @deprecated
- * @author Harry Fuecks <hfuecks@gmail.com>
- */
-function p_wiki_xhtml_summary($id, &$title, $rev='', $excuse=true){
-    $file = wikiFN($id,$rev);
-    $ret  = '';
-
-    //ensure $id is in global $ID (needed for parsing)
-    global $ID;
-    $keep = $ID;
-    $ID   = $id;
-
-    if($rev){
-        if(@file_exists($file)){
-            //no caching on old revisions
-            $ins = p_get_instructions(io_readWikiPage($file,$id,$rev));
-        }elseif($excuse){
-            $ret = p_locale_xhtml('norev');
-            //restore ID (just in case)
-            $ID = $keep;
-            return $ret;
-        }
-
-    }else{
-
-        if(@file_exists($file)){
-            // The XHTML for a summary is not cached so use the instruction cache
-            $ins = p_cached_instructions($file);
-        }elseif($excuse){
-            $ret = p_locale_xhtml('newpage');
-            //restore ID (just in case)
-            $ID = $keep;
-            return $ret;
-        }
-    }
-
-    $ret = p_render('xhtmlsummary',$ins,$info);
-
-    if ( $info['sum_pagetitle'] ) {
-        $title = $info['sum_pagetitle'];
-    } else {
-        $title = $id;
-    }
-
-    $ID = $keep;
-    return $ret;
-}
-
-/**
  * Returns the specified local text in parsed format
  *
  * @author Andreas Gohr <andi@splitbrain.org>
@@ -151,23 +94,6 @@ function p_locale_xhtml($id){
     //fetch parsed locale
     $html = p_cached_output(localeFN($id));
     return $html;
-}
-
-/**
- *     *** DEPRECATED ***
- *
- * use p_cached_output()
- *
- * Returns the given file parsed to XHTML
- *
- * Uses and creates a cachefile
- *
- * @deprecated
- * @author Andreas Gohr <andi@splitbrain.org>
- * @todo   rewrite to use mode instead of hardcoded XHTML
- */
-function p_cached_xhtml($file){
-    return p_cached_output($file);
 }
 
 /**
@@ -206,13 +132,12 @@ function p_cached_output($file, $format='xhtml', $id='') {
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function p_cached_instructions($file,$cacheonly=false,$id='') {
-    global $conf;
     static $run = null;
     if(is_null($run)) $run = array();
 
     $cache = new cache_instructions($id, $file);
 
-    if ($cacheonly || $cache->useCache() || isset($run[$file])) {
+    if ($cacheonly || $cache->useCache() || (isset($run[$file]) && !defined('DOKU_UNITTEST'))) {
         return $cache->retrieveCache();
     } else if (@file_exists($file)) {
         // no cache - do some work
@@ -311,15 +236,18 @@ function p_get_metadata($id, $key='', $render=METADATA_RENDER_USING_CACHE){
             }
         }
         if ($do_render) {
-            ++$render_count;
-            $rendered_pages[$id] = true;
+            if (!defined('DOKU_UNITTEST')) {
+                ++$render_count;
+                $rendered_pages[$id] = true;
+            }
             $old_meta = $meta;
             $meta = p_render_metadata($id, $meta);
             // only update the file when the metadata has been changed
             if ($meta == $old_meta || p_save_metadata($id, $meta)) {
                 // store a timestamp in order to make sure that the cachefile is touched
+                // this timestamp is also stored when the meta data is still the same
                 $cachefile->storeCache(time());
-            } elseif ($meta != $old_meta) {
+            } else {
                 msg('Unable to save metadata file. Hint: disk full; file permissions; safe_mode setting.',-1);
             }
         }
@@ -380,9 +308,18 @@ function p_set_metadata($id, $data, $render=false, $persistent=true){
         if ($key == 'relation'){
 
             foreach ($value as $subkey => $subvalue){
-                $meta['current'][$key][$subkey] = !empty($meta['current'][$key][$subkey]) ? array_merge($meta['current'][$key][$subkey], $subvalue) : $subvalue;
-                if ($persistent)
-                    $meta['persistent'][$key][$subkey] = !empty($meta['persistent'][$key][$subkey]) ? array_merge($meta['persistent'][$key][$subkey], $subvalue) : $subvalue;
+                if(isset($meta['current'][$key][$subkey]) && is_array($meta['current'][$key][$subkey])) {
+                    $meta['current'][$key][$subkey] = array_merge($meta['current'][$key][$subkey], (array)$subvalue);
+                } else {
+                    $meta['current'][$key][$subkey] = $subvalue;
+                }
+                if($persistent) {
+                    if(isset($meta['persistent'][$key][$subkey]) && is_array($meta['persistent'][$key][$subkey])) {
+                        $meta['persistent'][$key][$subkey] = array_merge($meta['persistent'][$key][$subkey], (array)$subvalue);
+                    } else {
+                        $meta['persistent'][$key][$subkey] = $subvalue;
+                    }
+                }
             }
 
             // be careful with some senisitive arrays of $meta
@@ -390,10 +327,10 @@ function p_set_metadata($id, $data, $render=false, $persistent=true){
 
             // these keys, must have subkeys - a legitimate value must be an array
             if (is_array($value)) {
-                $meta['current'][$key] = !empty($meta['current'][$key]) ? array_merge($meta['current'][$key],$value) : $value;
+                $meta['current'][$key] = !empty($meta['current'][$key]) ? array_merge((array)$meta['current'][$key],$value) : $value;
 
                 if ($persistent) {
-                    $meta['persistent'][$key] = !empty($meta['persistent'][$key]) ? array_merge($meta['persistent'][$key],$value) : $value;
+                    $meta['persistent'][$key] = !empty($meta['persistent'][$key]) ? array_merge((array)$meta['persistent'][$key],$value) : $value;
                 }
             }
 
@@ -546,7 +483,7 @@ function p_get_parsermodes(){
 
     //reuse old data
     static $modes = null;
-    if($modes != null){
+    if($modes != null && !defined('DOKU_UNITTEST')){
         return $modes;
     }
 
@@ -563,7 +500,8 @@ function p_get_parsermodes(){
         global $PARSER_MODES;
         $obj = null;
         foreach($pluginlist as $p){
-            if(!$obj =& plugin_load('syntax',$p)) continue; //attempt to load plugin into $obj
+            /** @var DokuWiki_Syntax_Plugin $obj */
+            if(!$obj = plugin_load('syntax',$p)) continue; //attempt to load plugin into $obj
             $PARSER_MODES[$obj->getType()][] = "plugin_$p"; //register mode type
             //add to modes
             $modes[] = array(
@@ -661,7 +599,9 @@ function p_render($mode,$instructions,&$info){
     // Loop through the instructions
     foreach ( $instructions as $instruction ) {
         // Execute the callback against the Renderer
-        call_user_func_array(array(&$Renderer, $instruction[0]),$instruction[1]);
+        if(method_exists($Renderer, $instruction[0])){
+            call_user_func_array(array(&$Renderer, $instruction[0]), $instruction[1] ? $instruction[1] : array());
+        }
     }
 
     //set info array
@@ -673,14 +613,20 @@ function p_render($mode,$instructions,&$info){
     return $Renderer->doc;
 }
 
+/**
+ * @param $mode string Mode of the renderer to get
+ * @return null|Doku_Renderer The renderer
+ */
 function & p_get_renderer($mode) {
+    /** @var Doku_Plugin_Controller $plugin_controller */
     global $conf, $plugin_controller;
 
     $rname = !empty($conf['renderer_'.$mode]) ? $conf['renderer_'.$mode] : $mode;
     $rclass = "Doku_Renderer_$rname";
 
     if( class_exists($rclass) ) {
-        return new $rclass();
+        $Renderer = new $rclass();
+        return $Renderer;
     }
 
     // try default renderer first:
@@ -696,12 +642,9 @@ function & p_get_renderer($mode) {
         $Renderer = new $rclass();
     }else{
         // Maybe a plugin/component is available?
-        list($plugin, $component) = $plugin_controller->_splitName($rname);
-        if (!$plugin_controller->isdisabled($plugin)){
-            $Renderer =& $plugin_controller->load('renderer',$rname);
-        }
+        $Renderer = $plugin_controller->load('renderer',$rname);
 
-        if(is_null($Renderer)){
+        if(!isset($Renderer) || is_null($Renderer)){
             msg("No renderer '$rname' found for mode '$mode'",-1);
             return null;
         }
@@ -721,6 +664,7 @@ function & p_get_renderer($mode) {
  *                                              METADATA_RENDER_USING_CACHE,
  *                                              METADATA_RENDER_UNLIMITED
  *
+ * @return string|null The first heading
  * @author Andreas Gohr <andi@splitbrain.org>
  * @author Michael Hamann <michael@content-space.de>
  */
@@ -735,11 +679,12 @@ function p_get_first_heading($id, $render=METADATA_RENDER_USING_SIMPLE_CACHE){
  * @param  string   $language   language to provide highlighting
  * @param  string   $wrapper    html element to wrap the returned highlighted text
  *
+ * @return string xhtml code
  * @author Christopher Smith <chris@jalakai.co.uk>
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function p_xhtml_cached_geshi($code, $language, $wrapper='pre') {
-    global $conf, $config_cascade;
+    global $conf, $config_cascade, $INPUT;
     $language = strtolower($language);
 
     // remove any leading or trailing blank lines
@@ -747,7 +692,7 @@ function p_xhtml_cached_geshi($code, $language, $wrapper='pre') {
 
     $cache = getCacheName($language.$code,".code");
     $ctime = @filemtime($cache);
-    if($ctime && !$_REQUEST['purge'] &&
+    if($ctime && !$INPUT->bool('purge') &&
             $ctime > filemtime(DOKU_INC.'inc/geshi.php') &&                 // geshi changed
             $ctime > @filemtime(DOKU_INC.'inc/geshi/'.$language.'.php') &&  // language syntax definition changed
             $ctime > filemtime(reset($config_cascade['main']['default']))){ // dokuwiki changed

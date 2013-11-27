@@ -23,7 +23,7 @@ function createToolButton(icon,label,key,id,classname){
         $btn.addClass(classname);
     }
 
-    $btn.attr('title', label);
+    $btn.attr('title', label).attr('aria-controls', 'wiki__text');
     if(key){
         $btn.attr('title', label + ' ['+key.toUpperCase()+']')
             .attr('accessKey', key);
@@ -40,6 +40,9 @@ function createToolButton(icon,label,key,id,classname){
         icon = DOKU_BASE + 'lib/images/toolbar/' + icon;
     }
     $ico.attr('src', icon);
+    $ico.attr('alt', '');
+    $ico.attr('width', 16);
+    $ico.attr('height', 16);
     $btn.append($ico);
 
     // we have to return a DOM object (for compatibility reasons)
@@ -74,6 +77,7 @@ function createPicker(id,props,edid){
     function $makebutton(title) {
         var $btn = jQuery(document.createElement('button'))
             .addClass('pickerbutton').attr('title', title)
+            .attr('aria-controls', edid)
             .bind('click', bind(pickerInsert, title, edid))
             .appendTo($picker);
         return $btn;
@@ -91,6 +95,7 @@ function createPicker(id,props,edid){
             }
             jQuery(document.createElement('img'))
                 .attr('src', item)
+                .attr('alt', '')
                 .appendTo($makebutton(key));
         }else if (typeof item == 'string'){
             // a list of text -> treat as text picker
@@ -130,9 +135,9 @@ function pickerInsert(text,edid){
 function addBtnActionSignature($btn, props, edid) {
     if(typeof SIG != 'undefined' && SIG != ''){
         $btn.bind('click', bind(insertAtCarret,edid,SIG));
-        return true;
+        return edid;
     }
-    return false;
+    return '';
 }
 
 /**

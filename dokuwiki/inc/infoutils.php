@@ -25,11 +25,14 @@ function checkUpdateMessages(){
 
     // check if new messages needs to be fetched
     if($lm < time()-(60*60*24) || $lm < @filemtime(DOKU_INC.DOKU_SCRIPT)){
+        @touch($cf);
+        dbglog("checkUpdateMessages(): downloading messages.txt");
         $http = new DokuHTTPClient();
-        $http->timeout = 8;
+        $http->timeout = 12;
         $data = $http->get(DOKU_MESSAGEURL.$updateVersion);
         io_saveFile($cf,$data);
     }else{
+        dbglog("checkUpdateMessages(): messages.txt up to date");
         $data = io_readFile($cf);
     }
 
@@ -74,7 +77,8 @@ function getVersionData(){
             if($date) $version['date'] = $date;
         }
     }else{
-        $version['date'] = 'unknown';
+        global $updateVersion;
+        $version['date'] = 'update version '.$updateVersion;
         $version['type'] = 'snapshot?';
     }
     return $version;
@@ -103,8 +107,8 @@ function check(){
         msg('DokuWiki version: '.getVersion(),1);
     }
 
-    if(version_compare(phpversion(),'5.1.2','<')){
-        msg('Your PHP version is too old ('.phpversion().' vs. 5.1.2+ needed)',-1);
+    if(version_compare(phpversion(),'5.2.0','<')){
+        msg('Your PHP version is too old ('.phpversion().' vs. 5.2.0+ needed)',-1);
     }else{
         msg('PHP version '.phpversion(),1);
     }
@@ -145,36 +149,6 @@ function check(){
         }
     }
 
-    if(is_writable($conf['datadir'])){
-        msg('Datadir is writable',1);
-    }else{
-        msg('Datadir is not writable',-1);
-    }
-
-    if(is_writable($conf['olddir'])){
-        msg('Attic is writable',1);
-    }else{
-        msg('Attic is not writable',-1);
-    }
-
-    if(is_writable($conf['mediadir'])){
-        msg('Mediadir is writable',1);
-    }else{
-        msg('Mediadir is not writable',-1);
-    }
-
-    if(is_writable($conf['cachedir'])){
-        msg('Cachedir is writable',1);
-    }else{
-        msg('Cachedir is not writable',-1);
-    }
-
-    if(is_writable($conf['lockdir'])){
-        msg('Lockdir is writable',1);
-    }else{
-        msg('Lockdir is not writable',-1);
-    }
-
     if(is_writable(DOKU_CONF)){
         msg('conf directory is writable',1);
     }else{
@@ -203,6 +177,22 @@ function check(){
         msg('mb_string extension not available - PHP only replacements will be used',0);
     }
 
+    if (!UTF8_PREGSUPPORT) {
+        msg('PHP is missing UTF-8 support in Perl-Compatible Regular Expressions (PCRE)', -1);
+    }
+    if (!UTF8_PROPERTYSUPPORT) {
+        msg('PHP is missing Unicode properties support in Perl-Compatible Regular Expressions (PCRE)', -1);
+    }
+
+    $loc = setlocale(LC_ALL, 0);
+    if(!$loc){
+        msg('No valid locale is set for your PHP setup. You should fix this',-1);
+    }elseif(stripos($loc,'utf') === false){
+        msg('Your locale <code>'.hsc($loc).'</code> seems not to be a UTF-8 locale, you should fix this if you encounter problems.',0);
+    }else{
+        msg('Valid locale '.hsc($loc).' found.', 1);
+    }
+
     if($conf['allowdebug']){
         msg('Debugging support is enabled. If you don\'t need it you should set $conf[\'allowdebug\'] = 0',-1);
     }else{
@@ -228,22 +218,6 @@ function check(){
         msg('The current page is writable by you',0);
     }else{
         msg('The current page is not writable by you',0);
-    }
-
-    $check = wl('','',true).'data/_dummy';
-    $http = new DokuHTTPClient();
-    $http->timeout = 6;
-    $res = $http->get($check);
-    if(strpos($res,'data directory') !== false){
-        msg('It seems like the data directory is accessible from the web.
-                Make sure this directory is properly protected
-                (See <a href="http://www.dokuwiki.org/security">security</a>)',-1);
-    }elseif($http->status == 404 || $http->status == 403){
-        msg('The data directory seems to be properly protected',1);
-    }else{
-        msg('Failed to check if the data directory is accessible from the web.
-                Make sure this directory is properly protected
-                (See <a href="http://www.dokuwiki.org/security">security</a>)',-1);
     }
 
     // Check for corrupted search index
@@ -294,17 +268,23 @@ function check(){
  * @author Andreas Gohr <andi@splitbrain.org>
  * @see    html_msgarea
  */
-function msg($message,$lvl=0,$line='',$file=''){
+
+define('MSG_PUBLIC', 0);
+define('MSG_USERS_ONLY', 1);
+define('MSG_MANAGERS_ONLY',2);
+define('MSG_ADMINS_ONLY',4);
+
+function msg($message,$lvl=0,$line='',$file='',$allow=MSG_PUBLIC){
     global $MSG, $MSG_shown;
     $errors[-1] = 'error';
     $errors[0]  = 'info';
     $errors[1]  = 'success';
     $errors[2]  = 'notify';
 
-    if($line || $file) $message.=' ['.basename($file).':'.$line.']';
+    if($line || $file) $message.=' ['.utf8_basename($file).':'.$line.']';
 
     if(!isset($MSG)) $MSG = array();
-    $MSG[]=array('lvl' => $errors[$lvl], 'msg' => $message);
+    $MSG[]=array('lvl' => $errors[$lvl], 'msg' => $message, 'allow' => $allow);
     if(isset($MSG_shown) || headers_sent()){
         if(function_exists('html_msgarea')){
             html_msgarea();
@@ -313,6 +293,42 @@ function msg($message,$lvl=0,$line='',$file=''){
         }
         unset($GLOBALS['MSG']);
     }
+}
+/**
+ * Determine whether the current user is allowed to view the message
+ * in the $msg data structure
+ *
+ * @param  $msg   array    dokuwiki msg structure
+ *                         msg   => string, the message
+ *                         lvl   => int, level of the message (see msg() function)
+ *                         allow => int, flag used to determine who is allowed to see the message
+ *                                       see MSG_* constants
+ */
+function info_msg_allowed($msg){
+    global $INFO, $auth;
+
+    // is the message public? - everyone and anyone can see it
+    if (empty($msg['allow']) || ($msg['allow'] == MSG_PUBLIC)) return true;
+
+    // restricted msg, but no authentication
+    if (empty($auth)) return false;
+
+    switch ($msg['allow']){
+        case MSG_USERS_ONLY:
+            return !empty($INFO['userinfo']);
+
+        case MSG_MANAGERS_ONLY:
+            return $INFO['ismanager'];
+
+        case MSG_ADMINS_ONLY:
+            return $INFO['isadmin'];
+
+        default:
+            trigger_error('invalid msg allow restriction.  msg="'.$msg['msg'].'" allow='.$msg['allow'].'"', E_USER_WARNING);
+            return $INFO['isadmin'];
+    }
+
+    return false;
 }
 
 /**

@@ -15,12 +15,14 @@ class Doku_Renderer_code extends Doku_Renderer {
      *
      * When the correct block was found it exits the script.
      */
-    function code($text, $language = NULL, $filename='' ) {
+    function code($text, $language = null, $filename='' ) {
+        global $INPUT;
         if(!$language) $language = 'txt';
         if(!$filename) $filename = 'snippet.'.$language;
-        $filename = basename($filename);
+        $filename = utf8_basename($filename);
+        $filename = utf8_stripspecials($filename, '_');
 
-        if($this->_codeblock == $_REQUEST['codeblock']){
+        if($this->_codeblock == $INPUT->str('codeblock')){
             header("Content-Type: text/plain; charset=utf-8");
             header("Content-Disposition: attachment; filename=$filename");
             header("X-Robots-Tag: noindex");
@@ -34,7 +36,7 @@ class Doku_Renderer_code extends Doku_Renderer {
     /**
      * Wraps around code()
      */
-    function file($text, $language = NULL, $filename='') {
+    function file($text, $language = null, $filename='') {
         $this->code($text, $language, $filename);
     }
 
@@ -42,7 +44,7 @@ class Doku_Renderer_code extends Doku_Renderer {
      * This should never be reached, if it is send a 404
      */
     function document_end() {
-        header("HTTP/1.0 404 Not Found");
+        http_status(404);
         echo '404 - Not found';
         exit;
     }

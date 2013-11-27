@@ -13,7 +13,7 @@ require_once DOKU_INC.'inc/cliopts.php';
 function usage($action) {
     switch ( $action ) {
         case 'checkout':
-           print "Usage: dwpage.php [opts] checkout <wiki:page> [working_file]
+            print "Usage: dwpage.php [opts] checkout <wiki:page> [working_file]
 
     Checks out a file from the repository, using the wiki id and obtaining
     a lock for the page.
@@ -30,7 +30,7 @@ function usage($action) {
 ";
         break;
         case 'commit':
-           print "Usage: dwpage.php [opts] -m \"Msg\" commit <working_file> <wiki:page>
+            print "Usage: dwpage.php [opts] -m \"Msg\" commit <working_file> <wiki:page>
 
     Checks in the working_file into the repository using the specified
     wiki id, archiving the previous version.
@@ -46,7 +46,7 @@ function usage($action) {
 ";
         break;
         case 'lock':
-           print "Usage: dwpage.php [opts] lock <wiki:page>
+            print "Usage: dwpage.php [opts] lock <wiki:page>
 
     Obtains or updates a lock for a wiki page
 
@@ -59,7 +59,7 @@ function usage($action) {
 ";
         break;
         case 'unlock':
-           print "Usage: dwpage.php [opts] unlock <wiki:page>
+            print "Usage: dwpage.php [opts] unlock <wiki:page>
 
     Removes a lock for a wiki page.
 
@@ -241,7 +241,7 @@ switch ( $OPTS->arg(0) ) {
         $TARGET_FN = $OPTS->arg(2);
 
         if ( empty($TARGET_FN) ) {
-            $TARGET_FN = getcwd().'/'.basename($WIKI_FN);
+            $TARGET_FN = getcwd().'/'.utf8_basename($WIKI_FN);
         }
 
         if ( !file_exists(dirname($TARGET_FN)) ) {

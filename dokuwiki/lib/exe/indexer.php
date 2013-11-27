@@ -16,30 +16,34 @@ if(!defined('NL')) define('NL',"\n");
 
 // check if user abort worked, if yes send output early
 $defer = !@ignore_user_abort() || $conf['broken_iua'];
-if(!$defer){
+$output = $INPUT->has('debug') && $conf['allowdebug'];
+if(!$defer && !$output){
     sendGIF(); // send gif
 }
 
-$ID = cleanID($_REQUEST['id']);
+$ID = cleanID($INPUT->str('id'));
 
 // Catch any possible output (e.g. errors)
-$output = isset($_REQUEST['debug']) && $conf['allowdebug'];
 if(!$output) ob_start();
+else header('Content-Type: text/plain');
 
 // run one of the jobs
 $tmp = array(); // No event data
 $evt = new Doku_Event('INDEXER_TASKS_RUN', $tmp);
 if ($evt->advise_before()) {
-  runIndexer() or
-  runSitemapper() or
-  sendDigest() or
-  runTrimRecentChanges() or
-  runTrimRecentChanges(true) or
-  $evt->advise_after();
+    runIndexer() or
+    runSitemapper() or
+    sendDigest() or
+    runTrimRecentChanges() or
+    runTrimRecentChanges(true) or
+    $evt->advise_after();
 }
-if($defer) sendGIF();
 
-if(!$output) ob_end_clean();
+if(!$output) {
+    ob_end_clean();
+    if($defer) sendGIF();
+}
+
 exit;
 
 // --------------------------------------------------------------------
@@ -54,6 +58,8 @@ exit;
  */
 function runTrimRecentChanges($media_changes = false) {
     global $conf;
+
+    echo "runTrimRecentChanges($media_changes): started".NL;
 
     $fn = ($media_changes ? $conf['media_changelog'] : $conf['changelog']);
 
@@ -70,6 +76,7 @@ function runTrimRecentChanges($media_changes = false) {
             if (count($lines)<=$conf['recent']) {
                 // nothing to trim
                 io_unlock($fn);
+                echo "runTrimRecentChanges($media_changes): finished".NL;
                 return false;
             }
 
@@ -78,19 +85,20 @@ function runTrimRecentChanges($media_changes = false) {
             $out_lines = array();
 
             for ($i=0; $i<count($lines); $i++) {
-              $log = parseChangelogLine($lines[$i]);
-              if ($log === false) continue;                      // discard junk
-              if ($log['date'] < $trim_time) {
-                $old_lines[$log['date'].".$i"] = $lines[$i];     // keep old lines for now (append .$i to prevent key collisions)
-              } else {
-                $out_lines[$log['date'].".$i"] = $lines[$i];     // definitely keep these lines
-              }
+                $log = parseChangelogLine($lines[$i]);
+                if ($log === false) continue;                      // discard junk
+                if ($log['date'] < $trim_time) {
+                    $old_lines[$log['date'].".$i"] = $lines[$i];     // keep old lines for now (append .$i to prevent key collisions)
+                } else {
+                    $out_lines[$log['date'].".$i"] = $lines[$i];     // definitely keep these lines
+                }
             }
 
             if (count($lines)==count($out_lines)) {
               // nothing to trim
               @unlink($fn.'_tmp');
               io_unlock($fn);
+              echo "runTrimRecentChanges($media_changes): finished".NL;
               return false;
             }
 
@@ -114,10 +122,12 @@ function runTrimRecentChanges($media_changes = false) {
             } else {
                 io_unlock($fn);
             }
+            echo "runTrimRecentChanges($media_changes): finished".NL;
             return true;
     }
 
     // nothing done
+    echo "runTrimRecentChanges($media_changes): finished".NL;
     return false;
 }
 
@@ -160,89 +170,20 @@ function runSitemapper(){
  * @author Adrian Lang <lang@cosmocode.de>
  */
 function sendDigest() {
-    echo 'sendDigest(): start'.NL;
+    global $conf;
     global $ID;
-    global $conf;
-    if (!$conf['subscribers']) {
-        return;
+
+    echo 'sendDigest(): started'.NL;
+    if(!actionOK('subscribe')) {
+        echo 'sendDigest(): disabled'.NL;
+        return false;
     }
-    $subscriptions = subscription_find($ID, array('style' => '(digest|list)',
-                                                  'escaped' => true));
-    global $auth;
-    global $lang;
-    global $conf;
-    global $USERINFO;
+    $sub = new Subscription();
+    $sent = $sub->send_bulk($ID);
 
-    // remember current user info
-    $olduinfo = $USERINFO;
-    $olduser  = $_SERVER['REMOTE_USER'];
-
-    foreach($subscriptions as $id => $users) {
-        if (!subscription_lock($id)) {
-            continue;
-        }
-        foreach($users as $data) {
-            list($user, $style, $lastupdate) = $data;
-            $lastupdate = (int) $lastupdate;
-            if ($lastupdate + $conf['subscribe_time'] > time()) {
-                // Less than the configured time period passed since last
-                // update.
-                continue;
-            }
-
-            // Work as the user to make sure ACLs apply correctly
-            $USERINFO = $auth->getUserData($user);
-            $_SERVER['REMOTE_USER'] = $user;
-            if ($USERINFO === false) {
-                continue;
-            }
-
-            if (substr($id, -1, 1) === ':') {
-                // The subscription target is a namespace
-                $changes = getRecentsSince($lastupdate, null, getNS($id));
-            } else {
-                if(auth_quickaclcheck($id) < AUTH_READ) continue;
-
-                $meta = p_get_metadata($id);
-                $changes = array($meta['last_change']);
-            }
-
-            // Filter out pages only changed in small and own edits
-            $change_ids = array();
-            foreach($changes as $rev) {
-                $n = 0;
-                while (!is_null($rev) && $rev['date'] >= $lastupdate &&
-                       ($_SERVER['REMOTE_USER'] === $rev['user'] ||
-                        $rev['type'] === DOKU_CHANGE_TYPE_MINOR_EDIT)) {
-                    $rev = getRevisions($rev['id'], $n++, 1);
-                    $rev = (count($rev) > 0) ? $rev[0] : null;
-                }
-
-                if (!is_null($rev) && $rev['date'] >= $lastupdate) {
-                    // Some change was not a minor one and not by myself
-                    $change_ids[] = $rev['id'];
-                }
-            }
-
-            if ($style === 'digest') {
-                foreach($change_ids as $change_id) {
-                    subscription_send_digest($USERINFO['mail'], $change_id,
-                                             $lastupdate);
-                }
-            } elseif ($style === 'list') {
-                subscription_send_list($USERINFO['mail'], $change_ids, $id);
-            }
-            // TODO: Handle duplicate subscriptions.
-
-            // Update notification time.
-            subscription_set($user, $id, $style, time(), true);
-        }
-        subscription_unlock($id);
-    }
-
-    // restore current user info
-    $USERINFO = $olduinfo;
-    $_SERVER['REMOTE_USER'] = $olduser;
+    echo "sendDigest(): sent $sent mails".NL;
+    echo 'sendDigest(): finished'.NL;
+    return (bool) $sent;
 }
 
 /**
@@ -252,10 +193,6 @@ function sendDigest() {
  * @author Harry Fuecks <fuecks@gmail.com>
  */
 function sendGIF(){
-    if(isset($_REQUEST['debug'])){
-        header('Content-Type: text/plain');
-        return;
-    }
     $img = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAEALAAAAAABAAEAAAIBTAA7');
     header('Content-Type: image/gif');
     header('Content-Length: '.strlen($img));

@@ -32,20 +32,25 @@ if (!defined('PREG_PATTERN_VALID_EMAIL')) define('PREG_PATTERN_VALID_EMAIL', '['
 /**
  * Prepare mailfrom replacement patterns
  *
+ * Also prepares a mailfromnobody config that contains an autoconstructed address
+ * if the mailfrom one is userdependent and this might not be wanted (subscriptions)
+ *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function mail_setup(){
     global $conf;
     global $USERINFO;
 
-    $replace = array();
+    // auto constructed address
+    $host = @parse_url(DOKU_URL,PHP_URL_HOST);
+    if(!$host) $host = 'example.com';
+    $noreply = 'noreply@'.$host;
 
+    $replace = array();
     if(!empty($USERINFO['mail'])){
         $replace['@MAIL@'] = $USERINFO['mail'];
     }else{
-        $host = @parse_url(DOKU_URL,PHP_URL_HOST);
-        if(!$host) $host = 'example.com';
-        $replace['@MAIL@'] = 'noreply@'.$host;
+        $replace['@MAIL@'] = $noreply;
     }
 
     if(!empty($_SERVER['REMOTE_USER'])){
@@ -60,9 +65,18 @@ function mail_setup(){
         $replace['@NAME@'] = '';
     }
 
-    $conf['mailfrom'] = str_replace(array_keys($replace),
-                                    array_values($replace),
-                                    $conf['mailfrom']);
+    // apply replacements
+    $from = str_replace(array_keys($replace),
+                        array_values($replace),
+                        $conf['mailfrom']);
+
+    // any replacements done? set different mailfromnone
+    if($from != $conf['mailfrom']){
+        $conf['mailfromnobody'] = $noreply;
+    }else{
+        $conf['mailfromnobody'] = $from;
+    }
+    $conf['mailfrom'] = $from;
 }
 
 /**
@@ -106,7 +120,7 @@ function _mail_send_action($data) {
 
     // discard mail request if no recipients are available
     if(trim($to) === '' && trim($cc) === '' && trim($bcc) === '') return false;
-    
+
     // end additional code to support event ... original mail_send() code from here
 
     if(defined('MAILHEADER_ASCIIONLY')){
@@ -144,10 +158,6 @@ function _mail_send_action($data) {
 
     $body = mail_quotedprintable_encode($body);
 
-    // TODO: fixme hack .. this needs to be in a plugin or config file
-    if (substr($to, -7) === 'php.net') {
-        $params = '-fnoreply@php.net';
-    }
     if($params == null){
         return @mail($to,$subject,$body,$header);
     }else{
@@ -212,9 +222,9 @@ function mail_encode_address($string,$header='',$names=true){
             if(!utf8_isASCII($text)){
                 // put the quotes outside as in =?UTF-8?Q?"Elan Ruusam=C3=A4e"?= vs "=?UTF-8?Q?Elan Ruusam=C3=A4e?="
                 if (preg_match('/^"(.+)"$/', $text, $matches)) {
-                  $text = '"=?UTF-8?Q?'.mail_quotedprintable_encode($matches[1], 0).'?="';
+                    $text = '"=?UTF-8?Q?'.mail_quotedprintable_encode($matches[1], 0).'?="';
                 } else {
-                  $text = '=?UTF-8?Q?'.mail_quotedprintable_encode($text, 0).'?=';
+                    $text = '=?UTF-8?Q?'.mail_quotedprintable_encode($text, 0).'?=';
                 }
                 // additionally the space character should be encoded as =20 (or each
                 // word QP encoded separately).
@@ -248,10 +258,6 @@ function mail_encode_address($string,$header='',$names=true){
  * @return  bool          true if address is valid
  */
 function mail_isvalid($email){
-    // temporary solution for the wiki reg spammer 
-    if ($email == 'sample@email.tst') {
-        return false;
-    }
     $validator = new EmailAddressValidator;
     $validator->allowLocalAddresses = true;
     return $validator->check_email_address($email);
@@ -278,10 +284,9 @@ function mail_quotedprintable_encode($sText,$maxlen=74,$bEmulate_imap_8bit=true)
         // for EBCDIC safeness encode !"#$@[\]^`{|}~,
         // for complete safeness encode every character :)
         if ($bEmulate_imap_8bit)
-            $sRegExp = '/[^\x20\x21-\x3C\x3E-\x7E]/e';
+            $sRegExp = '/[^\x20\x21-\x3C\x3E-\x7E]/';
 
-        $sReplmt = 'sprintf( "=%02X", ord ( "$0" ) ) ;';
-        $sLine = preg_replace( $sRegExp, $sReplmt, $sLine );
+        $sLine = preg_replace_callback( $sRegExp, 'mail_quotedprintable_encode_callback', $sLine );
 
         // encode x09,x20 at lineends
         {
@@ -324,3 +329,6 @@ function mail_quotedprintable_encode($sText,$maxlen=74,$bEmulate_imap_8bit=true)
     return implode(MAILHEADER_EOL,$aLines);
 }
 
+function mail_quotedprintable_encode_callback($matches){
+    return sprintf( "=%02X", ord ( $matches[0] ) ) ;
+}

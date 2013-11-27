@@ -37,6 +37,11 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
         $this->popularityLastSubmitFile = $conf['cachedir'].'/lastSubmitTime.txt';
     }
 
+    /**
+     * Return methods of this helper
+     *
+     * @return array with methods description
+     */
     function getMethods(){
         $result = array();
         $result[] = array(
@@ -69,7 +74,7 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
 
     /**
      * Check if autosubmit is enabled
-     * @return TRUE if we should send data once a month, FALSE otherwise
+     * @return boolean TRUE if we should send data once a month, FALSE otherwise
      */
     function isAutoSubmitEnabled(){
         return @file_exists($this->autosubmitFile);
@@ -78,12 +83,12 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
     /**
      * Send the data, to the submit url
      * @param string $data The popularity data
-     * @return An empty string if everything worked fine, a string describing the error otherwise
+     * @return string An empty string if everything worked fine, a string describing the error otherwise
      */
     function sendData($data){
         $error = '';
         $httpClient = new DokuHTTPClient();
-        $status = $httpClient->sendRequest($this->submitUrl, $data, 'POST');
+        $status = $httpClient->sendRequest($this->submitUrl, array('data' => $data), 'POST');
         if ( ! $status ){
             $error = $httpClient->error;
         }
@@ -102,7 +107,7 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
 
     /**
      * Gather all information
-     * @return The popularity data as a string
+     * @return string The popularity data as a string
      */
     function gatherAsString(){
         $data = $this->_gather();
@@ -119,19 +124,21 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
 
     /**
      * Gather all information
-     * @return The popularity data as an array
+     * @return array The popularity data as an array
      */
     function _gather(){
         global $conf;
+        /** @var $auth DokuWiki_Auth_Plugin */
         global $auth;
         $data = array();
         $phptime = ini_get('max_execution_time');
         @set_time_limit(0);
+        $pluginInfo = $this->getInfo();
 
         // version
         $data['anon_id'] = md5(auth_cookiesalt());
         $data['version'] = getVersion();
-        $data['popversion'] = $this->version;
+        $data['popversion'] = $pluginInfo['date'];
         $data['language'] = $conf['lang'];
         $data['now']      = time();
         $data['popauto']  = (int) $this->isAutoSubmitEnabled();
@@ -143,7 +150,7 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
 
         // number and size of pages
         $list = array();
-        search($list,$conf['datadir'],array($this,'_search_count'),'','');
+        search($list,$conf['datadir'],array($this,'_search_count'),array('all'=>false),'');
         $data['page_count']    = $list['file_count'];
         $data['page_size']     = $list['file_size'];
         $data['page_biggest']  = $list['file_max'];
@@ -243,6 +250,17 @@ class helper_plugin_popularity extends Dokuwiki_Plugin {
         return $data;
     }
 
+    /**
+     * Callback to search and count the content of directories in DokuWiki
+     *
+     * @param array &$data  Reference to the result data structure
+     * @param string $base  Base usually $conf['datadir']
+     * @param string $file  current file or directory relative to $base
+     * @param string $type  Type either 'd' for directory or 'f' for file
+     * @param int    $lvl   Current recursion depht
+     * @param array  $opts  option array as given to search()
+     * @return bool
+     */
     function _search_count(&$data,$base,$file,$type,$lvl,$opts){
         // traverse
         if($type == 'd'){

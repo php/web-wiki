@@ -22,6 +22,8 @@ var dw_linkwiz = {
         var pos = $editor.position();
 
         // create HTML Structure
+        if(dw_linkwiz.$wiz)
+            return;
         dw_linkwiz.$wiz = jQuery(document.createElement('div'))
                .dialog({
                    autoOpen: false,
@@ -50,9 +52,12 @@ var dw_linkwiz = {
         jQuery(dw_linkwiz.result).css('position', 'relative');
 
         dw_linkwiz.$entry = jQuery('#link__wiz_entry');
+        if(JSINFO.namespace){
+            dw_linkwiz.$entry.val(JSINFO.namespace+':');
+        }
 
         // attach event handlers
-        jQuery('#link__wiz_close').click(dw_linkwiz.hide);
+        jQuery('#link__wiz .ui-dialog-titlebar-close').click(dw_linkwiz.hide);
         dw_linkwiz.$entry.keyup(dw_linkwiz.onEntry);
         jQuery(dw_linkwiz.result).delegate('a', 'click', dw_linkwiz.onResultClick);
     },
@@ -64,7 +69,7 @@ var dw_linkwiz = {
         if(e.keyCode == 37 || e.keyCode == 39){ //left/right
             return true; //ignore
         }
-        if(e.keyCode == 27){
+        if(e.keyCode == 27){ //Escape
             dw_linkwiz.hide();
             e.preventDefault();
             e.stopPropagation();
@@ -102,7 +107,7 @@ var dw_linkwiz = {
     /**
      * Get one of the results by index
      *
-     * @param int result div to return
+     * @param   num int result div to return
      * @returns DOMObject or null
      */
     getResult: function(num){
@@ -113,7 +118,7 @@ var dw_linkwiz = {
     /**
      * Get one of the results by index
      *
-     * @param int result div to return
+     * @param   num int result div to return
      * @returns jQuery object
      */
     $getResult: function(num) {
@@ -232,15 +237,24 @@ var dw_linkwiz = {
            link = ':' + link;
         }
 
-        var so = link.length+3;
-
-        link = '[['+link+'|';
-        if(stxt) {
-            link += stxt;
+        var so = link.length;
+        var eo = 0;
+        if(dw_linkwiz.val){
+            if(dw_linkwiz.val.open) {
+                so += dw_linkwiz.val.open.length;
+                link = dw_linkwiz.val.open+link;
+            }
+            if(stxt) {
+                link += '|'+stxt;
+                so += 1;
+            }
+            if(dw_linkwiz.val.close) {
+                link += dw_linkwiz.val.close;
+                eo = dw_linkwiz.val.close.length;
+            }
         }
-        link += ']]';
 
-        pasteText(sel,link,{startofs: so, endofs: 2});
+        pasteText(sel,link,{startofs: so, endofs: eo});
         dw_linkwiz.hide();
 
         // reset the entry to the parent namespace

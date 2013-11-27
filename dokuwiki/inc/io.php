@@ -18,8 +18,8 @@ if(!defined('DOKU_INC')) die('meh.');
  *
  * @todo use safemode hack
  * @param string $id      - a pageid, the namespace of that id will be tried to deleted
- * @param string $basadir - the config name of the type to delete (datadir or mediadir usally)
- * @returns bool - true if at least one namespace was deleted
+ * @param string $basedir - the config name of the type to delete (datadir or mediadir usally)
+ * @return bool - true if at least one namespace was deleted
  * @author  Andreas Gohr <andi@splitbrain.org>
  * @author Ben Coburn <btcoburn@silicodon.net>
  */
@@ -63,7 +63,7 @@ function io_sweepNS($id,$basedir='datadir'){
  */
 function io_readWikiPage($file, $id, $rev=false) {
     if (empty($rev)) { $rev = false; }
-    $data = array(array($file, false), getNS($id), noNS($id), $rev);
+    $data = array(array($file, true), getNS($id), noNS($id), $rev);
     return trigger_event('IO_WIKIPAGE_READ', $data, '_io_readWikiPage_action', false);
 }
 
@@ -113,6 +113,7 @@ function io_readFile($file,$clean=true){
 
 function bzfile($file){
     $bz = bzopen($file,"r");
+    $str = '';
     while (!feof($bz)){
         //8192 seems to be the maximum buffersize?
         $str = $str . bzread($bz,8192);
@@ -392,7 +393,7 @@ function io_mkdir_p($target){
             return io_mkdir_ftp($dir);
         }else{
             $ret = @mkdir($target,$conf['dmode']); // crawl back up & create dir tree
-            if($ret && $conf['dperm']) chmod($target, $conf['dperm']);
+            if($ret && !empty($conf['dperm'])) chmod($target, $conf['dperm']);
             return $ret;
         }
     }
@@ -473,19 +474,20 @@ function io_download($url,$file,$useAttachment=false,$defaultName='',$maxSize=20
     $http = new DokuHTTPClient();
     $http->max_bodysize = $maxSize;
     $http->timeout = 25; //max. 25 sec
+    $http->keep_alive = false; // we do single ops here, no need for keep-alive
 
     $data = $http->get($url);
     if(!$data) return false;
 
+    $name = '';
     if ($useAttachment) {
-        $name = '';
         if (isset($http->resp_headers['content-disposition'])) {
             $content_disposition = $http->resp_headers['content-disposition'];
             $match=array();
             if (is_string($content_disposition) &&
                     preg_match('/attachment;\s*filename\s*=\s*"([^"]*)"/i', $content_disposition, $match)) {
 
-                $name = basename($match[1]);
+                $name = utf8_basename($match[1]);
             }
 
         }
@@ -527,25 +529,6 @@ function io_rename($from,$to){
     return true;
 }
 
-
-/**
- * Runs an external command and returns its output as string
- *
- * @author Harry Brueckner <harry_b@eml.cc>
- * @author Andreas Gohr <andi@splitbrain.org>
- * @deprecated
- */
-function io_runcmd($cmd){
-    $fh = popen($cmd, "r");
-    if(!$fh) return false;
-    $ret = '';
-    while (!feof($fh)) {
-        $ret .= fread($fh, 8192);
-    }
-    pclose($fh);
-    return $ret;
-}
-
 /**
  * Runs an external command with input and output pipes.
  * Returns the exit code from the process.
@@ -578,8 +561,8 @@ function io_exec($cmd, $input, &$output){
  * @param  string $file    The file to search
  * @param  string $pattern PCRE pattern
  * @param  int    $max     How many lines to return (0 for all)
- * @param  bool   $baxkref When true returns array with backreferences instead of lines
- * @return matching lines or backref, false on error
+ * @param  bool   $backref When true returns array with backreferences instead of lines
+ * @return array matching lines or backref, false on error
  */
 function io_grep($file,$pattern,$max=0,$backref=false){
     $fh = @fopen($file,'r');

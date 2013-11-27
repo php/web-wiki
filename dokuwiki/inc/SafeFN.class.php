@@ -1,17 +1,17 @@
 <?php
 
 /**
- *  Class to safely store UTF-8 in a Filename
+ * Class to safely store UTF-8 in a Filename
  *
- *  Encodes a utf8 string using only the following characters 0-9a-z_.-%
- *  characters 0-9a-z in the original string are preserved, "plain".
- *  all other characters are represented in a substring that starts
- *  with '%' are "converted".
- *  The transition from converted substrings to plain characters is
- *  marked with a '.'
+ * Encodes a utf8 string using only the following characters 0-9a-z_.-%
+ * characters 0-9a-z in the original string are preserved, "plain".
+ * all other characters are represented in a substring that starts
+ * with '%' are "converted".
+ * The transition from converted substrings to plain characters is
+ * marked with a '.'
  *
- *  @author   Christopher Smith
- *  @date     2010-04-02
+ * @author   Christopher Smith <chris@jalakai.co.uk>
+ * @date     2010-04-02
  */
 class SafeFN {
 
@@ -44,7 +44,7 @@ class SafeFN {
      *
      * @author   Christopher Smith <chris@jalakai.co.uk>
      */
-    public function encode($filename) {
+    public static function encode($filename) {
         return self::unicode_to_safe(utf8_to_unicode($filename));
     }
 
@@ -73,15 +73,15 @@ class SafeFN {
      *
      * @author   Christopher Smith <chris@jalakai.co.uk>
      */
-    public function decode($filename) {
+    public static function decode($filename) {
         return unicode_to_utf8(self::safe_to_unicode(strtolower($filename)));
     }
 
-    public function validate_printable_utf8($printable_utf8) {
+    public static function validate_printable_utf8($printable_utf8) {
         return !preg_match('#[\x01-\x1f]#',$printable_utf8);
     }
 
-    public function validate_safe($safe) {
+    public static function validate_safe($safe) {
         return !preg_match('#[^'.self::$plain.self::$post_indicator.self::$pre_indicator.']#',$safe);
     }
 
@@ -93,7 +93,7 @@ class SafeFN {
      *
      * @author   Christopher Smith <chris@jalakai.co.uk>
      */
-    private function unicode_to_safe($unicode) {
+    private static function unicode_to_safe($unicode) {
 
         $safe = '';
         $converted = false;
@@ -126,21 +126,22 @@ class SafeFN {
      *
      * @author   Christopher Smith <chris@jalakai.co.uk>
      */
-    private function safe_to_unicode($safe) {
+    private static function safe_to_unicode($safe) {
 
         $unicode = array();
         $split = preg_split('#(?=['.self::$post_indicator.self::$pre_indicator.'])#',$safe,-1,PREG_SPLIT_NO_EMPTY);
 
         $converted = false;
         foreach ($split as $sub) {
+            $len = strlen($sub);
             if ($sub[0] != self::$pre_indicator) {
                 // plain (unconverted) characters, optionally starting with a post_indicator
                 // set initial value to skip any post_indicator
-                for ($i=($converted?1:0); $i < strlen($sub); $i++) {
+                for ($i=($converted?1:0); $i < $len; $i++) {
                     $unicode[] = ord($sub[$i]);
                 }
                 $converted = false;
-            } else if (strlen($sub)==1) {
+            } else if ($len==1) {
                 // a pre_indicator character in the real data
                 $unicode[] = ord($sub);
                 $converted = true;

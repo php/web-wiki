@@ -161,7 +161,7 @@ class JpegMeta {
             if($info != false) break;
         }
 
-        if($info === false)  $info = $alt;
+        if($info === false)  $info = '';
         if(is_array($info)){
             if(isset($info['val'])){
                 $info = $info['val'];
@@ -874,7 +874,7 @@ class JpegMeta {
     /*************************************************************/
 
     /*************************************************************/
-    function _dispose() {
+    function _dispose($fileName = "") {
         $this->_fileName = $fileName;
 
         $this->_fp = null;
@@ -975,7 +975,7 @@ class JpegMeta {
 
             if ($capture) {
                 if ($length)
-                    $this->_markers[$count]['data'] =& fread($this->_fp, $length);
+                    $this->_markers[$count]['data'] = fread($this->_fp, $length);
                 else
                     $this->_markers[$count]['data'] = "";
             }
@@ -1209,7 +1209,7 @@ class JpegMeta {
     function _parseFileInfo() {
         if (file_exists($this->_fileName) && is_file($this->_fileName)) {
             $this->_info['file'] = array();
-            $this->_info['file']['Name'] = basename($this->_fileName);
+            $this->_info['file']['Name'] = utf8_decodeFN(utf8_basename($this->_fileName));
             $this->_info['file']['Path'] = fullpath($this->_fileName);
             $this->_info['file']['Size'] = filesize($this->_fileName);
             if ($this->_info['file']['Size'] < 1024) {
@@ -1300,7 +1300,7 @@ class JpegMeta {
             }
         } else {
             $this->_info['file'] = array();
-            $this->_info['file']['Name'] = basename($this->_fileName);
+            $this->_info['file']['Name'] = utf8_basename($this->_fileName);
             $this->_info['file']['Url'] = $this->_fileName;
         }
 
@@ -1452,7 +1452,7 @@ class JpegMeta {
             if ($this->_markers[$i]['marker'] == 0xE1) {
                 $signature = $this->_getFixedString($this->_markers[$i]['data'], 0, 29);
                 if ($signature == "http://ns.adobe.com/xap/1.0/\0") {
-                    $data =& substr($this->_markers[$i]['data'], 29);
+                    $data = substr($this->_markers[$i]['data'], 29);
                     break;
                 }
             }
@@ -2183,7 +2183,8 @@ class JpegMeta {
                         }
 
                         while ($j < $count) {
-                            $this->_putString($value, $j * 4, "\0\0\0\0");
+                            $v = "\0\0\0\0";
+                            $this->_putString($value, $j * 4, $v);
                             $j++;
                         }
                         break;
@@ -2206,7 +2207,8 @@ class JpegMeta {
                         }
 
                         while ($j < $count) {
-                            $this->_putString($value, $j * 8, "\0\0\0\0\0\0\0\0");
+                            $v = "\0\0\0\0\0\0\0\0";
+                            $this->_putString($value, $j * 8, $v);
                             $j++;
                         }
                         break;
@@ -2335,7 +2337,7 @@ class JpegMeta {
     function _readIPTC(&$data, $pos = 0) {
         $totalLength = strlen($data);
 
-        $IPTCTags =& $this->_iptcTagNames();
+        $IPTCTags = $this->_iptcTagNames();
 
         while ($pos < ($totalLength - 5)) {
             $signature = $this->_getShort($data, $pos);
@@ -2972,7 +2974,7 @@ class JpegMeta {
             elseif ($c == 62)
                 $ascii .= '&gt;';
             elseif ($c == 32)
-                $ascii .= '&nbsp;';
+                $ascii .= '&#160;';
             elseif ($c > 32)
                 $ascii .= chr($c);
             else

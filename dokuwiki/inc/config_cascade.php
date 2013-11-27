@@ -50,7 +50,6 @@ $config_cascade = array_merge(
             ),
         'userstyle' => array(
             'screen'  => DOKU_CONF.'userstyle.css',
-            'rtl'     => DOKU_CONF.'userrtl.css',
             'print'   => DOKU_CONF.'userprint.css',
             'feed'    => DOKU_CONF.'userfeed.css',
             'all'     => DOKU_CONF.'userall.css',
@@ -64,8 +63,9 @@ $config_cascade = array_merge(
         'plainauth.users' => array(
             'default' => DOKU_CONF.'users.auth.php',
             ),
-        
+
         'plugins' => array(
+            'default'   => array(DOKU_CONF.'plugins.php'),
             'local'     => array(DOKU_CONF.'plugins.local.php'),
             'protected' => array(
                 DOKU_CONF.'plugins.required.php',

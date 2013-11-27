@@ -31,6 +31,7 @@ var dw_mediamanager = {
         var $content, $tree;
         $content = jQuery('#media__content');
         $tree    = jQuery('#media__tree');
+        if(!$tree.length) return;
 
         dw_mediamanager.prepare_content($content);
 
@@ -434,7 +435,7 @@ var dw_mediamanager = {
                 dw_mediamanager.$resizables().resizable('destroy');
 
                 if (update_list) {
-                    dw_mediamanager.list.call(jQuery('input[value="Apply"]')[0]);
+                    dw_mediamanager.list.call(jQuery('#mediamanager__page form.options input[type="submit"]')[0]);
                 }
 
                 $content.html(data);
@@ -494,12 +495,12 @@ var dw_mediamanager = {
                 // set max width of resizable column
                 var widthOtherResizable = widthResizables - jQuery(this).width();
                 var minWidthNonResizable = parseFloat($filePanel.css("min-width"));
-                var maxWidth = widthFull - (widthOtherResizable + minWidthNonResizable);
+                var maxWidth = widthFull - (widthOtherResizable + minWidthNonResizable) - 1;
                 $resizables.resizable( "option", "maxWidth", maxWidth );
 
-                // width of file panel in % = 100% - width of resizables in % 
-                // this calculates with 99.99 and not 100 to overcome rounding errors
-                var relWidthNonResizable = 99.99 - (100 * widthResizables / widthFull);
+                // width of file panel in % = 100% - width of resizables in %
+                // this calculates with 99.9 and not 100 to overcome rounding errors
+                var relWidthNonResizable = 99.9 - (100 * widthResizables / widthFull);
                 // set width of file panel
                 $filePanel.width(relWidthNonResizable+'%');
 
@@ -512,6 +513,8 @@ var dw_mediamanager = {
                         jQuery(this).width(w);
                     });
                 }
+
+                dw_mediamanager.resize();
 
                 dw_mediamanager.opacity_slider();
                 dw_mediamanager.portions_slider();
@@ -699,7 +702,7 @@ var dw_mediamanager = {
         event.preventDefault();
 
         $link = jQuery(this);
-        id = $link.attr('name').substr(2);
+        id = $link.attr('id').substr(2);
 
         if(!opener){
             // if we don't run in popup display example
@@ -917,24 +920,5 @@ var dw_mediamanager = {
         return jQuery.grep(['1', '2', '3', '4'], allowed)[0] || false;
     }
 };
-
-// moved from helpers.js temporarily here
-/**
- * Very simplistic Flash plugin check, probably works for Flash 8 and higher only
- *
- */
-function hasFlash(version){
-    var ver = 0, axo;
-    try{
-        if(navigator.plugins !== null && navigator.plugins.length > 0){
-           ver = navigator.plugins["Shockwave Flash"].description.split(' ')[2].split('.')[0];
-        }else{
-           axo = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
-           ver = axo.GetVariable("$version").split(' ')[1].split(',')[0];
-        }
-    }catch(e){ }
-
-    return ver >= version;
-}
 
 jQuery(dw_mediamanager.init);

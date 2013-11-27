@@ -173,7 +173,7 @@ qq.extend(qq.FileUploaderExtended.prototype, {
 
         if (result.success){
             qq.addClass(item, this._classes.success);
-            $link = '<a href="' + result.link + '" name="h_:' + result.id + '" class="select">' + nameInput.value + '</a>';
+            $link = '<a href="' + result.link + '" id="h_:' + result.id + '" class="select">' + nameInput.value + '</a>';
             jQuery(fileElement).html($link);
 
         } else {
@@ -188,6 +188,7 @@ qq.extend(qq.FileUploaderExtended.prototype, {
             if (i) action = action.substr(0, i);
             var button = '<form method="post" action="' + action + '" id="mediamanager__done_form"><div>';
             button += '<input type="hidden" value="' + result.ns + '" name="ns">';
+            button += '<input type="hidden" value="1" name="recent">';
             button += '<input class="button" type="submit" value="' + LANG.media_done_btn + '"></div></form>';
             jQuery('#mediamanager__uploader').append(button);
         }

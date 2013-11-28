@@ -10,7 +10,7 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 
-class auth_plugin_phpcvs extends DokuWiki_Auth_Plugin {
+class auth_plugin_phpcvs extends auth_plugin_authplain {
 
 
     /**

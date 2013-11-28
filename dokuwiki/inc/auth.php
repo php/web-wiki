@@ -921,11 +921,12 @@ function register() {
     // gather input
     $login    = trim($auth->cleanUser($INPUT->post->str('login')));
     $fullname = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $INPUT->post->str('fullname')));
+    $spam     = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $INPUT->post->str('spam')));
     $email    = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $INPUT->post->str('email')));
     $pass     = $INPUT->post->str('pass');
     $passchk  = $INPUT->post->str('passchk');
 
-    if(empty($login) || empty($fullname) || empty($email)) {
+    if(empty($login) || empty($fullname) || empty($email) || empty($spam)) {
         msg($lang['regmissing'], -1);
         return false;
     }
@@ -945,6 +946,12 @@ function register() {
         msg($lang['regbadmail'], -1);
         return false;
     }
+        // make sure the secret spam box was filled out correctly
+    if($spam != "php-webmaster@lists.php.net") {
+        msg("That wasn't the answer we were expecting",-1);
+        return false;
+    }
+
 
     //okay try to create the user
     if(!$auth->triggerUserMod('create', array($login, $pass, $fullname, $email))) {

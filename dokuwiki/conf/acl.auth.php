@@ -16,6 +16,6 @@ web:*	@web	8
 pear:*	@pear	8
 vcs:*	@vcs	8
 internals:windows:*	@wintendo	8
-usergroups:	@usergroups	8
+usergroups:*	@usergroups	8
 usergroups	@usergroups	8
 

@@ -8,7 +8,7 @@
 
 
 $conf['title'] = 'PHP Wiki';
-$conf['template'] = 'phpwiki';
+$conf['template'] = 'phpnet';
 $conf['useacl'] = 1;
 $conf['authtype'] = 'phpcvs';
 $conf['superuser'] = '@admin';

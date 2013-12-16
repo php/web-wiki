@@ -21,19 +21,24 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
 
         global $conf;
         $this->cnf = $conf['auth']['phpcvs'];
-        $this->cando['external'] = true;
         $this->success = true;
+
+        /* We fallback on the authplain module, so pretend we can do these things */
+        $this->cando['addUser']   = true;
+        $this->cando['delUser']   = true;
+        $this->cando['modLogin']  = true;
+        $this->cando['modPass']   = true;
+        $this->cando['modName']   = true;
+        $this->cando['modMail']   = true;
+        $this->cando['modGroups'] = true;
+        $this->cando['getUsers']     = true;
+        $this->cando['getUserCount'] = true;
     }
 
 
+    /* There is no magic cookie, so don't trust it ! */
   function trustExternal($user,$pass,$sticky=false){
-      $silent = false;
-      if ($user === '' && isset($_COOKIE['MAGIC_COOKIE'])) {
-        list ($user, $pass) = explode(':', base64_decode($_COOKIE['MAGIC_COOKIE']), 2);
-        $sticky = false;
-        $silent = true;
-      }
-      return auth_login($user,$pass,$sticky,$silent);
+      return false;
     }
 
     /**

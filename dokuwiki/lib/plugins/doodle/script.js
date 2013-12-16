@@ -1,7 +1,5 @@
 /**
- * JavsScript methods 
- * for the dokuwiki
- * doodle plugin
+ * JavsScript methods for the dokuwiki doodle plugin
  * 
  * @author  Robert Rackl <spam11@doogie.de>
  * @date    January 2011
@@ -13,10 +11,10 @@
  * @param fullname name of the entry that should be edited
  */
 function editEntry(formId, fullname) {
-  var doodleForm = document.getElementById(formId);
-  doodleForm.formId = formId;
-  doodleForm.edit__entry.value = fullname;
-  doodleForm.submit();
+    var doodleForm = document.getElementById(formId);
+    doodleForm.formId = formId;
+    doodleForm.edit__entry.value = fullname;
+    doodleForm.submit();
 }
                                         
 /** 
@@ -25,8 +23,8 @@ function editEntry(formId, fullname) {
  * @param fullname name of the entry that should be edited
  */
 function deleteEntry(formId, fullname) {
-   var doodleForm = document.getElementById(formId);
-   doodleForm.formId = formId;
-   doodleForm.delete__entry.value = fullname;
-   doodleForm.submit();
+    var doodleForm = document.getElementById(formId);
+    doodleForm.formId = formId;
+    doodleForm.delete__entry.value = fullname;
+    doodleForm.submit();
 }

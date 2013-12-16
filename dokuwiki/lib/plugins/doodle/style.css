@@ -7,3 +7,23 @@ div.dokuwiki table.inline td.notokay {
   background-color: #fcc;
   text-align: center;
 }
+
+.doodle__edit {
+  background:url(../../../lib/images/pencil.png) top right no-repeat;
+  width: 20px;
+  height: 20px;
+  padding: 0 0 0 10px;
+  cursor: pointer;
+  border: 0;
+  color: rgba(0, 0, 0, 0);
+}
+
+.doodle__delete {
+  background:url(../../../lib/images/del.png) top right no-repeat;
+  width: 20px;
+  height: 20px;
+  padding: 0 0 0 10px;
+  cursor: pointer;
+  border: 0;
+  color: rgba(0, 0, 0, 0);
+}

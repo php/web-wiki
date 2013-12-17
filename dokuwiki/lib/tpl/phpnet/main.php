@@ -50,11 +50,11 @@ EXTRA;
 include __DIR__ . "/../../../shared/templates/header.inc";
 ?>
 
+<section class="mainscreen">
     <!--[if lte IE 7 ]><div id="IE7"><![endif]--><!--[if IE 8 ]><div id="IE8"><![endif]-->
     <div id="dokuwiki__site"><div id="dokuwiki__top" class="site <?php echo tpl_classes(); ?> <?php
         echo ($showSidebar) ? 'showSidebar' : ''; ?> <?php echo ($hasSidebar) ? 'hasSidebar' : ''; ?>">
 
-        <?php include('tpl_header.php') ?>
 
         <div class="wrapper group">
 
@@ -80,7 +80,7 @@ include __DIR__ . "/../../../shared/templates/header.inc";
                     <?php tpl_flush() ?>
                     <?php tpl_includeFile('pageheader.html') ?>
                     <!-- wikipage start -->
-                    <?php tpl_content() ?>
+                    <?php tpl_content(false) ?>
                     <!-- wikipage stop -->
                     <?php tpl_includeFile('pagefooter.html') ?>
                 </div>
@@ -130,6 +130,10 @@ include __DIR__ . "/../../../shared/templates/header.inc";
     <div class="no"><?php tpl_indexerWebBug() /* provide DokuWiki housekeeping, required in all templates */ ?></div>
     <div id="screen__mode" class="no"></div><?php /* helper to detect CSS media query in script.js */ ?>
     <!--[if ( lte IE 7 | IE 8 ) ]></div><![endif]-->
+</section>
+<section class="secondscreen">
+<?php tpl_toc() ?>
+</section>
 
 <?php
 include __DIR__ . "/../../../shared/templates/footer.inc";

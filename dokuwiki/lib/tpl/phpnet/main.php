@@ -36,11 +36,8 @@ if (empty($_SERVER['REMOTE_USER'])) {
         array("href" => "?do=profile",  "text" => $name,),
     );
 }
-ob_start();
-tpl_metaheaders();
-$HEAD_RAND = ob_get_contents();
-ob_end_clean();
-$HEAD_RAND .= <<< EXTRA
+$CSS = array("/shared/styles/wiki.css");
+$HEAD_RAND = <<< EXTRA
 <style type="text/css">
 #dokuwiki__site {
     margin: 40px auto;

@@ -228,7 +228,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
         // ----- FORM ACTIONS (only allowed when showing the most recent version of the page, not when editing) -----
         $formId =  'doodle__form__'.cleanID($this->params['title']);
-        if ($ACT == 'show' && $_REQUEST['formId'] == $formId && $can_vote) {
+        if ($ACT == 'show' && $_REQUEST['formId'] == $formId && $REV == false && $can_vote) {
             // ---- cast new vote
             if (!empty($_REQUEST['cast__vote'])) {
                 $this->castVote();

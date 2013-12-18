@@ -31,6 +31,7 @@ if (empty($_SERVER['REMOTE_USER'])) {
 } else {
     $name = hsc($INFO['userinfo']['name']).' ('.hsc($_SERVER['REMOTE_USER']). ')';
     $LINKS = array(
+        array("href" => "?do=edit",     "text" => "Edit this page",),
         array("href" => "?do=admin",    "text" => "Admin",),
         array("href" => "?do=logout",   "text" => "Logout",),
         array("href" => "?do=profile",  "text" => $name,),

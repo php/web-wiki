@@ -130,10 +130,7 @@ include __DIR__ . "/../../../shared/templates/header.inc";
     <div id="screen__mode" class="no"></div><?php /* helper to detect CSS media query in script.js */ ?>
     <!--[if ( lte IE 7 | IE 8 ) ]></div><![endif]-->
 </section>
-<section class="secondscreen">
-<?php tpl_toc() ?>
-</section>
 
-<?php
+<?php $SECONDSCREEN = tpl_toc(true);
 include __DIR__ . "/../../../shared/templates/footer.inc";
 

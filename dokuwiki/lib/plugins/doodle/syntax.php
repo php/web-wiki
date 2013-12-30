@@ -223,7 +223,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         //FIXME: count($choices) may be different from number of choices in $doodle data!
 
         $can_vote = false;
-        if (count(array_intersect(array('admin', 'phpcvs', 'voting'), $INFO['userinfo']['grps'])) > 0) {
+        if ($INFO["userinfo"] && count(array_intersect(array('admin', 'phpcvs', 'voting'), $INFO['userinfo']['grps'])) > 0) {
             $can_vote = true;
         }
         // ----- FORM ACTIONS (only allowed when showing the most recent version of the page, not when editing) -----

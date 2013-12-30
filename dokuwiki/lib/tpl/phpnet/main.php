@@ -50,6 +50,15 @@ EXTRA;
 include __DIR__ . "/../../../shared/templates/header.inc";
 ?>
 
+<section id="breadcrumbs" class="mainscreen">
+<nav>
+<ol>
+<?php foreach(array_slice(breadcrumbs(), -8) as $breadcrumb => $name): ?>
+    <li><?php tpl_link(wl($breadcrumb), hsc($name), 'class="breadcrumbs" title="'.$id.'"')?></li>
+<?php endforeach ?>
+</ol>
+<nav>
+</section>
 <section class="mainscreen">
     <!--[if lte IE 7 ]><div id="IE7"><![endif]--><!--[if IE 8 ]><div id="IE8"><![endif]-->
     <div id="dokuwiki__site"><div id="dokuwiki__top" class="site <?php echo tpl_classes(); ?> <?php

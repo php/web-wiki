@@ -1,5 +1,5 @@
 diff --git a/dokuwiki/lib/plugins/doodle/doodle_template.php b/dokuwiki/lib/plugins/doodle/doodle_template.php
-index 0dafba4..843a7cd 100755
+index 0dafba4..2f0dccf 100755
 --- a/dokuwiki/lib/plugins/doodle/doodle_template.php
 +++ b/dokuwiki/lib/plugins/doodle/doodle_template.php
 @@ -9,6 +9,7 @@
@@ -10,9 +10,14 @@ index 0dafba4..843a7cd 100755
    $c = count($template['choices']);
  ?>
  
-@@ -42,18 +43,30 @@
-           <?php $fullname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
-           <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
+@@ -39,21 +40,33 @@
+ <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
+     <tr>
+         <td class="rightalign">
+-          <?php $fullname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
+-          <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
++          <?php $people_link = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
++          <?php echo $userData['editLinks'].$people_link.$userData['username'] ?>
          </td>
 -        <?php for ($col = 0; $col < $c; $col++) {
 -            echo $userData['choice'][$col];

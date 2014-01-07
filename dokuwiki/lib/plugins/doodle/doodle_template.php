@@ -9,7 +9,6 @@
   global $ID;
 
   $template = $this->template;
-  $is_closed = $this->params['closed'];
   $c = count($template['choices']);
 ?>
 
@@ -40,33 +39,21 @@
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
     <tr>
         <td class="rightalign">
-          <?php $people_link = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
-          <?php echo $userData['editLinks'].$people_link.$userData['username'] ?>
+          <?php $fullname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
+          <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
         </td>
-        <?php
-        if ($is_closed || $INFO['userinfo']['name'] == $fullname) {
-            for ($col = 0; $col < $c; $col++) {
-                echo $userData['choice'][$col];
-            }
-        } else {
-            ?><td class="votehidden" colspan="<?php echo $c ?>">&nbsp;</td><?php
-        }
-        ?>
+        <?php for ($col = 0; $col < $c; $col++) {
+            echo $userData['choice'][$col];
+        } ?>        
     </tr>
 <?php } ?>
  
     <!-- Results / sum per column -->
     <tr>
         <th class="rightalign"><b><?php echo $template['result'] ?></b></th>
-        <?php
-        if ($is_closed) {
-            for ($col = 0; $col < $c; $col++) {
-                ?><th class="centeralign"><b><?php echo $template['count'][$col] ?></b></th><?php
-            }
-        } else {
-            ?><th class="centeralign" colspan="<?php echo $c ?>"><?php echo count($template['doodleData']) ?></th><?php
-        }
-        ?>
+<?php for ($col = 0; $col < $c; $col++) { ?>
+        <th class="centeralign"><b><?php echo $template['count'][$col] ?></b></th>
+<?php } ?>
     </tr>
 
 <?php

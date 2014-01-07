@@ -27,8 +27,3 @@ div.dokuwiki table.inline td.notokay {
   border: 0;
   color: rgba(0, 0, 0, 0);
 }
-
-div.dokuwiki table.inline td.votehidden {
-  background-color: #f3f3f3;
-  text-align: center;
-}

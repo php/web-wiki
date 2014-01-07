@@ -40,8 +40,8 @@
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
     <tr>
         <td class="rightalign">
-          <?php $people_link = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
-          <?php echo $userData['editLinks'].$people_link.$userData['username'] ?>
+          <?php $fullname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
+          <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
         </td>
         <?php
         if ($is_closed || $INFO['userinfo']['name'] == $fullname) {

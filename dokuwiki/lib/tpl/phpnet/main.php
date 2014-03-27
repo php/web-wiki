@@ -57,7 +57,7 @@ include __DIR__ . "/../../../shared/templates/header.inc";
     <li><?php tpl_link(wl($breadcrumb), hsc($name), 'class="breadcrumbs" title="'.$id.'"')?></li>
 <?php endforeach ?>
 </ol>
-<nav>
+</nav>
 </section>
 <section class="mainscreen">
     <!--[if lte IE 7 ]><div id="IE7"><![endif]--><!--[if IE 8 ]><div id="IE8"><![endif]-->

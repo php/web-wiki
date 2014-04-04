@@ -50,7 +50,7 @@ EXTRA;
 include __DIR__ . "/../../../shared/templates/header.inc";
 ?>
 
-<section id="breadcrumbs" class="mainscreen">
+<section id="breadcrumbs">
 <nav>
 <ol>
 <?php foreach(array_slice(breadcrumbs(), -8) as $breadcrumb => $name): ?>

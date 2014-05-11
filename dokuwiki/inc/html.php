@@ -561,15 +561,16 @@ function html_revisions($first=0, $media_id = false){
         $form->addElement(' - ');
         $form->addElement(form_makeOpenTag('span', array('class' => 'user')));
         if($info['user']){
-            $form->addElement('<bdi>'.editorinfo($info['user']).'</bdi>');
             if(auth_ismanager()){
-                $form->addElement(' <bdo dir="ltr">('.$info['ip'].')</bdo>');
+                $form->addElement('<bdi title="'.$info['ip'].'">'.editorinfo($info['user']).'</bdi>:');
+            }
+            else {
+                $form->addElement('<bdi>'.editorinfo($info['user']).'</bdi>:');			
             }
         }else{
-            $form->addElement('<bdo dir="ltr">'.$info['ip'].'</bdo>');
+            $form->addElement('<bdo dir="ltr">'.$info['ip'].'</bdo>:');
         }
         $form->addElement(form_makeCloseTag('span'));
-        $form->addElement(': ');
 
         if ($info['sum']) {
             $form->addElement(form_makeOpenTag('span', array('class' => 'revision_desc')));

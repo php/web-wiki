@@ -1418,34 +1418,7 @@ function shorten($keep, $short, $max, $min = 9, $char = '…') {
  * @author Andy Webber <dokuwiki AT andywebber DOT com>
  */
 function editorinfo($username) {
-    global $conf;
-    global $auth;
-
-    switch($conf['showuseras']) {
-        case 'username':
-        case 'email':
-        case 'email_link':
-            if($auth) $info = $auth->getUserData($username);
-            break;
-        default:
-            return hsc($username);
-    }
-
-    if(isset($info) && $info) {
-        switch($conf['showuseras']) {
-            case 'username':
-                return hsc($info['name']);
-            case 'email':
-                return obfuscate($info['mail']);
-            case 'email_link':
-                $mail = obfuscate($info['mail']);
-                return '<a href="mailto:'.$mail.'">'.$mail.'</a>';
-            default:
-                return hsc($username);
-        }
-    } else {
-        return hsc($username);
-    }
+    return '<a href="//people.php.net/'.$username.'">'.$username.'</a>';
 }
 
 /**

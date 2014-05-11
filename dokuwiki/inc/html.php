@@ -558,13 +558,7 @@ function html_revisions($first=0, $media_id = false){
 
         if ($media_id) $form->addElement(form_makeOpenTag('div'));
 
-        if ($info['sum']) {
-            $form->addElement(form_makeOpenTag('span', array('class' => 'sum')));
-            if (!$media_id) $form->addElement(' – ');
-            $form->addElement('<bdi>'.htmlspecialchars($info['sum']).'</bdi>');
-            $form->addElement(form_makeCloseTag('span'));
-        }
-
+        $form->addElement(' - ');
         $form->addElement(form_makeOpenTag('span', array('class' => 'user')));
         if($info['user']){
             $form->addElement('<bdi>'.editorinfo($info['user']).'</bdi>');
@@ -575,6 +569,18 @@ function html_revisions($first=0, $media_id = false){
             $form->addElement('<bdo dir="ltr">'.$info['ip'].'</bdo>');
         }
         $form->addElement(form_makeCloseTag('span'));
+        $form->addElement(': ');
+
+        if ($info['sum']) {
+            $form->addElement(form_makeOpenTag('span', array('class' => 'revision_desc')));
+            $form->addElement('<bdi>'.htmlspecialchars($info['sum']).'</bdi>');
+            $form->addElement(form_makeCloseTag('span'));
+        }
+        else {
+            $form->addElement(form_makeOpenTag('span', array('class' => 'revision_desc')));
+            $form->addElement('no changes description');
+            $form->addElement(form_makeCloseTag('span'));
+        }
 
         if ($media_id) $form->addElement(form_makeCloseTag('div'));
 

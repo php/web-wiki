@@ -479,13 +479,7 @@ function html_revisions($first=0, $media_id = false){
 
         if ($media_id) $form->addElement(form_makeOpenTag('div'));
 
-        if (!$media_id) {
-            $form->addElement(form_makeOpenTag('span', array('class' => 'sum')));
-            $form->addElement(' – ');
-            $form->addElement(htmlspecialchars($INFO['sum']));
-            $form->addElement(form_makeCloseTag('span'));
-        }
-
+        $form->addElement(' - ');
         $form->addElement(form_makeOpenTag('span', array('class' => 'user')));
         if (!$media_id) $editor = $INFO['editor'];
         else {
@@ -496,8 +490,14 @@ function html_revisions($first=0, $media_id = false){
                 $editor = $revinfo['ip'];
             }
         }
-        $form->addElement((empty($editor))?('('.$lang['external_edit'].')'):editorinfo($editor));
+        $form->addElement((empty($editor))?('('.$lang['external_edit'].')'):editorinfo($editor).':');
         $form->addElement(form_makeCloseTag('span'));
+
+        if (!$media_id) {
+            $form->addElement(form_makeOpenTag('span', array('class' => 'revision_desc')));
+            $form->addElement(htmlspecialchars($INFO['sum']));
+            $form->addElement(form_makeCloseTag('span'));
+        }
 
         $form->addElement('('.$lang['current'].')');
 

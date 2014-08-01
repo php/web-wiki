@@ -18,4 +18,6 @@ vcs:*	@vcs	8
 internals:windows:*	@wintendo	8
 usergroups:*	@usergroups	8
 usergroups	@usergroups	8
+licenses:*	@ALL		0
+licenses:*	@phpcvs		16
 

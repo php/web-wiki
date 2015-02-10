@@ -18,4 +18,5 @@ Approval may take several hours or days.
 
 **Note**: After submitting this registration form, your information (name and email) is sent to the publicly viewable [[http://news.php.net/php.webmaster|php-webmaster]] mailing list, along with your IP address, hostname, and user agent (browser info).
 
+**Be aware** that wiki accout itself doesn't give you voting privileges, according to our [[https://wiki.php.net/rfc/voting#who_can_vote|rules]].
 

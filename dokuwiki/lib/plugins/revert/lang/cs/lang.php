@@ -1,9 +1,8 @@
 <?php
+
 /**
- * Czech language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
+ * 
  * @author Bohumir Zamecnik <bohumir@zamecnik.org>
  * @author Zbynek Krivka <zbynek.krivka@seznam.cz>
  * @author tomas@valenta.cz
@@ -11,6 +10,15 @@
  * @author Lefty <lefty@multihost.cz>
  * @author Vojta Beran <xmamut@email.cz>
  * @author zbynek.krivka@seznam.cz
+ * @author Bohumir Zamecnik <bohumir.zamecnik@gmail.com>
+ * @author Jakub A. Těšínský (j@kub.cz)
+ * @author mkucera66@seznam.cz
+ * @author Zbyněk Křivka <krivka@fit.vutbr.cz>
+ * @author Gerrit Uitslag <klapinklapin@gmail.com>
+ * @author Petr Klíma <qaxi@seznam.cz>
+ * @author Radovan Buroň <radovan@buron.cz>
+ * @author Viktor Zavadil <vzavadil@newps.cz>
+ * @author Jaroslav Lichtblau <jlichtblau@seznam.cz>
  */
 $lang['menu']                  = 'Obnova zaspamovaných stránek';
 $lang['filter']                = 'Hledat zaspamované stránky';

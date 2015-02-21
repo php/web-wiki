@@ -9,11 +9,12 @@
  * @author Emanuel-Emeric Andraşi <em.andrasi@mandrivausers.ro>
  * @author Emanuel-Emeric Andrasi <em.andrasi@mandrivausers.ro>
  * @author Marius OLAR <olarmariusalex@gmail.com>
+ * @author Marius Olar <olarmariusalex@yahoo.com>
  * @author Emanuel-Emeric Andrași <em.andrasi@mandrivausers.ro>
  */
 $lang['admin_acl']             = 'Managementul Listei de Control a Accesului';
-$lang['acl_group']             = 'Grup';
-$lang['acl_user']              = 'Utilizator';
+$lang['acl_group']             = 'Grup:';
+$lang['acl_user']              = 'Utilizator:';
 $lang['acl_perms']             = 'Autorizare pentru';
 $lang['page']                  = 'Pagina';
 $lang['namespace']             = 'Spaţiu de nume';

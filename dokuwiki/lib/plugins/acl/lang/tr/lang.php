@@ -1,17 +1,18 @@
 <?php
+
 /**
- * turkish language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Selim Farsakoğlu <farsakogluselim@yahoo.de>
  * @author Aydın Coşkuner <aydinweb@gmail.com>
  * @author Cihan Kahveci <kahvecicihan@gmail.com>
  * @author Yavuz Selim <yavuzselim@gmail.com>
  * @author Caleb Maclennan <caleb@alerque.com>
+ * @author farukerdemoncel@gmail.com
  */
 $lang['admin_acl']             = 'Erişim Kontrol Listesi (ACL) Yönetimi';
-$lang['acl_group']             = 'Grup';
-$lang['acl_user']              = 'Kullanıcı';
+$lang['acl_group']             = 'Grup:';
+$lang['acl_user']              = 'Kullanıcı:';
 $lang['acl_perms']             = 'Şunun için yetkiler:';
 $lang['page']                  = 'Sayfa';
 $lang['namespace']             = 'Namespace';

@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Italian language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Diego Pierotto ita.translations@tiscali.it
  * @author ita.translations@tiscali.it
  * @author Lorenzo Breda <lbreda@gmail.com>
@@ -9,6 +10,8 @@
  * @author robocap <robocap1@gmail.com>
  * @author Osman Tekin osman.tekin93@hotmail.it
  * @author Jacopo Corbetta <jacopo.corbetta@gmail.com>
+ * @author Matteo Pasotti <matteo@xquiet.eu>
+ * @author snarchio@gmail.com
  */
 $lang['name']                  = 'Raccolta dati sul wiki (può impiegare del tempo per caricarsi)';
 $lang['submit']                = 'Invia dati';

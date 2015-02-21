@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Spanish language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Oscar M. Lage <r0sk10@gmail.com>
  * @author Gabriel Castillo <gch@pumas.ii.unam.mx>
  * @author oliver@samera.com.py
@@ -20,6 +21,8 @@
  * @author emezeta <emezeta@infoprimo.com>
  * @author Oscar Ciudad <oscar@jacho.net>
  * @author Ruben Figols <ruben.figols@gmail.com>
+ * @author Gerardo Zamudio <gerardo@gerardozamudio.net>
+ * @author Mercè López mercelz@gmail.com
  */
 $lang['menu']                  = 'Restaurador';
 $lang['filter']                = 'Buscar páginas con spam';

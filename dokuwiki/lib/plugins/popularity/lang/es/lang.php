@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Spanish language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author oliver@samera.com.py
  * @author Enrico Nicoletto <liverig@gmail.com>
  * @author Manuel Meco <manuel.meco@gmail.com>
@@ -19,6 +20,8 @@
  * @author emezeta <emezeta@infoprimo.com>
  * @author Oscar Ciudad <oscar@jacho.net>
  * @author Ruben Figols <ruben.figols@gmail.com>
+ * @author Gerardo Zamudio <gerardo@gerardozamudio.net>
+ * @author Mercè López mercelz@gmail.com
  */
 $lang['name']                  = 'Retroinformación (Feedback) plugin Popularity';
 $lang['submit']                = 'Enviar datos';

@@ -148,18 +148,22 @@ class auth_plugin_authpgsql extends auth_plugin_authmysql {
      * @param   array $filter    array of field/pattern pairs
      * @return  array userinfo (refer getUserData for internal userinfo details)
      */
-    public function retrieveUsers($first = 0, $limit = 10, $filter = array()) {
+    public function retrieveUsers($first = 0, $limit = 0, $filter = array()) {
         $out = array();
 
         if($this->_openDB()) {
             $this->_lockTables("READ");
             $sql = $this->_createSQLFilter($this->conf['getUsers'], $filter);
-            $sql .= " ".$this->conf['SortOrder']." LIMIT $limit OFFSET $first";
+            $sql .= " ".$this->conf['SortOrder'];
+            if($limit) $sql .= " LIMIT $limit";
+            if($first) $sql .= " OFFSET $first";
             $result = $this->_queryDB($sql);
 
-            foreach($result as $user)
-                if(($info = $this->_getUserInfo($user['user'])))
+            foreach($result as $user) {
+                if(($info = $this->_getUserInfo($user['user']))) {
                     $out[$user['user']] = $info;
+                }
+            }
 
             $this->_unlockTables();
             $this->_closeDB();
@@ -210,7 +214,10 @@ class auth_plugin_authpgsql extends auth_plugin_authmysql {
             $sql = str_replace('%{user}', addslashes($user), $sql);
             $sql = str_replace('%{gid}', addslashes($gid), $sql);
             $sql = str_replace('%{group}', addslashes($group), $sql);
-            if($this->_modifyDB($sql) !== false) return true;
+            if($this->_modifyDB($sql) !== false) {
+                $this->_flushUserInfoCache($user);
+                return true;
+            }
 
             if($newgroup) { // remove previously created group on error
                 $sql = str_replace('%{gid}', addslashes($gid), $this->conf['delGroup']);
@@ -265,6 +272,7 @@ class auth_plugin_authpgsql extends auth_plugin_authmysql {
                 }
 
                 if($gid !== false){
+                    $this->_flushUserInfoCache($user);
                     return true;
                 } else {
                     /* remove the new user and all group relations if a group can't

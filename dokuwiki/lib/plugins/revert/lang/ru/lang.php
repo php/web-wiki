@@ -1,6 +1,8 @@
 <?php
+
 /**
- * russian language file
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Denis Simakov <akinoame1@gmail.com>
  * @author Andrew Pleshakov <beotiger@mail.ru>
  * @author Змей Этерийский evil_snake@eternion.ru
@@ -14,11 +16,13 @@
  * @author Aleksandr Selivanov <alexgearbox@gmail.com>
  * @author Ladyko Andrey <fylh@succexy.spb.ru>
  * @author Eugene <windy.wanderer@gmail.com>
+ * @author Johnny Utah <pcpa@cyberpunk.su>
+ * @author Ivan I. Udovichenko (sendtome@mymailbox.pp.ua)
  */
 $lang['menu']                  = 'Менеджер откаток';
 $lang['filter']                = 'Поиск спам-страниц';
 $lang['revert']                = 'Откатить изменения для выбранных страниц';
-$lang['reverted']              = '%s откачена к версии %s';
+$lang['reverted']              = '%s возвращена к версии %s';
 $lang['removed']               = '%s удалена';
 $lang['revstart']              = 'Начат процесс откатки. Он может занять много времени. Если скрипт не успевает завершить работу и выдаёт ошибку, необходимо произвести откатку более маленькими частями.';
 $lang['revstop']               = 'Процесс откатки успешно завершён.';

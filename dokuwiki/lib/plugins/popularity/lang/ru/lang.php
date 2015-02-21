@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Russian language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Змей Этерийский evil_snake@eternion.ru
  * @author Hikaru Nakajima <jisatsu@mail.ru>
  * @author Alexei Tereschenko <alexeitlex@yahoo.com>
@@ -13,6 +14,8 @@
  * @author Aleksandr Selivanov <alexgearbox@gmail.com>
  * @author Ladyko Andrey <fylh@succexy.spb.ru>
  * @author Eugene <windy.wanderer@gmail.com>
+ * @author Johnny Utah <pcpa@cyberpunk.su>
+ * @author Ivan I. Udovichenko (sendtome@mymailbox.pp.ua)
  */
 $lang['name']                  = 'Сбор информации о популярности (для загрузки может потребоваться некоторое время)';
 $lang['submit']                = 'Отправить данные';

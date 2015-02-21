@@ -1,12 +1,15 @@
 <?php
+
 /**
- * Persian language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author behrad eslamifar <behrad_es@yahoo.com)
  * @author Mohsen Firoozmandan <info@mambolearn.com>
  * @author omidmr@gmail.com
  * @author Omid Mottaghi <omidmr@gmail.com>
  * @author Mohammad Reza Shoaei <shoaei@gmail.com>
+ * @author Milad DZand <M.DastanZand@gmail.com>
+ * @author AmirH Hassaneini <mytechmix@gmail.com>
  */
 $lang['name']                  = 'بازخورد محبوبیت (ممکن است اندکی زمان ببرد)';
 $lang['submit']                = 'ارسال اطلاعات';

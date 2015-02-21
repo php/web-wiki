@@ -229,14 +229,15 @@ class DokuWiki_Auth_Plugin extends DokuWiki_Plugin {
      * at least these fields:
      *
      * name string  full name of the user
-     * mail string  email addres of the user
+     * mail string  email address of the user
      * grps array   list of groups the user is in
      *
      * @author  Andreas Gohr <andi@splitbrain.org>
      * @param   string $user the user name
+     * @param   bool $requireGroups whether or not the returned data must include groups
      * @return  array containing user data or false
      */
-    public function getUserData($user) {
+    public function getUserData($user, $requireGroups=true) {
         if(!$this->cando['external']) msg("no valid authorisation system in use", -1);
         return false;
     }
@@ -316,11 +317,11 @@ class DokuWiki_Auth_Plugin extends DokuWiki_Plugin {
      *
      * @author  Chris Smith <chris@jalakai.co.uk>
      * @param   int   $start     index of first user to be returned
-     * @param   int   $limit     max number of users to be returned
+     * @param   int   $limit     max number of users to be returned, 0 for unlimited
      * @param   array $filter    array of field/pattern pairs, null for no filter
      * @return  array list of userinfo (refer getUserData for internal userinfo details)
      */
-    public function retrieveUsers($start = 0, $limit = -1, $filter = null) {
+    public function retrieveUsers($start = 0, $limit = 0, $filter = null) {
         msg("authorisation method does not support mass retrieval of user data", -1);
         return array();
     }

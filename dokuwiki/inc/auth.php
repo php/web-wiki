@@ -947,7 +947,7 @@ function register() {
         return false;
     }
         // make sure the secret spam box was filled out correctly
-    if($spam != "php-webmaster@lists.php.net") {
+    if($spam != "internals@lists.php.net") {
         msg("That wasn't the answer we were expecting",-1);
         return false;
     }

@@ -1,4 +1,4 @@
-====== Acces Interzis ======
+====== Acces nepermis ======
 
-Din păcate nu aveţi destule drepturi pentru a continua. Poate aţi uitat să vă logaţi?
+Din păcate nu ai destule drepturi pentru a continua.
 

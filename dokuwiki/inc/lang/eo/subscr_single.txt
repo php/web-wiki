@@ -15,9 +15,8 @@ Nova versio: @NEWPAGE@
 
 Por nuligi la paĝinformojn, ensalutu la vikion ĉe
 @DOKUWIKIURL@, poste iru al
-@NEWPAGE@
+@SUBSCRIBE@
 kaj malabonu la paĝajn kaj/aŭ nomspacajn ŝanĝojn.
 
 --
-Tiu retpoŝtaĵo kreiĝis de DokuWiki ĉe
-@DOKUWIKIURL@
+Tiu retpoŝtaĵo kreiĝis de DokuWiki ĉe @DOKUWIKIURL@

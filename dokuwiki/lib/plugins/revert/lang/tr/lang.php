@@ -1,11 +1,13 @@
 <?php
+
 /**
- * Turkish language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Aydın Coşkuner <aydinweb@gmail.com>
  * @author Cihan Kahveci <kahvecicihan@gmail.com>
  * @author Yavuz Selim <yavuzselim@gmail.com>
  * @author Caleb Maclennan <caleb@alerque.com>
+ * @author farukerdemoncel@gmail.com
  */
 $lang['menu']                  = 'Eskiye Döndürme';
 $lang['filter']                = 'Spam bulunan sayfaları ara';

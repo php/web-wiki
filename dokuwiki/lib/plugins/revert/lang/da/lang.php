@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Danish language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Kalle Sommer Nielsen <kalle@php.net>
  * @author Esben Laursen <hyber@hyber.dk>
  * @author Harith <haj@berlingske.dk>
@@ -9,6 +10,7 @@
  * @author Erik Bjørn Pedersen <erik.pedersen@shaw.ca>
  * @author rasmus@kinnerup.com
  * @author Michael Pedersen subben@gmail.com
+ * @author Mikael Lyngvig <mikael@lyngvig.org>
  */
 $lang['menu']                  = 'Gendannelsesstyring';
 $lang['filter']                = 'Søg efter uønskede sider';

@@ -1,12 +1,17 @@
 <?php
+
 /**
- * japanese language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Yuji Takenaka <webmaster@davilin.com>
  * @author Ikuo Obataya <i.obataya@gmail.com>
  * @author Daniel Dupriest <kououken@gmail.com>
  * @author Kazutaka Miyasaka <kazmiya@gmail.com>
+ * @author Taisuke Shimamoto <dentostar@gmail.com>
+ * @author Satoshi Sahara <sahara.satoshi@gmail.com>
+ * @author Hideaki SAWADA <chuno@live.jp>
+ * @author Hideaki SAWADA <sawadakun@live.jp>
+ * @author PzF_X <jp_minecraft@yahoo.co.jp>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -42,7 +47,7 @@ $lang['btn_backtomedia']       = 'メディアファイル選択に戻る';
 $lang['btn_subscribe']         = '変更履歴配信の登録';
 $lang['btn_profile']           = 'ユーザー情報の更新';
 $lang['btn_reset']             = 'リセット';
-$lang['btn_resendpwd']         = 'パスワード再発行';
+$lang['btn_resendpwd']         = '新しいパスワードをセット';
 $lang['btn_draft']             = 'ドラフトを編集';
 $lang['btn_recover']           = 'ドラフトを復元';
 $lang['btn_draftdel']          = 'ドラフトを削除';
@@ -50,7 +55,10 @@ $lang['btn_revert']            = '元に戻す';
 $lang['btn_register']          = 'ユーザー登録';
 $lang['btn_apply']             = '適用';
 $lang['btn_media']             = 'メディアマネージャー';
-$lang['loggedinas']            = 'ようこそ';
+$lang['btn_deleteuser']        = '自分のアカウントの抹消';
+$lang['btn_img_backto']        = '戻る %s';
+$lang['btn_mediaManager']      = 'メディアマネージャーで閲覧';
+$lang['loggedinas']            = 'ようこそ:';
 $lang['user']                  = 'ユーザー名';
 $lang['pass']                  = 'パスワード';
 $lang['newpass']               = '新しいパスワード';
@@ -61,9 +69,11 @@ $lang['fullname']              = 'フルネーム';
 $lang['email']                 = 'メールアドレス';
 $lang['profile']               = 'ユーザー情報';
 $lang['badlogin']              = 'ユーザー名かパスワードが違います。';
+$lang['badpassconfirm']        = 'パスワードが間違っています。';
 $lang['minoredit']             = '小変更';
 $lang['draftdate']             = 'ドラフト保存日時：';
 $lang['nosecedit']             = 'ページ内容が変更されていますがセクション情報が古いため、代わりにページ全体をロードしました。';
+$lang['searchcreatepage']      = 'もし、探しているものが見つからない場合、 検索キーワードにちなんだ名前の文書を作成もしくは編集を行ってください。';
 $lang['regmissing']            = '全ての項目を入力してください。';
 $lang['reguexists']            = 'このユーザー名は既に存在しています。';
 $lang['regsuccess']            = '新しいユーザーが作成されました。パスワードは登録したメールアドレス宛てに送付されます。';
@@ -77,9 +87,14 @@ $lang['profna']                = 'ユーザー情報の変更は出来ません'
 $lang['profnochange']          = '変更点はありませんでした。';
 $lang['profnoempty']           = 'ユーザー名とメールアドレスを入力して下さい。';
 $lang['profchanged']           = 'ユーザー情報は更新されました。';
+$lang['profnodelete']          = 'この wiki はユーザーを削除できない。';
+$lang['profdeleteuser']        = 'アカウントの削除';
+$lang['profdeleted']           = 'このwikiからあなたのユーザーアカウントは削除済です。';
+$lang['profconfdelete']        = 'このwikiから自分のアカウント抹消を希望します。<br/> この操作は取消すことができません。';
+$lang['profconfdeletemissing'] = '確認のチェックボックスがチェックされていません。';
 $lang['pwdforget']             = 'パスワードをお忘れですか？パスワード再発行';
 $lang['resendna']              = 'パスワードの再発行は出来ません。';
-$lang['resendpwd']             = '新しいパスワードを送信します：';
+$lang['resendpwd']             = '新しいパスワードをセット';
 $lang['resendpwdmissing']      = '全ての項目を入力して下さい。';
 $lang['resendpwdnouser']       = '入力されたユーザーが見つかりませんでした。';
 $lang['resendpwdbadauth']      = '申し訳ありません。この確認コードは有効ではありません。メール内に記載されたリンクを確認してください。';
@@ -89,11 +104,12 @@ $lang['license']               = '特に明示されていない限り、本Wiki
 $lang['licenseok']             = '注意： 本ページを編集することは、あなたの編集した内容が次のライセンスに従うことに同意したものとみなします：';
 $lang['searchmedia']           = '検索ファイル名：';
 $lang['searchmedia_in']        = '%s 内を検索';
-$lang['txt_upload']            = 'アップロードするファイルを選んでください。';
-$lang['txt_filename']          = '名前を変更してアップロード（オプション）';
+$lang['txt_upload']            = 'アップロードするファイルを選んでください。:';
+$lang['txt_filename']          = '名前を変更してアップロード（オプション）:';
 $lang['txt_overwrt']           = '既存のファイルを上書き';
-$lang['lockedby']              = 'この文書は次のユーザによってロックされています';
-$lang['lockexpire']            = 'ロック期限：';
+$lang['maxuploadsize']         = 'アップロード上限サイズ %s /ファイル';
+$lang['lockedby']              = 'この文書は次のユーザーによってロックされています:';
+$lang['lockexpire']            = 'ロック期限：:';
 $lang['js']['willexpire']      = '編集中の文書はロック期限を過ぎようとしています。このままロックする場合は、一度文書の確認を行って期限をリセットしてください。';
 $lang['js']['notsavedyet']     = '変更は保存されません。このまま処理を続けてよろしいですか？';
 $lang['js']['searchmedia']     = 'ファイル検索';
@@ -120,8 +136,7 @@ $lang['js']['medialeft']       = 'イメージを左に寄せる';
 $lang['js']['mediaright']      = 'イメージを右に寄せる';
 $lang['js']['mediacenter']     = 'イメージを中央に寄せる';
 $lang['js']['medianoalign']    = '位置を設定しない';
-$lang['js']['nosmblinks']      = 'ウィンドウズの共有フォルダへリンクは Microsoft Internet Explorer でのみ可能となります。
-当然、カットアンドペーストが使用できます。';
+$lang['js']['nosmblinks']      = 'ウィンドウズの共有フォルダへリンクは Microsoft Internet Explorer でしか機能しませんが、リンクをコピーして貼り付けることは可能です。';
 $lang['js']['linkwiz']         = 'リンクウィザード';
 $lang['js']['linkto']          = 'リンク先：';
 $lang['js']['del_confirm']     = '選択した項目を本当に削除しますか？';
@@ -173,18 +188,29 @@ $lang['difflink']              = 'この比較画面にリンクする';
 $lang['diff_type']             = '差分の表示方法：';
 $lang['diff_inline']           = 'インライン';
 $lang['diff_side']             = '横に並べる';
+$lang['diffprevrev']           = '前のリビジョン';
+$lang['diffnextrev']           = '次のリビジョン';
+$lang['difflastrev']           = '最新リビジョン';
+$lang['diffbothprevrev']       = '両方とも前のリビジョン';
+$lang['diffbothnextrev']       = '両方とも次のリビジョン';
 $lang['line']                  = 'ライン';
-$lang['breadcrumb']            = 'トレース';
-$lang['youarehere']            = '現在位置';
-$lang['lastmod']               = '最終更新';
+$lang['breadcrumb']            = 'トレース:';
+$lang['youarehere']            = '現在位置:';
+$lang['lastmod']               = '最終更新:';
 $lang['by']                    = 'by';
 $lang['deleted']               = '削除';
 $lang['created']               = '作成';
-$lang['restored']              = '以前のバージョンを復元';
+$lang['restored']              = '以前のリビジョンを復元 (%s)';
 $lang['external_edit']         = '外部編集';
 $lang['summary']               = '編集の概要';
 $lang['noflash']               = 'この内容を表示するためには <a href="http://www.adobe.com/products/flashplayer/">Adobe Flash Plugin</a> が必要です。';
 $lang['download']              = 'この部分をダウンロード';
+$lang['tools']                 = 'ツール';
+$lang['user_tools']            = 'ユーザ用ツール';
+$lang['site_tools']            = 'サイト用ツール';
+$lang['page_tools']            = 'ページ用ツール';
+$lang['skip_to_content']       = '内容へ移動';
+$lang['sidebar']               = 'サイドバー';
 $lang['mail_newpage']          = '文書の追加：';
 $lang['mail_changed']          = '文書の変更：';
 $lang['mail_subscribe_list']   = '名前空間内でページが変更：';
@@ -223,20 +249,18 @@ $lang['admin_register']        = '新規ユーザー作成';
 $lang['metaedit']              = 'メタデータ編集';
 $lang['metasaveerr']           = 'メタデータの書き込みに失敗しました';
 $lang['metasaveok']            = 'メタデータは保存されました';
-$lang['img_backto']            = '戻る';
-$lang['img_title']             = 'タイトル';
-$lang['img_caption']           = '見出し';
-$lang['img_date']              = '日付';
-$lang['img_fname']             = 'ファイル名';
-$lang['img_fsize']             = 'サイズ';
-$lang['img_artist']            = '作成者';
-$lang['img_copyr']             = '著作権';
-$lang['img_format']            = 'フォーマット';
-$lang['img_camera']            = '使用カメラ';
-$lang['img_keywords']          = 'キーワード';
-$lang['img_width']             = '幅';
-$lang['img_height']            = '高さ';
-$lang['img_manager']           = 'メディアマネージャーで閲覧';
+$lang['img_title']             = 'タイトル:';
+$lang['img_caption']           = '見出し:';
+$lang['img_date']              = '日付:';
+$lang['img_fname']             = 'ファイル名:';
+$lang['img_fsize']             = 'サイズ:';
+$lang['img_artist']            = '作成者:';
+$lang['img_copyr']             = '著作権:';
+$lang['img_format']            = 'フォーマット:';
+$lang['img_camera']            = '使用カメラ:';
+$lang['img_keywords']          = 'キーワード:';
+$lang['img_width']             = '幅:';
+$lang['img_height']            = '高さ:';
 $lang['subscr_subscribe_success'] = '%sが%sの購読リストに登録されました。';
 $lang['subscr_subscribe_error'] = '%sを%sの購読リストへの追加に失敗しました。';
 $lang['subscr_subscribe_noaddress'] = 'あなたのログインに対応するアドレスがないため、購読リストへ追加することができません。';
@@ -253,8 +277,8 @@ $lang['subscr_m_receive']      = '受信';
 $lang['subscr_style_every']    = '全ての変更にメールを送信';
 $lang['subscr_style_digest']   = 'それぞれのページへの変更の要約をメールする（%.2f 日毎）';
 $lang['subscr_style_list']     = '前回のメールから変更されたページをリスト（%.2f 日毎）';
-$lang['authmodfailed']         = 'ユーザー認証の設定が正しくありません。Wikiの管理者に連絡して下さい。';
 $lang['authtempfail']          = 'ユーザー認証が一時的に使用できなくなっています。この状態が続いているようであれば、Wikiの管理者に連絡して下さい。';
+$lang['authpwdexpire']         = 'あなたのパスワードは、あと%d日で有効期限が切れます。パスワードを変更してください。';
 $lang['i_chooselang']          = '使用言語を選択してください';
 $lang['i_installer']           = 'DokuWiki インストーラー';
 $lang['i_wikiname']            = 'Wiki名';
@@ -264,22 +288,27 @@ $lang['i_problems']            = '問題が発見されました。以下に示�
 $lang['i_modified']            = 'セキュリティの理由から、新規もしくはカスタマイズしていない DokuWiki に対してのみ、このスクリプトは有効です。
                          ダウンロードしたパッケージを再解凍して使用するか、
                          <a href="http://dokuwiki.org/install">Dokuwiki インストールガイド</a>を参考にしてインストールしてください。';
-$lang['i_funcna']              = 'PHPの関数 <code>%s</code> が使用できません。ホスティング会社が何らかの理由で無効にしている恐れがあります。';
+$lang['i_funcna']              = 'PHPの関数 <code>%s</code> が使用できません。ホスティング会社が何らかの理由で無効にしている可能性があります。';
 $lang['i_phpver']              = 'PHPのバージョン <code>%s</code> が必要なバージョン <code>%s</code> より以前のものです。PHPのアップグレードが必要です。';
+$lang['i_mbfuncoverload']      = 'DokuWiki を実行する php.ini ファイルの mbstring.func_overload は無効にして下さい。';
 $lang['i_permfail']            = '<code>%s</code> に書き込みできません。このディレクトリの権限を確認して下さい。';
 $lang['i_confexists']          = '<code>%s</code> は既に存在します';
 $lang['i_writeerr']            = '<code>%s</code> を作成できません。ディレクトリとファイルの権限を確認し、それらを手動で作成する必要があります。';
 $lang['i_badhash']             = 'dokuwiki.php が認識できないか、編集されています（hash=<code>%s</code>）';
 $lang['i_badval']              = '<code>%s</code> - 正しくない、もしくは値が空です';
-$lang['i_success']             = '設定ファイルは正しく作成されました。<a href="doku.php">作成した DokuWiki</a>を使用するには install.php を削除してください。';
-$lang['i_failure']             = '設定ファイルの作成中にエラーが発生しました。<a href="doku.php">作成した DokuWiki</a>を使用する前に、それらの問題を手動で修正する必要があります。';
+$lang['i_success']             = '設定ファイルは正しく作成されました。<a href="doku.php?id=wiki:welcome">作成した DokuWiki</a>を使用するには install.php を削除してください。';
+$lang['i_failure']             = '設定ファイルの作成中にエラーが発生しました。<a href="doku.php?id=wiki:welcome">作成した DokuWiki</a>を使用する前に、それらの問題を手動で修正する必要があります。';
 $lang['i_policy']              = 'ACL初期設定';
 $lang['i_pol0']                = 'オープン Wiki（全ての人に、閲覧・書き込み・アップロードを許可）';
 $lang['i_pol1']                = 'パブリック Wiki（閲覧は全ての人が可能、書き込み・アップロードは登録ユーザーのみ）';
 $lang['i_pol2']                = 'クローズド Wiki (登録ユーザーにのみ使用を許可)';
+$lang['i_allowreg']            = 'ユーザ自身で登録可能';
 $lang['i_retry']               = '再試行';
 $lang['i_license']             = 'あなたが作成したコンテンツが属するライセンスを選択してください：';
-$lang['recent_global']         = '現在、<b>%s</b> 名前空間内の変更点を閲覧中です。<a href="%s">Wiki全体の最近の変更点を確認する</a>ことも可能です。';
+$lang['i_license_none']        = 'ライセンス情報を表示しません。';
+$lang['i_pop_field']           = 'Dokuwiki の内容の向上に協力して下さい：';
+$lang['i_pop_label']           = '月に一回、DokuWikiの開発者に匿名の使用データを送信します。';
+$lang['recent_global']         = '現在、<b>%s</b> 名前空間内の変更点を閲覧中です。<a href="%s">Wiki全体の最近の変更点の確認</a>もできます。';
 $lang['years']                 = '%d年前';
 $lang['months']                = '%dカ月前';
 $lang['weeks']                 = '%d週間前';
@@ -311,4 +340,7 @@ $lang['media_perm_read']       = 'ファイルを閲覧する権限がありま�
 $lang['media_perm_upload']     = 'ファイルをアップロードする権限がありません。';
 $lang['media_update']          = '新しいバージョンをアップロード';
 $lang['media_restore']         = 'このバージョンを復元';
-$lang['plugin_install_err']    = 'プラグインが正しくインストールされませんでした。プラグインのディレクトリ名を \'%s\' から \'%s\' に変更してください。';
+$lang['currentns']             = '現在の名前空間';
+$lang['searchresult']          = '検索結果';
+$lang['plainhtml']             = 'プレーンHTML';
+$lang['wikimarkup']            = 'Wikiマークアップ';

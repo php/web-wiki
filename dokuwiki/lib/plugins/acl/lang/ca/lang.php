@@ -7,10 +7,11 @@
  * @author Carles Bellver <carles.bellver@gmail.com>
  * @author carles.bellver@gmail.com
  * @author carles.bellver@cent.uji.es
+ * @author daniel@6temes.cat
  */
 $lang['admin_acl']             = 'Gestió de la Llista de Control d\'Accés';
-$lang['acl_group']             = 'Grup';
-$lang['acl_user']              = 'Usuari';
+$lang['acl_group']             = 'Grup:';
+$lang['acl_user']              = 'Usuari:';
 $lang['acl_perms']             = 'Permisos per a';
 $lang['page']                  = 'Pàgina';
 $lang['namespace']             = 'Espai';

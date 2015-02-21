@@ -154,7 +154,7 @@ function tpl_content_core() {
             html_resendpwd();
             break;
         case 'denied':
-            print p_locale_xhtml('denied');
+            html_denied();
             break;
         case 'profile' :
             html_updateprofile();
@@ -210,7 +210,7 @@ function tpl_toc($return = false) {
         } else {
             $tocok = true;
         }
-        $toc = $meta['description']['tableofcontents'];
+        $toc = isset($meta['description']['tableofcontents']) ? $meta['description']['tableofcontents'] : null;
         if(!$tocok || !is_array($toc) || !$conf['tocminheads'] || count($toc) < $conf['tocminheads']) {
             $toc = array();
         }
@@ -291,6 +291,8 @@ function tpl_metaheaders($alt = true) {
     global $lang;
     global $conf;
     global $updateVersion;
+    /** @var Input $INPUT */
+    global $INPUT;
 
     // prepare the head array
     $head = array();
@@ -316,15 +318,17 @@ function tpl_metaheaders($alt = true) {
     }
 
     if($alt) {
-        $head['link'][] = array(
-            'rel'  => 'alternate', 'type'=> 'application/rss+xml',
-            'title'=> $lang['btn_recent'], 'href'=> DOKU_BASE.'feed.php'
-        );
-        $head['link'][] = array(
-            'rel'  => 'alternate', 'type'=> 'application/rss+xml',
-            'title'=> $lang['currentns'],
-            'href' => DOKU_BASE.'feed.php?mode=list&ns='.$INFO['namespace']
-        );
+        if(actionOK('rss')) {
+            $head['link'][] = array(
+                'rel'  => 'alternate', 'type'=> 'application/rss+xml',
+                'title'=> $lang['btn_recent'], 'href'=> DOKU_BASE.'feed.php'
+            );
+            $head['link'][] = array(
+                'rel'  => 'alternate', 'type'=> 'application/rss+xml',
+                'title'=> $lang['currentns'],
+                'href' => DOKU_BASE.'feed.php?mode=list&ns='.$INFO['namespace']
+            );
+        }
         if(($ACT == 'show' || $ACT == 'search') && $INFO['writable']) {
             $head['link'][] = array(
                 'rel'  => 'edit',
@@ -333,7 +337,7 @@ function tpl_metaheaders($alt = true) {
             );
         }
 
-        if($ACT == 'search') {
+        if(actionOK('rss') && $ACT == 'search') {
             $head['link'][] = array(
                 'rel'  => 'alternate', 'type'=> 'application/rss+xml',
                 'title'=> $lang['searchresult'],
@@ -365,7 +369,11 @@ function tpl_metaheaders($alt = true) {
             } else {
                 $head['meta'][] = array('name'=> 'robots', 'content'=> 'noindex,nofollow');
             }
-            $head['link'][] = array('rel'=> 'canonical', 'href'=> wl($ID, '', true, '&'));
+            $canonicalUrl = wl($ID, '', true, '&');
+            if ($ID == $conf['start']) {
+                $canonicalUrl = DOKU_URL;
+            }
+            $head['link'][] = array('rel'=> 'canonical', 'href'=> $canonicalUrl);
         } else {
             $head['meta'][] = array('name'=> 'robots', 'content'=> 'noindex,follow');
         }
@@ -377,13 +385,6 @@ function tpl_metaheaders($alt = true) {
 
     // set metadata
     if($ACT == 'show' || $ACT == 'export_xhtml') {
-        // date of modification
-        if($REV) {
-            $head['meta'][] = array('name'=> 'date', 'content'=> date('Y-m-d\TH:i:sO', $REV));
-        } else {
-            $head['meta'][] = array('name'=> 'date', 'content'=> date('Y-m-d\TH:i:sO', $INFO['lastmod']));
-        }
-
         // keywords (explicit or implicit)
         if(!empty($INFO['meta']['subject'])) {
             $head['meta'][] = array('name'=> 'keywords', 'content'=> join(',', $INFO['meta']['subject']));
@@ -401,7 +402,7 @@ function tpl_metaheaders($alt = true) {
     // make $INFO and other vars available to JavaScripts
     $json   = new JSON();
     $script = "var NS='".$INFO['namespace']."';";
-    if($conf['useacl'] && !empty($_SERVER['REMOTE_USER'])) {
+    if($conf['useacl'] && $INPUT->server->str('REMOTE_USER')) {
         $script .= "var SIG='".toolbar_signature()."';";
     }
     $script .= 'var JSINFO = '.$json->encode($JSINFO).';';
@@ -455,6 +456,12 @@ function _tpl_metaheaders_action($data) {
  * Just builds a link.
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string $url
+ * @param string $name
+ * @param string $more
+ * @param bool   $return if true return the link html, otherwise print
+ * @return bool|string html of the link, or true if printed
  */
 function tpl_link($url, $name, $more = '', $return = false) {
     $out = '<a href="'.$url.'" ';
@@ -471,6 +478,10 @@ function tpl_link($url, $name, $more = '', $return = false) {
  * Wrapper around html_wikilink
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string      $id   page id
+ * @param string|null $name link name
+ * @return bool true
  */
 function tpl_pagelink($id, $name = null) {
     print '<bdi>'.html_wikilink($id, $name).'</bdi>';
@@ -533,6 +544,13 @@ function tpl_button($type, $return = false) {
  *
  * @author Adrian Lang <mail@adrianlang.de>
  * @see    tpl_get_action
+ *
+ * @param string $type  action name
+ * @param string $pre   prefix of link
+ * @param string $suf   suffix of link
+ * @param string $inner inner HTML for link
+ * @param bool $return  if true it returns html, otherwise prints
+ * @return bool|string html of action link or false if nothing, or true if printed
  */
 function tpl_actionlink($type, $pre = '', $suf = '', $inner = '', $return = false) {
     global $lang;
@@ -548,6 +566,7 @@ function tpl_actionlink($type, $pre = '', $suf = '', $inner = '', $return = fals
          * @var string $method
          * @var bool   $nofollow
          * @var array  $params
+         * @var string $replacement
          */
         extract($data);
         if(strpos($id, '#') === 0) {
@@ -556,6 +575,9 @@ function tpl_actionlink($type, $pre = '', $suf = '', $inner = '', $return = fals
             $linktarget = wl($id, $params);
         }
         $caption = $lang['btn_'.$type];
+        if(strpos($caption, '%s')){
+            $caption = sprintf($caption, $replacement);
+        }
         $akey    = $addTitle = '';
         if($accesskey) {
             $akey     = 'accesskey="'.$accesskey.'" ';
@@ -566,7 +588,7 @@ function tpl_actionlink($type, $pre = '', $suf = '', $inner = '', $return = fals
             $linktarget, $pre.(($inner) ? $inner : $caption).$suf,
             'class="action '.$type.'" '.
                 $akey.$rel.
-                'title="'.hsc($caption).$addTitle.'"', 1
+                'title="'.hsc($caption).$addTitle.'"', true
         );
     }
     if($return) return $out;
@@ -603,17 +625,20 @@ function tpl_get_action($type) {
     global $REV;
     global $ACT;
     global $conf;
+    /** @var Input $INPUT */
+    global $INPUT;
 
     // check disabled actions and fix the badly named ones
     if($type == 'history') $type = 'revisions';
     if ($type == 'subscription') $type = 'subscribe';
     if(!actionOK($type)) return false;
 
-    $accesskey = null;
-    $id        = $ID;
-    $method    = 'get';
-    $params    = array('do' => $type);
-    $nofollow  = true;
+    $accesskey   = null;
+    $id          = $ID;
+    $method      = 'get';
+    $params      = array('do' => $type);
+    $nofollow    = true;
+    $replacement = '';
     switch($type) {
         case 'edit':
             // most complicated type - we need to decide on current action
@@ -637,7 +662,7 @@ function tpl_get_action($type) {
                     $accesskey     = 'v';
                 }
             } else {
-                $params    = array();
+                $params    = array('do' => '');
                 $type      = 'show';
                 $accesskey = 'v';
             }
@@ -658,7 +683,7 @@ function tpl_get_action($type) {
             break;
         case 'top':
             $accesskey = 't';
-            $params    = array();
+            $params    = array('do' => '');
             $id        = '#dokuwiki__top';
             break;
         case 'back':
@@ -667,12 +692,17 @@ function tpl_get_action($type) {
                 return false;
             }
             $id        = $parent;
-            $params    = array();
+            $params    = array('do' => '');
             $accesskey = 'b';
+            break;
+        case 'img_backto':
+            $params = array();
+            $accesskey = 'b';
+            $replacement = $ID;
             break;
         case 'login':
             $params['sectok'] = getSecurityToken();
-            if(isset($_SERVER['REMOTE_USER'])) {
+            if($INPUT->server->has('REMOTE_USER')) {
                 if(!actionOK('logout')) {
                     return false;
                 }
@@ -681,12 +711,12 @@ function tpl_get_action($type) {
             }
             break;
         case 'register':
-            if(!empty($_SERVER['REMOTE_USER'])) {
+            if($INPUT->server->str('REMOTE_USER')) {
                 return false;
             }
             break;
         case 'resendpwd':
-            if(!empty($_SERVER['REMOTE_USER'])) {
+            if($INPUT->server->str('REMOTE_USER')) {
                 return false;
             }
             break;
@@ -703,25 +733,39 @@ function tpl_get_action($type) {
             $params['sectok'] = getSecurityToken();
             break;
         case 'subscribe':
-            if(!$_SERVER['REMOTE_USER']) {
+            if(!$INPUT->server->str('REMOTE_USER')) {
                 return false;
             }
             break;
         case 'backlink':
             break;
         case 'profile':
-            if(!isset($_SERVER['REMOTE_USER'])) {
+            if(!$INPUT->server->has('REMOTE_USER')) {
                 return false;
             }
             break;
         case 'media':
             $params['ns'] = getNS($ID);
             break;
+        case 'mediaManager':
+            // View image in media manager
+            global $IMG;
+            $imgNS = getNS($IMG);
+            $authNS = auth_quickaclcheck("$imgNS:*");
+            if ($authNS < AUTH_UPLOAD) {
+                return false;
+            }
+            $params = array(
+                'ns' => $imgNS,
+                'image' => $IMG,
+                'do' => 'media'
+            );
+            //$type = 'media';
+            break;
         default:
             return '[unknown %s type]';
-            break;
     }
-    return compact('accesskey', 'type', 'id', 'method', 'params', 'nofollow');
+    return compact('accesskey', 'type', 'id', 'method', 'params', 'nofollow', 'replacement');
 }
 
 /**
@@ -740,9 +784,9 @@ function tpl_get_action($type) {
 function tpl_action($type, $link = false, $wrapper = false, $return = false, $pre = '', $suf = '', $inner = '') {
     $out = '';
     if($link) {
-        $out .= tpl_actionlink($type, $pre, $suf, $inner, 1);
+        $out .= tpl_actionlink($type, $pre, $suf, $inner, true);
     } else {
-        $out .= tpl_button($type, 1);
+        $out .= tpl_button($type, true);
     }
     if($out && $wrapper) $out = "<$wrapper>$out</$wrapper>";
 
@@ -805,7 +849,7 @@ function tpl_breadcrumbs($sep = '•') {
     $crumbs_sep = ' <span class="bcsep">'.$sep.'</span> ';
 
     //render crumbs, highlight the last one
-    print '<span class="bchead">'.$lang['breadcrumb'].':</span>';
+    print '<span class="bchead">'.$lang['breadcrumb'].'</span>';
     $last = count($crumbs);
     $i    = 0;
     foreach($crumbs as $id => $name) {
@@ -845,7 +889,7 @@ function tpl_youarehere($sep = ' » ') {
     $parts = explode(':', $ID);
     $count = count($parts);
 
-    echo '<span class="bchead">'.$lang['youarehere'].': </span>';
+    echo '<span class="bchead">'.$lang['youarehere'].' </span>';
 
     // always print the startpage
     echo '<span class="home">';
@@ -885,9 +929,11 @@ function tpl_youarehere($sep = ' » ') {
  */
 function tpl_userinfo() {
     global $lang;
-    global $INFO;
-    if(isset($_SERVER['REMOTE_USER'])) {
-        print $lang['loggedinas'].': <bdi>'.hsc($INFO['userinfo']['name']).'</bdi> (<bdi>'.hsc($_SERVER['REMOTE_USER']).'</bdi>)';
+    /** @var Input $INPUT */
+    global $INPUT;
+
+    if($INPUT->server->str('REMOTE_USER')) {
+        print $lang['loggedinas'].' '.userlink();
         return true;
     }
     return false;
@@ -929,7 +975,7 @@ function tpl_pageinfo($ret = false) {
         $out .= '<bdi>'.$fn.'</bdi>';
         $out .= ' · ';
         $out .= $lang['lastmod'];
-        $out .= ': ';
+        $out .= ' ';
         $out .= $date;
         if($INFO['editor']) {
             $out .= ' '.$lang['by'].' ';
@@ -940,7 +986,7 @@ function tpl_pageinfo($ret = false) {
         if($INFO['locked']) {
             $out .= ' · ';
             $out .= $lang['lockedby'];
-            $out .= ': ';
+            $out .= ' ';
             $out .= '<bdi>'.editorinfo($INFO['locked']).'</bdi>';
         }
         if($ret) {
@@ -997,7 +1043,7 @@ function tpl_pagetitle($id = null, $ret = false) {
  * Only allowed in: detail.php
  *
  * @author Andreas Gohr <andi@splitbrain.org>
- * @param array  $tags tags to try
+ * @param array|string  $tags tag or array of tags to try
  * @param string $alt alternative output if no data was found
  * @param null   $src the image src, uses global $SRC if not given
  * @return string
@@ -1011,9 +1057,70 @@ function tpl_img_getTag($tags, $alt = '', $src = null) {
     static $meta = null;
     if(is_null($meta)) $meta = new JpegMeta($src);
     if($meta === false) return $alt;
-    $info = $meta->getField($tags);
+    $info = cleanText($meta->getField($tags));
     if($info == false) return $alt;
     return $info;
+}
+
+/**
+ * Returns a description list of the metatags of the current image
+ *
+ * @return string html of description list
+ */
+function tpl_img_meta() {
+    global $lang;
+
+    $tags = tpl_get_img_meta();
+
+    echo '<dl>';
+    foreach($tags as $tag) {
+        $label = $lang[$tag['langkey']];
+        if(!$label) $label = $tag['langkey'] . ':';
+
+        echo '<dt>'.$label.'</dt><dd>';
+        if ($tag['type'] == 'date') {
+            echo dformat($tag['value']);
+        } else {
+            echo hsc($tag['value']);
+        }
+        echo '</dd>';
+    }
+    echo '</dl>';
+}
+
+/**
+ * Returns metadata as configured in mediameta config file, ready for creating html
+ *
+ * @return array with arrays containing the entries:
+ *   - string langkey  key to lookup in the $lang var, if not found printed as is
+ *   - string type     type of value
+ *   - string value    tag value (unescaped)
+ */
+function tpl_get_img_meta() {
+
+    $config_files = getConfigFiles('mediameta');
+    foreach ($config_files as $config_file) {
+        if(@file_exists($config_file)) {
+            include($config_file);
+        }
+    }
+    /** @var array $fields the included array with metadata */
+
+    $tags = array();
+    foreach($fields as $tag){
+        $t = array();
+        if (!empty($tag[0])) {
+            $t = array($tag[0]);
+        }
+        if(is_array($tag[3])) {
+            $t = array_merge($t,$tag[3]);
+        }
+        $value = tpl_img_getTag($t);
+        if ($value) {
+            $tags[] = array('langkey' => $tag[1], 'type' => $tag[2], 'value' => $value);
+        }
+    }
+    return $tags;
 }
 
 /**
@@ -1030,7 +1137,9 @@ function tpl_img_getTag($tags, $alt = '', $src = null) {
  */
 function tpl_img($maxwidth = 0, $maxheight = 0, $link = true, $params = null) {
     global $IMG;
+    /** @var Input $INPUT */
     global $INPUT;
+    global $REV;
     $w = tpl_img_getTag('File.Width');
     $h = tpl_img_getTag('File.Height');
 
@@ -1055,8 +1164,8 @@ function tpl_img($maxwidth = 0, $maxheight = 0, $link = true, $params = null) {
     }
 
     //prepare URLs
-    $url = ml($IMG, array('cache'=> $INPUT->str('cache')), true, '&');
-    $src = ml($IMG, array('cache'=> $INPUT->str('cache'), 'w'=> $w, 'h'=> $h), true, '&');
+    $url = ml($IMG, array('cache'=> $INPUT->str('cache'),'rev'=>$REV), true, '&');
+    $src = ml($IMG, array('cache'=> $INPUT->str('cache'),'rev'=>$REV, 'w'=> $w, 'h'=> $h), true, '&');
 
     //prepare attributes
     $alt = tpl_img_getTag('Simple.Title');
@@ -1123,10 +1232,11 @@ function tpl_indexerWebBug() {
  *
  * use this function to access template configuration variables
  *
- * @param string $id
- * @return string
+ * @param string $id      name of the value to access
+ * @param mixed  $notset  what to return if the setting is not available
+ * @return mixed
  */
-function tpl_getConf($id) {
+function tpl_getConf($id, $notset=false) {
     global $conf;
     static $tpl_configloaded = false;
 
@@ -1143,7 +1253,11 @@ function tpl_getConf($id) {
         }
     }
 
-    return $conf['tpl'][$tpl][$id];
+    if(isset($conf['tpl'][$tpl][$id])){
+        return $conf['tpl'][$tpl][$id];
+    }
+
+    return $notset;
 }
 
 /**
@@ -1177,16 +1291,29 @@ function tpl_getLang($id) {
     static $lang = array();
 
     if(count($lang) === 0) {
-        $path = tpl_incdir().'lang/';
+        global $conf, $config_cascade; // definitely don't invoke "global $lang"
+
+        $path = tpl_incdir() . 'lang/';
 
         $lang = array();
 
-        global $conf; // definitely don't invoke "global $lang"
         // don't include once
-        @include($path.'en/lang.php');
-        if($conf['lang'] != 'en') @include($path.$conf['lang'].'/lang.php');
-    }
+        @include($path . 'en/lang.php');
+        foreach($config_cascade['lang']['template'] as $config_file) {
+            if(@file_exists($config_file . $conf['template'] . '/en/lang.php')) {
+                include($config_file . $conf['template'] . '/en/lang.php');
+            }
+        }
 
+        if($conf['lang'] != 'en') {
+            @include($path . $conf['lang'] . '/lang.php');
+            foreach($config_cascade['lang']['template'] as $config_file) {
+                if(@file_exists($config_file . $conf['template'] . '/' . $conf['lang'] . '/lang.php')) {
+                    include($config_file . $conf['template'] . '/' . $conf['lang'] . '/lang.php');
+                }
+            }
+        }
+    }
     return $lang[$id];
 }
 
@@ -1207,7 +1334,7 @@ function tpl_locale_xhtml($id) {
 function tpl_localeFN($id) {
     $path = tpl_incdir().'lang/';
     global $conf;
-    $file = DOKU_CONF.'/template_lang/'.$conf['template'].'/'.$conf['lang'].'/'.$id.'.txt';
+    $file = DOKU_CONF.'template_lang/'.$conf['template'].'/'.$conf['lang'].'/'.$id.'.txt';
     if (!@file_exists($file)){
         $file = $path.$conf['lang'].'/'.$id.'.txt';
         if(!@file_exists($file)){
@@ -1229,6 +1356,7 @@ function tpl_localeFN($id) {
  *
  * @triggers MEDIAMANAGER_CONTENT_OUTPUT
  * @param bool $fromajax - set true when calling this function via ajax
+ * @param string $sort
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 function tpl_mediaContent($fromajax = false, $sort='natural') {
@@ -1237,6 +1365,7 @@ function tpl_mediaContent($fromajax = false, $sort='natural') {
     global $INUSE;
     global $NS;
     global $JUMPTO;
+    /** @var Input $INPUT */
     global $INPUT;
 
     $do = $INPUT->extract('do')->str('do');
@@ -1286,6 +1415,7 @@ function tpl_mediaFileList() {
     global $NS;
     global $JUMPTO;
     global $lang;
+    /** @var Input $INPUT */
     global $INPUT;
 
     $opened_tab = $INPUT->str('tab_files');
@@ -1326,12 +1456,14 @@ function tpl_mediaFileList() {
  * @author Kate Arzamastseva <pshns@ukr.net>
  */
 function tpl_mediaFileDetails($image, $rev) {
-    global $AUTH, $NS, $conf, $DEL, $lang, $INPUT;
+    global $conf, $DEL, $lang;
+    /** @var Input $INPUT */
+    global $INPUT;
 
     $removed = (!file_exists(mediaFN($image)) && file_exists(mediaMetaFN($image, '.changes')) && $conf['mediarevisions']);
     if(!$image || (!file_exists(mediaFN($image)) && !$removed) || $DEL) return;
     if($rev && !file_exists(mediaFN($image, $rev))) $rev = false;
-    if(isset($NS) && getNS($image) != $NS) return;
+    $ns = getNS($image);
     $do = $INPUT->str('mediado');
 
     $opened_tab = $INPUT->str('tab_details');
@@ -1367,13 +1499,13 @@ function tpl_mediaFileDetails($image, $rev) {
     echo '<div class="panelContent">'.NL;
 
     if($opened_tab == 'view') {
-        media_tab_view($image, $NS, $AUTH, $rev);
+        media_tab_view($image, $ns, null, $rev);
 
     } elseif($opened_tab == 'edit' && !$removed) {
-        media_tab_edit($image, $NS, $AUTH);
+        media_tab_edit($image, $ns);
 
     } elseif($opened_tab == 'history' && $conf['mediarevisions']) {
-        media_tab_history($image, $NS, $AUTH);
+        media_tab_history($image, $ns);
     }
 
     echo '</div>'.NL;
@@ -1404,12 +1536,14 @@ function tpl_actiondropdown($empty = '', $button = '&gt;') {
     global $ID;
     global $REV;
     global $lang;
+    /** @var Input $INPUT */
+    global $INPUT;
 
     echo '<form action="'.script().'" method="get" accept-charset="utf-8">';
     echo '<div class="no">';
     echo '<input type="hidden" name="id" value="'.$ID.'" />';
     if($REV) echo '<input type="hidden" name="rev" value="'.$REV.'" />';
-    if (!empty($_SERVER['REMOTE_USER'])) {
+    if ($INPUT->server->str('REMOTE_USER')) {
         echo '<input type="hidden" name="sectok" value="'.getSecurityToken().'" />';
     }
 
@@ -1775,11 +1909,14 @@ function tpl_media() {
  */
 function tpl_classes() {
     global $ACT, $conf, $ID, $INFO;
+    /** @var Input $INPUT */
+    global $INPUT;
+
     $classes = array(
         'dokuwiki',
         'mode_'.$ACT,
         'tpl_'.$conf['template'],
-        !empty($_SERVER['REMOTE_USER']) ? 'loggedIn' : '',
+        $INPUT->server->bool('REMOTE_USER') ? 'loggedIn' : '',
         $INFO['exists'] ? '' : 'notFound',
         ($ID == $conf['start']) ? 'home' : '',
     );

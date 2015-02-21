@@ -3,10 +3,11 @@
  * Basque language file
  *
  * @author Inko Illarramendi <inko.i.a@gmail.com>
+ * @author Zigor Astarbe <astarbe@gmail.com>
  */
 $lang['admin_acl']             = 'Atzipen Kontrol Listaren Kudeaketa';
-$lang['acl_group']             = 'Taldea';
-$lang['acl_user']              = 'Erabiltzailea';
+$lang['acl_group']             = 'Taldea:';
+$lang['acl_user']              = 'Erabiltzailea:';
 $lang['acl_perms']             = 'Baimenak honetarako:';
 $lang['page']                  = 'Orria';
 $lang['namespace']             = 'Izen-espazioa';

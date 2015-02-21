@@ -1,8 +1,8 @@
 <?php
+
 /**
- * Brazilian Portuguese language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Luis Fernando Enciso <lfenciso@certto.com.br>
  * @author Alauton/Loug
  * @author Frederico Gonçalves Guimarães <frederico@teia.bio.br>
@@ -19,10 +19,11 @@
  * @author Sergio Motta sergio@cisne.com.br
  * @author Isaias Masiero Filho <masiero@masiero.org>
  * @author Balaco Baco <balacobaco@imap.cc>
+ * @author Victor Westmann <victor.westmann@gmail.com>
  */
 $lang['admin_acl']             = 'Administração da Lista de Controles de Acesso';
-$lang['acl_group']             = 'Grupo';
-$lang['acl_user']              = 'Usuário';
+$lang['acl_group']             = 'Grupo:';
+$lang['acl_user']              = 'Usuário:';
 $lang['acl_perms']             = 'Permissões para';
 $lang['page']                  = 'Página';
 $lang['namespace']             = 'Espaço de nomes';

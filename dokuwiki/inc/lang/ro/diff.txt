@@ -1,4 +1,3 @@
-====== Diferenţe ======
+====== Diferențe ======
 
-Aceasta arată diferenţele dintre revziile selectate şi versiunea curentă a paginii.
-
+Aici sunt prezentate diferențele dintre versiunile selectate și versiunea curentă a paginii.

@@ -1,8 +1,8 @@
 <?php
+
 /**
- * Danish language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author koeppe <koeppe@kazur.dk>
  * @author Jon Bendtsen <bendtsen@diku.dk>
  * @author Lars Næsbye Christensen <larsnaesbye@stud.ku.dk>
@@ -13,10 +13,11 @@
  * @author Erik Bjørn Pedersen <erik.pedersen@shaw.ca>
  * @author rasmus@kinnerup.com
  * @author Michael Pedersen subben@gmail.com
+ * @author Mikael Lyngvig <mikael@lyngvig.org>
  */
 $lang['admin_acl']             = 'Rettighedsadministration';
-$lang['acl_group']             = 'Gruppe';
-$lang['acl_user']              = 'Bruger';
+$lang['acl_group']             = 'Gruppe:';
+$lang['acl_user']              = 'Bruger:';
 $lang['acl_perms']             = 'Rettigheder for';
 $lang['page']                  = 'Dokument';
 $lang['namespace']             = 'Navnerum';

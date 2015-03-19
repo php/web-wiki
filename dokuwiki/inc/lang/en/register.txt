@@ -19,7 +19,3 @@ The login name should be a valid [[doku>wiki:pagename|pagename]].
 **Note**: If you find a minor problem with the wiki (like a typo or invalid grammar) then please email the [[internals@lists.php.net|internals]] mailing list with the URL, and suggested change.
 
 **Note**: All information here is readable without registering. Write access is controlled however. All users with a php.net vcs account have full write access to the wiki, and may simply login with their VCS credentials.
-
-**Note**: After submitting this registration form, your information (name and email) is sent to the publicly viewable [[http://news.php.net/php.internals|internals]] mailing list, along with your IP address, hostname, and user agent (browser info).
-
-

@@ -4,6 +4,7 @@
  * @author     Esther Brunner <wikidesign@gmail.com>
  * @author     Christopher Smith <chris@jalakai.co.uk>
  * @author     Gina Häußge, Michael Klier <dokuwiki@chimeric.de>
+ * @author     Michael Hamann <michael@content-space.de>
  */
 
 // must be run within Dokuwiki
@@ -13,12 +14,14 @@ if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
 if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN', DOKU_INC.'lib/plugins/');
 
-require_once(DOKU_INC.'inc/search.php');
-
+/**
+ * Helper functions for the include plugin and other plugins that want to include pages.
+ */
 class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
 
     var $defaults  = array();
     var $sec_close = true;
+    /** @var helper_plugin_tag $taghelper */
     var $taghelper = null;
     var $includes  = array(); // deprecated - compatibility code for the blog plugin
 
@@ -26,12 +29,14 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      * Constructor loads default config settings once
      */
     function helper_plugin_include() {
+        $this->defaults['noheader']  = $this->getConf('noheader');
         $this->defaults['firstsec']  = $this->getConf('firstseconly');
         $this->defaults['editbtn']   = $this->getConf('showeditbtn');
         $this->defaults['taglogos']  = $this->getConf('showtaglogos');
         $this->defaults['footer']    = $this->getConf('showfooter');
         $this->defaults['redirect']  = $this->getConf('doredirect');
         $this->defaults['date']      = $this->getConf('showdate');
+        $this->defaults['mdate']     = $this->getConf('showmdate');
         $this->defaults['user']      = $this->getConf('showuser');
         $this->defaults['comments']  = $this->getConf('showcomments');
         $this->defaults['linkbacks'] = $this->getConf('showlinkbacks');
@@ -40,7 +45,14 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         $this->defaults['permalink'] = $this->getConf('showpermalink');
         $this->defaults['indent']    = $this->getConf('doindent');
         $this->defaults['linkonly']  = $this->getConf('linkonly');
+        $this->defaults['title']     = $this->getConf('title');
+        $this->defaults['pageexists']  = $this->getConf('pageexists');
+        $this->defaults['parlink']   = $this->getConf('parlink');
         $this->defaults['inline']    = false;
+        $this->defaults['order']     = $this->getConf('order');
+        $this->defaults['rsort']     = $this->getConf('rsort');
+        $this->defaults['depth']     = $this->getConf('depth');
+        $this->defaults['readmore']  = $this->getConf('readmore');
     }
 
     /**
@@ -61,9 +73,12 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      */
     function get_flags($setflags) {
         // load defaults
-        $flags = array();
         $flags = $this->defaults;
         foreach ($setflags as $flag) {
+            $value = '';
+            if (strpos($flag, '=') !== -1) {
+                list($flag, $value) = explode('=', $flag, 2);
+            }
             switch ($flag) {
                 case 'footer':
                     $flags['footer'] = 1;
@@ -77,6 +92,10 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                     break;
                 case 'fullpage':
                     $flags['firstsec'] = 0;
+                    break;
+                case 'showheader':
+                case 'header':
+                    $flags['noheader'] = 0;
                     break;
                 case 'noheader':
                     $flags['noheader'] = 1;
@@ -137,6 +156,12 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                 case 'nodate':
                     $flags['date'] = 0;
                     break;
+                case 'mdate':
+                    $flags['mdate'] = 1;
+                    break;
+                case 'nomdate':
+                    $flags['mdate'] = 0;
+                    break;
                 case 'indent':
                     $flags['indent'] = 1;
                     break;
@@ -153,6 +178,52 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                 case 'inline':
                     $flags['inline'] = 1;
                     break;
+                case 'title':
+                    $flags['title'] = 1;
+                    break;
+                case 'notitle':
+                    $flags['title'] = 0;
+                    break;
+                case 'pageexists':
+                    $flags['pageexists'] = 1;
+                    break;
+                case 'nopageexists':
+                    $flags['pageexists'] = 0;
+                    break;
+                case 'existlink':
+                    $flags['pageexists'] = 1;
+                    $flags['linkonly'] = 1;
+                    break;
+                case 'parlink':
+                    $flags['parlink'] = 1;
+                    break;
+                case 'noparlink':
+                    $flags['parlink'] = 0;
+                    break;
+                case 'order':
+                    $flags['order'] = $value;
+                    break;
+                case 'sort':
+                    $flags['rsort'] = 0;
+                    break;
+                case 'rsort':
+                    $flags['rsort'] = 1;
+                    break;
+                case 'depth':
+                    $flags['depth'] = max(intval($value), 0);
+                    break;
+                case 'beforeeach':
+                    $flags['beforeeach'] = $value;
+                    break;
+                case 'aftereach':
+                    $flags['aftereach'] = $value;
+                    break;
+                case 'readmore':
+                    $flags['readmore'] = 1;
+                    break;
+                case 'noreadmore':
+                    $flags['readmore'] = 0;
+                    break;
             }
         }
         // the include_content URL parameter overrides flags
@@ -167,7 +238,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      * @author Michael Klier <chi@chimeric.de>
      * @author Michael Hamann <michael@content-space.de>
      */
-    function _get_instructions($page, $sect, $mode, $lvl, $flags, $root_id = null) {
+    function _get_instructions($page, $sect, $mode, $lvl, $flags, $root_id = null, $included_pages = array()) {
         $key = ($sect) ? $page . '#' . $sect : $page;
         $this->includes[$key] = true; // legacy code for keeping compatibility with other plugins
 
@@ -178,19 +249,34 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         }
 
         if ($flags['linkonly']) {
-            $ins = array(
-                array('p_open', array()),
-                array('internallink', array(':'.$key)),
-                array('p_close', array()),
-            );
+            if (page_exists($page) || $flags['pageexists']  == 0) {
+                $title = '';
+                if ($flags['title'])
+                    $title = p_get_first_heading($page);
+                if($flags['parlink']) {
+                    $ins = array(
+                        array('p_open', array()),
+                        array('internallink', array(':'.$key, $title)),
+                        array('p_close', array()),
+                    );
+                } else {
+                    $ins = array(array('internallink', array(':'.$key,$title)));
+                }
+            }else {
+                $ins = array();
+            }
         } else {
             if (page_exists($page)) {
-                $ins = p_cached_instructions(wikiFN($page));
+                global $ID;
+                $backupID = $ID;
+                $ID = $page; // Change the global $ID as otherwise plugins like the discussion plugin will save data for the wrong page
+                $ins = p_cached_instructions(wikiFN($page), false, $page);
+                $ID = $backupID;
             } else {
                 $ins = array();
             }
 
-            $this->_convert_instructions($ins, $lvl, $page, $sect, $flags, $root_id);
+            $this->_convert_instructions($ins, $lvl, $page, $sect, $flags, $root_id, $included_pages);
         }
         return $ins;
     }
@@ -208,7 +294,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      *
      * @author Michael Klier <chi@chimeric.de>
      */
-    function _convert_instructions(&$ins, $lvl, $page, $sect, $flags, $root_id) {
+    function _convert_instructions(&$ins, $lvl, $page, $sect, $flags, $root_id, $included_pages = array()) {
         global $conf;
 
         // filter instructions if needed
@@ -217,7 +303,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         }
 
         if($flags['firstsec']) {
-            $this->_get_firstsec($ins, $page);  // only first section 
+            $this->_get_firstsec($ins, $page, $flags);  // only first section 
         }
         
         $ns  = getNS($page);
@@ -228,8 +314,18 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         $first_header = -1;
         $no_header  = false;
         $sect_title = false;
+        $endpos     = null; // end position of the raw wiki text
 
         for($i=0; $i<$num; $i++) {
+            // adjust links with image titles
+            if (strpos($ins[$i][0], 'link') !== false && isset($ins[$i][1][1]) && is_array($ins[$i][1][1]) && $ins[$i][1][1]['type'] == 'internalmedia') {
+                // resolve relative ids, but without cleaning in order to preserve the name
+                $media_id = resolve_id($ns, $ins[$i][1][1]['src']);
+                // make sure that after resolving the link again it will be the same link
+                if ($media_id{0} != ':') $media_id = ':'.$media_id;
+                $ins[$i][1][1]['src'] = $media_id;
+            }
+
             switch($ins[$i][0]) {
                 case 'document_start':
                 case 'document_end':
@@ -263,6 +359,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                 case 'section_close':
                     if ($flags['inline'])
                         unset($ins[$i]);
+                    break;
                 case 'internallink':
                 case 'internalmedia':
                     // make sure parameters aren't touched
@@ -279,6 +376,40 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                     if ($link_id{0} != ':') $link_id = ':'.$link_id;
                     // restore parameters
                     $ins[$i][1][0] = ($link_params != '') ? $link_id.'?'.$link_params : $link_id;
+                    if ($ins[$i][0] == 'internallink' && !empty($included_pages)) {
+                        // change links to included pages into local links
+                        $link_id = $ins[$i][1][0];
+                        $link_parts = explode('?', $link_id, 2);
+                        // only adapt links without parameters
+                        if (count($link_parts) === 1) {
+                            $link_parts = explode('#', $link_id, 2);
+                            $hash = '';
+                            if (count($link_parts) === 2) {
+                                list($link_id, $hash) = $link_parts;
+                            }
+                            $exists = false;
+                            resolve_pageid($ns, $link_id, $exists);
+                            if (array_key_exists($link_id, $included_pages)) {
+                                if ($hash) {
+                                    // hopefully the hash is also unique in the including page (otherwise this might be the wrong link target)
+                                    $ins[$i][0] = 'locallink';
+                                    $ins[$i][1][0] = $hash;
+                                } else {
+                                    // the include section ids are different from normal section ids (so they won't conflict) but this
+                                    // also means that the normal locallink function can't be used
+                                    $ins[$i][0] = 'plugin';
+                                    $ins[$i][1] = array('include_locallink', array($included_pages[$link_id]['hid'], $ins[$i][1][1], $ins[$i][1][0]));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'locallink':
+                    /* Convert local links to internal links if the page hasn't been fully included */
+                    if ($included_pages == null || !array_key_exists($page, $included_pages)) {
+                        $ins[$i][0] = 'internallink';
+                        $ins[$i][1][0] = ':'.$page.'#'.$ins[$i][1][0];
+                    }
                     break;
                 case 'plugin':
                     // FIXME skip other plugins?
@@ -288,12 +419,24 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                         case 'linkback':                // skip linkbacks
                         case 'data_entry':              // skip data plugin
                         case 'meta':                    // skip meta plugin
+                        case 'indexmenu_tag':           // skip indexmenu sort tag
+                        case 'include_sorttag':         // skip include plugin sort tag
                             unset($ins[$i]);
                             break;
                         // adapt indentation level of nested includes
                         case 'include_include':
                             if (!$flags['inline'] && $flags['indent'])
                                 $ins[$i][1][1][4] += $lvl;
+                            break;
+                        /*
+                         * if there is already a closelastsecedit instruction (was added by one of the section
+                         * functions), store its position but delete it as it can't be determined yet if it is needed,
+                         * i.e. if there is a header which generates a section edit (depends on the levels, level
+                         * adjustments, $no_header, ...)
+                         */
+                        case 'include_closelastsecedit':
+                            $endpos = $ins[$i][1][1][0];
+                            unset($ins[$i]);
                             break;
                     }
                     break;
@@ -316,8 +459,9 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         $section_close_at = false;
         foreach($conv_idx as $idx) {
             if($ins[$idx][0] == 'header') {
-                if ($section_close_at === false) {
-                    // store the index of the first heading (the begin of the first section)
+                if ($section_close_at === false && isset($ins[$idx+1]) && $ins[$idx+1][0] == 'section_open') {
+                    // store the index of the first heading that is followed by a new section
+                    // the wrap plugin creates sections without section_open so the section shouldn't be closed before them
                     $section_close_at = $idx;
                 }
 
@@ -343,7 +487,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
 
                 // set footer level
                 if(!$footer_lvl && ($idx == $first_header) && !$no_header) {
-                    if($flags['indent']) {
+                    if($flags['indent'] && isset($lvl_new)) {
                         $footer_lvl = $lvl_new;
                     } else {
                         $footer_lvl = $lvl_max;
@@ -358,7 +502,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
 
                 // check if noheader is used and set the footer level to the first section
                 if($no_header && !$footer_lvl) {
-                    if($flags['indent']) {
+                    if($flags['indent'] && isset($lvl_new)) {
                         $footer_lvl = $lvl_new;
                     } else {
                         $footer_lvl = $lvl_max;
@@ -369,15 +513,12 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
 
         // close last open section of the included page if there is any
         if ($contains_secedit) {
-            array_push($ins, array('plugin', array('include_close_last_secedit', array())));
+            array_push($ins, array('plugin', array('include_closelastsecedit', array($endpos))));
         }
 
         // add edit button
         if($flags['editbtn']) {
-            $perm = auth_quickaclcheck($page);
-            $can_edit = page_exists($page) ? $perm >= AUTH_EDIT : $perm >= AUTH_CREATE;
-            if ($can_edit)
-                $this->_editbtn($ins, $page, $sect, $sect_title, ($flags['redirect'] ? $root_id : false));
+            $this->_editbtn($ins, $page, $sect, $sect_title, ($flags['redirect'] ? $root_id : false));
         }
 
         // add footer
@@ -402,8 +543,13 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         }
 
         // add instructions entry wrapper
-        array_unshift($ins, array('plugin', array('include_wrap', array('open', $page, $flags['redirect']))));
+        $include_secid = (isset($flags['include_secid']) ? $flags['include_secid'] : NULL);
+        array_unshift($ins, array('plugin', array('include_wrap', array('open', $page, $flags['redirect'], $include_secid))));
+        if (isset($flags['beforeeach']))
+            array_unshift($ins, array('entity', array($flags['beforeeach'])));
         array_push($ins, array('plugin', array('include_wrap', array('close'))));
+        if (isset($flags['aftereach']))
+            array_push($ins, array('entity', array($flags['aftereach'])));
 
         // close previous section if any and re-open after inclusion
         if($lvl != 0 && $this->sec_close && !$flags['inline']) {
@@ -430,9 +576,10 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      * @author Michael Klier <chi@chimeric.de>
      */
     function _editbtn(&$ins, $page, $sect, $sect_title, $root_id) {
+        $title = ($sect) ? $sect_title : $page;
         $editbtn = array();
         $editbtn[0] = 'plugin';
-        $editbtn[1] = array('include_editbtn', array($page, $sect, $sect_title, $root_id));
+        $editbtn[1] = array('include_editbtn', array($title));
         $ins[] = $editbtn;
     }
 
@@ -443,7 +590,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      */
     function _permalink(&$ins, $page, $sect, $flags) {
         $ins[0] = 'plugin';
-        $ins[1] = array('include_header', array($ins[1][0], $ins[1][1], $page, $sect, $flags));
+        $ins[1] = array('include_header', array($ins[1][0], $ins[1][1], $ins[1][2], $page, $sect, $flags));
     }
 
     /** 
@@ -451,11 +598,12 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      *
      * @author Michael Klier <chi@chimeric.de>
      */ 
-    function _get_section(&$ins, $sect) { 
+    function _get_section(&$ins, $sect) {
         $num = count($ins);
         $offset = false;
         $lvl    = false;
         $end    = false;
+        $endpos = null; // end position in the input text, needed for section edit buttons
 
         $check = array(); // used for sectionID() in order to get the same ids as the xhtml renderer
 
@@ -468,6 +616,7 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                     $lvl    = $ins[$i][1][1]; 
                 } elseif ($offset && $lvl && ($ins[$i][1][1] <= $lvl)) {
                     $end = $i - $offset;
+                    $endpos = $ins[$i][1][2]; // the position directly after the found section, needed for the section edit button
                     break;
                 }
             }
@@ -476,6 +625,8 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         $end = $end ? $end : ($num - 1);
         if(is_array($ins)) {
             $ins = array_slice($ins, $offset, $end);
+            // store the end position in the include_closelastsecedit instruction so it can generate a matching button
+            $ins[] = array('plugin', array('include_closelastsecedit', array($endpos)));
         }
     } 
 
@@ -484,19 +635,33 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      *
      * @author Michael Klier <chi@chimeric.de>
      */
-    function _get_firstsec(&$ins, $page) {
+    function _get_firstsec(&$ins, $page, $flags) {
         $num = count($ins);
         $first_sect = false;
+        $endpos = null; // end position in the input text
         for($i=0; $i<$num; $i++) {
             if($ins[$i][0] == 'section_close') {
                 $first_sect = $i;
             }
+            if ($ins[$i][0] == 'header') {
+                /*
+                 * Store the position of the last header that is encountered. As section_close/open-instruction are
+                 * always (unless some plugin modifies this) around a header instruction this means that the last
+                 * position that is stored here is exactly the position of the section_close/open at which the content
+                 * is truncated.
+                 */
+                $endpos = $ins[$i][1][2];
+            }
+            // only truncate the content and add the read more link when there is really
+            // more than that first section
             if(($first_sect) && ($ins[$i][0] == 'section_open')) {
                 $ins = array_slice($ins, 0, $first_sect);
-                $ins[] = array('p_open', array());
-                $ins[] = array('internallink', array($page, $this->getLang('readmore')));
-                $ins[] = array('p_close', array());
+                if ($flags['readmore']) {
+                    $ins[] = array('plugin', array('include_readmore', array($page)));
+                }
                 $ins[] = array('section_close', array());
+                // store the end position in the include_closelastsecedit instruction so it can generate a matching button
+                $ins[] = array('plugin', array('include_closelastsecedit', array($endpos)));
                 return;
             }
         }
@@ -507,16 +672,20 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
      *
      * @author Michael Hamann <michael@content-space.de>
      */
-    function _get_included_pages($mode, $page, $sect, $parent_id) {
+    function _get_included_pages($mode, $page, $sect, $parent_id, $flags) {
         global $conf;
         $pages = array();
         switch($mode) {
         case 'namespace':
-            $ns    = str_replace(':', '/', cleanID($page));
-            search($pagearrays, $conf['datadir'], 'search_list', '', $ns);
+            $page  = cleanID($page);
+            $ns    = utf8_encodeFN(str_replace(':', '/', $page));
+            // depth is absolute depth, not relative depth, but 0 has a special meaning.
+            $depth = $flags['depth'] ? $flags['depth'] + substr_count($page, ':') + ($page ? 1 : 0) : 0;
+            search($pagearrays, $conf['datadir'], 'search_allpages', array('depth' => $depth), $ns);
             if (is_array($pagearrays)) {
                 foreach ($pagearrays as $pagearray) {
-                    $pages[] = $pagearray['id'];
+                    if (!isHiddenPage($pagearray['id'])) // skip hidden pages
+                        $pages[] = $pagearray['id'];
                 }
             }
             break;
@@ -541,15 +710,71 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
                 $pages[] = $page;
         }
 
-        sort($pages);
+        if (count($pages) > 1) {
+            if ($flags['order'] === 'id') {
+                if ($flags['rsort']) {
+                    usort($pages, array($this, '_r_strnatcasecmp'));
+                } else {
+                    natcasesort($pages);
+                }
+            } else {
+                $ordered_pages = array();
+                foreach ($pages as $page) {
+                    $key = '';
+                    switch ($flags['order']) {
+                        case 'title':
+                            $key = p_get_first_heading($page);
+                            break;
+                        case 'created':
+                            $key = p_get_metadata($page, 'date created', METADATA_DONT_RENDER);
+                            break;
+                        case 'modified':
+                            $key = p_get_metadata($page, 'date modified', METADATA_DONT_RENDER);
+                            break;
+                        case 'indexmenu':
+                            $key = p_get_metadata($page, 'indexmenu_n', METADATA_RENDER_USING_SIMPLE_CACHE);
+                            if ($key === null)
+                                $key = '';
+                            break;
+                        case 'custom':
+                            $key = p_get_metadata($page, 'include_n', METADATA_RENDER_USING_SIMPLE_CACHE);
+                            if ($key === null)
+                                $key = '';
+                            break;
+                    }
+                    $key .= '_'.$page;
+                    $ordered_pages[$key] = $page;
+                }
+                if ($flags['rsort']) {
+                    uksort($ordered_pages, array($this, '_r_strnatcasecmp'));
+                } else {
+                    uksort($ordered_pages, 'strnatcasecmp');
+                }
+                $pages = $ordered_pages;
+            }
+        }
 
         $result = array();
         foreach ($pages as $page) {
-            $perm = auth_quickaclcheck($page);
             $exists = page_exists($page);
-            $result[] = array('id' => $page, 'exists' => $exists, 'can_edit' => ($perm >= AUTH_EDIT), 'parent_id' => $parent_id);
+            $result[] = array('id' => $page, 'exists' => $exists, 'parent_id' => $parent_id);
         }
         return $result;
+    }
+
+    /**
+     * String comparisons using a "natural order" algorithm in reverse order
+     *
+     * @link http://php.net/manual/en/function.strnatcmp.php
+     * @param string $a First string
+     * @param string $b Second string
+     * @return int Similar to other string comparison functions, this one returns &lt; 0 if
+     * str1 is greater than str2; &gt;
+     * 0 if str1 is lesser than
+     * str2, and 0 if they are equal.
+     */
+    function _r_strnatcasecmp($a, $b) {
+        return strnatcasecmp($b, $a);
     }
 
     /**
@@ -559,8 +784,12 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
     function _get_included_pages_from_meta_instructions($instructions) {
         $pages = array();
         foreach ($instructions as $instruction) {
-            extract($instruction);
-            $pages = array_merge($pages, $this->_get_included_pages($mode, $page, $sect, $parent_id));
+            $mode      = $instruction['mode'];
+            $page      = $instruction['page'];
+            $sect      = $instruction['sect'];
+            $parent_id = $instruction['parent_id'];
+            $flags     = $instruction['flags'];
+            $pages = array_merge($pages, $this->_get_included_pages($mode, $page, $sect, $parent_id, $flags));
         }
         return $pages;
     }
@@ -578,15 +807,60 @@ class helper_plugin_include extends DokuWiki_Plugin { // DokuWiki_Helper_Plugin
         $user     = $_SERVER['REMOTE_USER'];
         $group    = $INFO['userinfo']['grps'][0];
 
-        $replace = array( 
-                '@USER@'  => cleanID($user), 
+        // set group for unregistered users
+        if (!isset($group)) {
+            $group = 'ALL';
+        }
+
+        $time_stamp = time();
+        if(preg_match('/@DATE(\w+)@/',$id,$matches)) {
+            switch($matches[1]) {
+            case 'PMONTH':
+                $time_stamp = strtotime("-1 month");
+                break;
+            case 'NMONTH':
+                $time_stamp = strtotime("+1 month");
+                break;
+            case 'NWEEK':
+                $time_stamp = strtotime("+1 week");
+                break;
+            case 'PWEEK':
+                $time_stamp = strtotime("-1 week");
+                break;
+            case 'TOMORROW':
+                $time_stamp = strtotime("+1 day");
+                break;
+            case 'YESTERDAY':
+                $time_stamp = strtotime("-1 day");
+                break;
+            case 'NYEAR':
+                $time_stamp = strtotime("+1 year");
+                break;
+            case 'PYEAR':
+                $time_stamp = strtotime("-1 year");
+                break;
+            }
+            $id = preg_replace('/@DATE(\w+)@/','', $id);
+        }
+
+        $replace = array(
+                '@USER@'  => cleanID($user),
                 '@NAME@'  => cleanID($INFO['userinfo']['name']),
                 '@GROUP@' => cleanID($group),
-                '@YEAR@'  => date('Y'), 
-                '@MONTH@' => date('m'), 
-                '@DAY@'   => date('d'), 
-                ); 
-        return str_replace(array_keys($replace), array_values($replace), $id); 
+                '@YEAR@'  => date('Y',$time_stamp),
+                '@MONTH@' => date('m',$time_stamp),
+                '@WEEK@' => date('W',$time_stamp),
+                '@DAY@'   => date('d',$time_stamp),
+                '@YEARPMONTH@' => date('Ym',strtotime("-1 month")),
+                '@PMONTH@' => date('m',strtotime("-1 month")),
+                '@NMONTH@' => date('m',strtotime("+1 month")),
+                '@YEARNMONTH@' => date('Ym',strtotime("+1 month")),
+                '@YEARPWEEK@' => date('YW',strtotime("-1 week")),
+                '@PWEEK@' => date('W',strtotime("-1 week")),
+                '@NWEEK@' => date('W',strtotime("+1 week")),
+                '@YEARNWEEK@' => date('YW',strtotime("+1 week")),
+                );
+        return str_replace(array_keys($replace), array_values($replace), $id);
     }
 }
 // vim:ts=4:sw=4:et:

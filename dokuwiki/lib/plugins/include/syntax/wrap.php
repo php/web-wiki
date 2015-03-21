@@ -7,11 +7,7 @@
  * @author  Michael Hamann <michael@content-space.de>
  */
 
-if (!defined('DOKU_INC'))
-    define('DOKU_INC', realpath(dirname(__FILE__) . '/../../') . '/');
-if (!defined('DOKU_PLUGIN'))
-    define('DOKU_PLUGIN', DOKU_INC . 'lib/plugins/');
-require_once (DOKU_PLUGIN . 'syntax.php');
+if (!defined('DOKU_INC')) die('must be used inside DokuWiki');
 
 class syntax_plugin_include_wrap extends DokuWiki_Syntax_Plugin {
 
@@ -23,7 +19,7 @@ class syntax_plugin_include_wrap extends DokuWiki_Syntax_Plugin {
         return 50;
     }
 
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         // this is a syntax plugin that doesn't offer any syntax, so there's nothing to handle by the parser
     }
 
@@ -34,20 +30,29 @@ class syntax_plugin_include_wrap extends DokuWiki_Syntax_Plugin {
      * @author Michael Klier <chi@chimeric.de>
      * @author Michael Hamann <michael@content-space.de>
      */
-    function render($mode, &$renderer, $data) {
+    function render($mode, Doku_Renderer $renderer, $data) {
         if ($mode == 'xhtml') {
-            switch($data[0]) {
+            list($state, $page, $redirect, $secid) = $data;
+            switch($state) {
                 case 'open':
-                    if ($data[2]) { // $data[2] = $flags['redirect']
-                        $renderer->startSectionEdit(0, 'plugin_include_start', $data[1]);
+                    if ($redirect) {
+                        $renderer->startSectionEdit(0, 'plugin_include_start', $page);
                     } else {
-                        $renderer->startSectionEdit(0, 'plugin_include_start_noredirect', $data[1]);
+                        $renderer->startSectionEdit(0, 'plugin_include_start_noredirect', $page);
                     }
                     $renderer->finishSectionEdit();
                     // Start a new section with type != section so headers in the included page
                     // won't print section edit buttons of the parent page
-                    $renderer->startSectionEdit(0, 'plugin_include_end', $data[1]);
-                    $renderer->doc .= '<div class="plugin_include_content plugin_include__' . $data[1] . '">' . DOKU_LF;
+                    $renderer->startSectionEdit(0, 'plugin_include_end', $page);
+                    if ($secid === NULL) {
+                        $id = '';
+                    } else {
+                        $id = ' id="'.$secid.'"';
+                    }
+                    $renderer->doc .= '<div class="plugin_include_content plugin_include__' . $page .'"'.$id.'>' . DOKU_LF;
+                    if (is_a($renderer,'renderer_plugin_dw2pdf')) {
+                        $renderer->doc .= '<a name="'.$secid.'" />';
+                    }
                     break;
                 case 'close':
                     $renderer->finishSectionEdit();

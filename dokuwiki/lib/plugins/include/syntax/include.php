@@ -24,29 +24,62 @@ require_once(DOKU_PLUGIN.'syntax.php');
  */ 
 class syntax_plugin_include_include extends DokuWiki_Syntax_Plugin { 
 
+    /** @var $helper helper_plugin_include */
     var $helper = null;
 
+    /**
+     * Get syntax plugin type.
+     *
+     * @return string The plugin type.
+     */
     function getType() { return 'substition'; }
+
+    /**
+     * Get sort order of syntax plugin.
+     *
+     * @return int The sort order.
+     */
     function getSort() { return 303; }
+
+    /**
+     * Get paragraph type.
+     *
+     * @return string The paragraph type.
+     */
     function getPType() { return 'block'; }
 
+    /**
+     * Connect patterns/modes
+     *
+     * @param $mode mixed The current mode
+     */
     function connectTo($mode) {  
         $this->Lexer->addSpecialPattern("{{page>.+?}}", $mode, 'plugin_include_include');  
         $this->Lexer->addSpecialPattern("{{section>.+?}}", $mode, 'plugin_include_include'); 
         $this->Lexer->addSpecialPattern("{{namespace>.+?}}", $mode, 'plugin_include_include'); 
         $this->Lexer->addSpecialPattern("{{tagtopic>.+?}}", $mode, 'plugin_include_include'); 
-    } 
+    }
 
-    function handle($match, $state, $pos, &$handler) {
+    /**
+     * Handle syntax matches
+     *
+     * @param string       $match   The current match
+     * @param int          $state   The match state
+     * @param int          $pos     The position of the match
+     * @param Doku_Handler $handler The hanlder object
+     * @return array The instructions of the plugin
+     */
+    function handle($match, $state, $pos, Doku_Handler $handler) {
 
         $match = substr($match, 2, -2); // strip markup
         list($match, $flags) = explode('&', $match, 2);
 
         // break the pattern up into its parts 
         list($mode, $page, $sect) = preg_split('/>|#/u', $match, 3); 
-        $check = null;
+        $check = false;
         if (isset($sect)) $sect = sectionID($sect, $check);
-        return array($mode, $page, $sect, explode('&', $flags));
+        $level = NULL;
+        return array($mode, $page, $sect, explode('&', $flags), $level, $pos);
     }
 
     /**
@@ -54,8 +87,8 @@ class syntax_plugin_include_include extends DokuWiki_Syntax_Plugin {
      *
      * @author Michael Hamann <michael@content-space.de>
      */
-    function render($format, &$renderer, $data) {
-        global $ID, $conf;
+    function render($format, Doku_Renderer $renderer, $data) {
+        global $ID;
 
         // static stack that records all ancestors of the child pages
         static $page_stack = array();
@@ -66,15 +99,16 @@ class syntax_plugin_include_include extends DokuWiki_Syntax_Plugin {
         $parent_id = $page_stack[count($page_stack)-1];
         $root_id = $page_stack[0];
 
-        list($mode, $page, $sect, $flags, $level) = $data;
+        list($mode, $page, $sect, $flags, $level, $pos) = $data;
 
         if (!$this->helper)
-            $this->helper =& plugin_load('helper', 'include');
+            $this->helper = plugin_load('helper', 'include');
         $flags = $this->helper->get_flags($flags);
 
-        $pages = $this->helper->_get_included_pages($mode, $page, $sect, $parent_id);
+        $pages = $this->helper->_get_included_pages($mode, $page, $sect, $parent_id, $flags);
 
         if ($format == 'metadata') {
+            /** @var Doku_Renderer_metadata $renderer */
 
             // remove old persistent metadata of previous versions of the include plugin
             if (isset($renderer->persistent['plugin_include'])) {
@@ -82,24 +116,42 @@ class syntax_plugin_include_include extends DokuWiki_Syntax_Plugin {
                 unset($renderer->meta['plugin_include']);
             }
 
-            $renderer->meta['plugin_include']['instructions'][] = compact('mode', 'page', 'sect', 'parent_id');
+            $renderer->meta['plugin_include']['instructions'][] = compact('mode', 'page', 'sect', 'parent_id', $flags);
             if (!isset($renderer->meta['plugin_include']['pages']))
                $renderer->meta['plugin_include']['pages'] = array(); // add an array for array_merge
             $renderer->meta['plugin_include']['pages'] = array_merge($renderer->meta['plugin_include']['pages'], $pages);
             $renderer->meta['plugin_include']['include_content'] = isset($_REQUEST['include_content']);
         }
 
+        $secids = array();
+        if ($format == 'xhtml') {
+            $secids = p_get_metadata($ID, 'plugin_include secids');
+        }
+
         foreach ($pages as $page) {
             extract($page);
+            $id = $page['id'];
+            $exists = $page['exists'];
 
             if (in_array($id, $page_stack)) continue;
             array_push($page_stack, $id);
 
             // add references for backlink
-            if ($format == 'metadata')
+            if ($format == 'metadata') {
                 $renderer->meta['relation']['references'][$id] = $exists;
+                $renderer->meta['relation']['haspart'][$id]    = $exists;
+                if (!$sect && !$flags['firstsec'] && !$flags['linkonly'] && !isset($renderer->meta['plugin_include']['secids'][$id])) {
+                    $renderer->meta['plugin_include']['secids'][$id] = array('hid' => 'plugin_include__'.str_replace(':', '__', $id), 'pos' => $pos);
+                }
+            }
 
-            $instructions = $this->helper->_get_instructions($id, $sect, $mode, $level, $flags, $root_id);
+            if (isset($secids[$id]) && $pos === $secids[$id]['pos']) {
+                $flags['include_secid'] = $secids[$id]['hid'];
+            } else {
+                unset($flags['include_secid']);
+            }
+
+            $instructions = $this->helper->_get_instructions($id, $sect, $mode, $level, $flags, $root_id, $secids);
 
             $renderer->nest($instructions);
 

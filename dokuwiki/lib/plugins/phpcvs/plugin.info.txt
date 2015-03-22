@@ -1,0 +1,7 @@
+base   phpcvs
+author Lukas Smith
+email  smith@pooteeweet.org
+date   2013-12-16
+name   PHP CVS
+desc   Auth component
+url    http://git.php.net/?p=web/wiki.git;a=tree;f=dokuwiki/lib/plugins/phpcvs

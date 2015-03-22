@@ -52,11 +52,7 @@ include __DIR__ . "/../../../shared/templates/header.inc";
 
 <section id="breadcrumbs">
 <nav>
-<ol>
-<?php foreach(array_slice(breadcrumbs(), -8) as $breadcrumb => $name): ?>
-    <li><?php tpl_link(wl($breadcrumb), hsc($name), 'class="breadcrumbs" title="'.$id.'"')?></li>
-<?php endforeach ?>
-</ol>
+<?php tpl_youarehere(' › '); ?>
 </nav>
 </section>
 <section class="mainscreen">

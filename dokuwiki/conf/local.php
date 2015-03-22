@@ -22,5 +22,7 @@ $conf['rss_content'] = 'htmldiff';
 $conf['userewrite'] = '1';
 $conf['useslash'] = 1;
 $conf['send404'] = 1;
+$conf['breadcrumbs'] = 0;
+$conf['youarehere'] = 1;
 
 // end auto-generated content

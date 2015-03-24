@@ -39,13 +39,8 @@ if (empty($_SERVER['REMOTE_USER'])) {
 }
 ob_start();
 tpl_metaheaders();
-$HEAD_RAND = ob_get_contents();
-ob_end_clean();
+$HEAD_WIKI = ob_get_clean();
 $CSS = array("/styles/wiki.css");
-$HEAD_RAND = <<< EXTRA
-<script type="text/javascript" charset="utf-8" src="/lib/exe/js.php?tseed=5d2c1bdf8687c762731f425556438dd5"></script>
-
-EXTRA;
 
 include __DIR__ . "/../../../shared/templates/header.inc";
 ?>
@@ -139,5 +134,5 @@ include __DIR__ . "/../../../shared/templates/header.inc";
 </section>
 
 <?php $SECONDSCREEN = tpl_toc(true);
+$JS = false;
 include __DIR__ . "/../../../shared/templates/footer.inc";
-

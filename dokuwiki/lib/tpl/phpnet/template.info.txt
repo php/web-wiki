@@ -1,7 +1,7 @@
-base     dokuwiki
-author   Anika Henke
-email    anika@selfthinker.org
-date     2013-05-02
-name     DokuWiki Template
-desc     DokuWiki's default template since 2012
-url      http://www.dokuwiki.org/template:dokuwiki
+base     phpnet
+author   The PHP Group
+email    systems@php.net
+date     2015-03-24
+name     php.net Template
+desc     Template of wiki.php.net
+url      http://git.php.net/?p=web/wiki.git;a=tree;f=dokuwiki/lib/tpl/phpnet

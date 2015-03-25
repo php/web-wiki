@@ -1591,7 +1591,6 @@ function html_register(){
     }
     $form->addElement(form_makeTextField('fullname', $INPUT->post->str('fullname'), $lang['fullname'], '', 'block', $base_attrs));
     $form->addElement(form_makeField('email','email', $INPUT->post->str('email'), $lang['email'], '', 'block', $email_attrs));
-    $form->addElement(form_makeTextField('spam', $_POST['spam'], 'To which email address do you have to send an email now?', '', 'block', array('size'=>'50')));
     $form->addElement(form_makeButton('submit', '', $lang['btn_register']));
     $form->endFieldset();
     html_form('register', $form);

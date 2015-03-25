@@ -1,0 +1,7 @@
+base   phpreg
+author Christoph M. Becker
+email  cmb@php.net
+date   2015-03-25
+name   PHP Reg
+desc   Registration spam prevention
+url    http://git.php.net/?p=web/wiki.git;a=tree;f=dokuwiki/lib/plugins/phpreg

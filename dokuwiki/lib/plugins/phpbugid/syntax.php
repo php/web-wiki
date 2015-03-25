@@ -18,20 +18,6 @@ class  syntax_plugin_phpbugid extends DokuWiki_Syntax_Plugin {
 
 
     /**
-     * return some info
-     */
-    function getInfo(){
-      return array(
-        'author' => 'Lukas Kahwe Smith',
-        'email'  => 'smith@pooteeweet.org',
-        'date'   => '2008-06-20',
-        'name'   => 'PHP Bug id',
-        'desc'   => 'Add a short syntax to link to php bugs',
-        'url'    => 'http://svn.php.net/viewvc/web/php-wiki/trunk/dokuwiki/lib/plugins/phpbugid/',
-      );
-    }
-
-    /**
      * What kind of syntax are we?
      */
     function getType(){

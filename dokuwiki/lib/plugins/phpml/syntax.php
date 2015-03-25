@@ -18,20 +18,6 @@ class  syntax_plugin_phpml extends DokuWiki_Syntax_Plugin {
 
 
     /**
-     * return some info
-     */
-    function getInfo(){
-      return array(
-        'author' => 'Lukas Kahwe Smith',
-        'email'  => 'smith@pooteeweet.org',
-        'date'   => '2008-06-20',
-        'name'   => 'PHP ML',
-        'desc'   => 'Add a short syntax to link to php mailinglists',
-        'url'    => 'http://cvs.php.net/viewvc.cgi/php-wiki-web/dokuwiki/lib/plugins/phpml/syntax.php?view=markup',
-      );
-    }
-
-    /**
      * What kind of syntax are we?
      */
     function getType(){

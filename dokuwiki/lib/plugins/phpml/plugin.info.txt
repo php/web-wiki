@@ -1,7 +1,0 @@
-base   phpml
-author Lukas Kahwe Smith
-email  <smith@pooteeweet.org>
-date   2008-06-20
-name   PHP ML
-desc   Add a short syntax to link to php mailinglists
-url    https://wiki.php.net/wiki/phpml

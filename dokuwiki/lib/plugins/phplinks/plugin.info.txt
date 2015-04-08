@@ -1,0 +1,7 @@
+base   phplinks
+author The PHP Group
+email  systems@php.net
+date   2015-04-08
+name   PHP Links
+desc   Shortcut syntax for links to PHP mailing lists and bug tracker; based on phpbugid and phpml by Lukas Kahwe Smith
+url    https://wiki.php.net/wiki/phplinks

@@ -1,7 +1,0 @@
-base   phpbugid
-author Lukas Kahwe Smith
-email  <smith@pooteeweet.org>
-date   2008-06-20
-name   PHP Bug id
-desc   Add a short syntax to link to php bugs
-url    https://wiki.php.net/wiki/phpbugid

@@ -20,4 +20,5 @@ usergroups:*	@usergroups	8
 usergroups	@usergroups	8
 licenses:*	@ALL		0
 licenses:*	@phpcvs		16
-
+doc:*	@doc	8
+doc	@doc	8

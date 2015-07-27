@@ -22,4 +22,4 @@ licenses:*	@ALL		0
 licenses:*	@phpcvs		16
 doc:*	@doc	8
 doc	@doc	8
-phpng-upgrading	@beberlei	8
+phpng-upgrading	@php7upgrading	8

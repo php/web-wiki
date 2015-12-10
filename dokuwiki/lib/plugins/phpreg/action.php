@@ -57,7 +57,7 @@ class action_plugin_phpreg extends DokuWiki_Action_Plugin
         $spam = isset($_POST['spam']) ? $_POST['spam'] : '';
         $out = form_makeTextField(
             'spam', $spam,
-            'To which email address do you have to send an email now?',
+            'To which email address do you have to send an email to now?',
             '', 'block', array('size' => '50')
         );
         $event->data->insertElement($pos, $out);

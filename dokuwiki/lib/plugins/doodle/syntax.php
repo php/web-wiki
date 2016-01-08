@@ -2,10 +2,10 @@
 /**
  * Doodle Plugin 2.0: helps to schedule meetings
  *
- * @license	GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @url     http://www.dokuwiki.org/plugin:doodle2
  * @author  Robert Rackl <wiki@doogie.de>
- * @author	Jonathan Tsai <tryweb@ichiayi.com>
+ * @author  Jonathan Tsai <tryweb@ichiayi.com>
  * @author  Esther Brunner <wikidesign@gmail.com>
  * @author  Romain Coltel <aorimn@gmail.com>
  */
@@ -25,6 +25,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  *   adminUsers="user1|user2"
  *   adminGroups="group1|group2"
  *   voteType="default|multi"
+ *   anonymous="true|false"
  *   closed="true|false" >
  *     * Option 1 
  *     * Option 2 **some wikimarkup** \\ is __allowed__!
@@ -99,7 +100,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             'adminGroups'    => '',
             'adminMail'      => null,
             'voteType'       => 'default',
-            'closed'         => FALSE
+            'closed'         => FALSE,
+            'anonymous'      => FALSE,
         );
 
         //----- parse parameteres into name="value" pairs  
@@ -148,6 +150,9 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             } else
             if (strcmp($name, "SORT") == 0) {
                 $params['sort'] = $value;  // make it possible to sort by time
+            } else
+            if (strcmp($name, "ANONYMOUS") == 0) {
+                $params['anonymous'] = strcasecmp($value, "TRUE") == 0;
             }
         }
 
@@ -598,7 +603,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
           debout('Doodle must have title.');
           return 'doodle.doodle';
         }
-        $dID       = hsc(trim($this->params['title']));
+        if($this->params['anonymous']) {
+            // different filename for anonymous polls, so that it won't be possible
+            // to reveal anonymous poll data by making it not anonymous
+            $dID = "a.";
+        } else {
+            $dID = "o.";
+        }
+        $dID       .= hsc(trim($this->params['title']));
         $dfile     = metaFN($dID, '.doodle');       // serialized doodle data file in meta directory
         return $dfile;        
     }

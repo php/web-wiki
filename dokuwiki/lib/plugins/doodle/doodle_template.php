@@ -9,6 +9,7 @@
   global $ID;
 
   $template = $this->template;
+  $anonymous = $this->params['anonymous'];
   $c = count($template['choices']);
 ?>
 
@@ -36,15 +37,19 @@
 <?php } ?>
     </tr>
 
-<?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
+<?php foreach ($template['doodleData'] as $fullname => $userData) { 
+    if ($anonymous && $INFO['userinfo']['name'] != $fullname) {
+		continue;
+	}
+	?>
     <tr>
         <td class="rightalign">
-          <?php $fullname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
-          <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
+          <?php $linkname = '<a href="//people.php.net/user.php?username=' . $fullname.'">' .$fullname. '</a>';?>
+          <?php echo $userData['editLinks'].$linkname.$userData['username'] ?>
         </td>
         <?php for ($col = 0; $col < $c; $col++) {
             echo $userData['choice'][$col];
-        } ?>        
+        } ?>
     </tr>
 <?php } ?>
  

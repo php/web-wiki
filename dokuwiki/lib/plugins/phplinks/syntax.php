@@ -68,7 +68,7 @@ class syntax_plugin_phplinks extends DokuWiki_Syntax_Plugin
         preg_match('/\[\[([-a-z]+)\@(\d+)\|?([^\]]*)\]\]/', $match, $matches);
         if ($matches[1] == 'bugid') {
             $name = $matches[3] ? $matches[3] : 'bug #' . $matches[2];
-            $url = 'http://bugs.php.net/bug.php?id=' . $matches[1];
+            $url = 'http://bugs.php.net/bug.php?id=' . $matches[2];
         } else {
             $name = $matches[3] ? $matches[3] : 'ml#' . $matches[2];
             $url = 'http://marc.info/?l=' . $matches[1] . '&m=' . $matches[2];

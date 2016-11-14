@@ -1,0 +1,7 @@
+base   blockquote
+author Anika Henke (previous author: Gina Haeussge)
+email  anika@selfthinker.org
+date   2016-04-03
+name   Blockquote Plugin
+desc   Write quotations in a semantically correct way
+url    https://www.dokuwiki.org/plugin:blockquote

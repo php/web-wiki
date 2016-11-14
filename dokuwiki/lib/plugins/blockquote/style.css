@@ -1,0 +1,28 @@
+
+/* blockquote */
+.dokuwiki blockquote.blockquote-plugin {
+    margin: 1em 3em 1em 3em;
+    border: 1px dotted __border__;
+    background: __background_alt__ url(images/blockquote.gif) no-repeat 0.3em 0.3em;
+    padding: 1em;
+}
+
+/* cite */
+.dokuwiki cite.blockquote-plugin {
+    font-style: italic;
+}
+
+.dokuwiki blockquote.blockquote-plugin cite.blockquote-plugin {
+    text-align: right;
+    display: block;
+}
+
+.dokuwiki blockquote.blockquote-plugin cite.blockquote-plugin:before {
+    content: "—";
+}
+
+/* q */
+.dokuwiki q.blockquote-plugin {
+    border: 1px dotted __border__;
+    background: __background_alt__;
+}

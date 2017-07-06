@@ -1,4 +1,15 @@
 <?php
 
-$conf['auth']['phpcvs'] = array('admins' => array('lsmith', 'pajoye', 'philip', 'scottmac', 'bjori', 'derick', 'tyrael', 'krakjoe', 'pollita'));
+$conf['auth']['phpcvs'] = array('admins' => array(
+    'bjori',
+    'derick',
+    'krakjoe',
+    'levim',
+    'lsmith',
+    'pajoye',
+    'philip',
+    'pollita',
+    'scottmac',
+    'tyrael',
+));
 

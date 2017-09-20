@@ -2,7 +2,7 @@
 
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * 
+ *
  * @author Jaka Kranjc <lynxlupodian@hotmail.com>
  * @author Boštjan Seničar <senicar@gmail.com>
  * @author Dejan Levec <webphp@gmail.com>
@@ -42,7 +42,6 @@ $lang['btn_update']            = 'Posodobi';
 $lang['btn_delete']            = 'Izbriši';
 $lang['btn_back']              = 'Nazaj';
 $lang['btn_backlink']          = 'Povratne povezave';
-$lang['btn_backtomedia']       = 'Nazaj na izbiro predstavnih datotek';
 $lang['btn_subscribe']         = 'Urejanje naročnin';
 $lang['btn_profile']           = 'Posodobi profil';
 $lang['btn_reset']             = 'Ponastavi';
@@ -150,7 +149,6 @@ $lang['js']['media_overwrt']   = 'Prepiši obstoječe datoteke';
 $lang['rssfailed']             = 'Prišlo je do napake med pridobivanjem vira: ';
 $lang['nothingfound']          = 'Ni najdenih predmetov.';
 $lang['mediaselect']           = 'Predstavne datoteke';
-$lang['fileupload']            = 'Pošiljanje predstavnih datotek';
 $lang['uploadsucc']            = 'Pošiljanje je bilo uspešno končano.';
 $lang['uploadfail']            = 'Pošiljanje je spodletelo. Morda so uporabljena neustrezna dovoljenja.';
 $lang['uploadwrong']           = 'Pošiljanje je zavrnjeno. Uporabljena pripona datoteke je prepovedana.';
@@ -239,7 +237,6 @@ $lang['qb_sig']                = 'Vstavi podpis';
 $lang['qb_smileys']            = 'Smeški';
 $lang['qb_chars']              = 'Posebni znaki';
 $lang['upperns']               = 'skoči na nadrejeni imenski prostor';
-$lang['admin_register']        = 'Dodaj novega uporabnika';
 $lang['metaedit']              = 'Uredi metapodatke';
 $lang['metasaveerr']           = 'Zapisovanje metapodatkov je spodletelo';
 $lang['metasaveok']            = 'Metapodatki so shranjeni';
@@ -272,7 +269,6 @@ $lang['subscr_style_every']    = 'elektronsko sporočilo ob vsaki spremembi';
 $lang['subscr_style_digest']   = 'strnjeno elektronsko sporočilo sprememb za vsako stran (vsakih %.2f dni)';
 $lang['subscr_style_list']     = 'seznam spremenjenih strani od zadnjega elektronskega sporočila (vsakih %.2f dni)';
 $lang['authtempfail']          = 'Potrditev uporabnika je trenutno nedostopna. Stopite v stik s skrbnikom sistema wiki.';
-$lang['authpwdexpire']         = 'Geslo bo poteklo v %d dneh. Priporočljivo ga je zamenjati.';
 $lang['i_chooselang']          = 'Izberite jezik';
 $lang['i_installer']           = 'DokuWiki namestitev';
 $lang['i_wikiname']            = 'Ime Wiki spletišča';
@@ -335,3 +331,5 @@ $lang['currentns']             = 'Trenutni imenski prostor';
 $lang['searchresult']          = 'Rezultati iskanja';
 $lang['plainhtml']             = 'Zapis HTML';
 $lang['wikimarkup']            = 'Oblikovni jezik Wiki';
+$lang['email_signature_text'] = 'Sporočilo je samodejno ustvarjeno na spletišču
+@DOKUWIKIURL@';

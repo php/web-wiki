@@ -2,7 +2,7 @@
 
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * 
+ *
  * @author Davor Turkalj <turki.bsc@gmail.com>
  */
 $lang['menu']                  = 'Upravitelj korisnicima';
@@ -21,7 +21,7 @@ $lang['delete']                = 'Obriši';
 $lang['delete_selected']       = 'Obriši odabrano';
 $lang['edit']                  = 'Uredi';
 $lang['edit_prompt']           = 'Uredi ovog korisnika';
-$lang['modify']                = 'Snimi promjene';
+$lang['modify']                = 'Pohrani promjene';
 $lang['search']                = 'Potraži';
 $lang['search_prompt']         = 'Izvedi potragu';
 $lang['clear']                 = 'Obriši filtar potrage';
@@ -33,7 +33,7 @@ $lang['line']                  = 'Linija br.';
 $lang['error']                 = 'Poruka o grešci';
 $lang['summary']               = 'Prikaz korisnika %1$d-%2$d od %3$d nađenih. Ukupno %4$d korisnika.';
 $lang['nonefound']             = 'Nema korisnika koji odgovaraju filtru.Ukupno %d korisnika.';
-$lang['delete_ok']             = '%d korisnik obrisano';
+$lang['delete_ok']             = '%d korisnika obrisano';
 $lang['delete_fail']           = '%d neuspjelih brisanja.';
 $lang['update_ok']             = 'Korisnik uspješno izmijenjen';
 $lang['update_fail']           = 'Neuspjela izmjena korisnika';
@@ -49,7 +49,7 @@ $lang['note_group']            = 'Novi korisnik biti će dodijeljen u podrazumij
 $lang['note_pass']             = 'Lozinka će biti generirana ako se polje ostavi prazno i obavješćivanje korisnika je omogućeno.';
 $lang['add_ok']                = 'Korisnik uspješno dodan';
 $lang['add_fail']              = 'Neuspješno dodavanje korisnika';
-$lang['notify_ok']             = 'Obavijest korisniku poslana';
+$lang['notify_ok']             = 'Poslana obavijest korisniku';
 $lang['notify_fail']           = 'Obavijest korisniku ne može biti poslana';
 $lang['import_userlistcsv']    = 'Datoteka s popisom korisnika (CSV):';
 $lang['import_header']         = 'Zadnje greške pri uvozu';
@@ -64,3 +64,11 @@ $lang['import_error_readfail'] = 'Uvoz neuspješan. Ne mogu pročitati učitanu 
 $lang['import_error_create']   = 'Ne mogu kreirati korisnika';
 $lang['import_notify_fail']    = 'Obavijest uvezenom korisniku %s nije moguće poslati na adresu e-pošte %s.';
 $lang['import_downloadfailures'] = 'Preuzmi  greške kao CSV za ispravak';
+$lang['addUser_error_missing_pass'] = 'Molim ili postavite lozinku ili aktivirajte obavijest korisniku za omogućavanje generiranje lozinke.';
+$lang['addUser_error_pass_not_identical'] = 'Unesene lozinke nisu identične.';
+$lang['addUser_error_modPass_disabled'] = 'Izmjena lozinke je trenutno onemogućena.';
+$lang['addUser_error_name_missing'] = 'Molim unesite ime novog korisnika.';
+$lang['addUser_error_modName_disabled'] = 'Izmjena imena je trenutno onemogućena.';
+$lang['addUser_error_mail_missing'] = 'Molim unesite adresu epošte za novog korisnika.';
+$lang['addUser_error_modMail_disabled'] = 'Izmjena adrese epošte je trenutno onemogućena.';
+$lang['addUser_error_create_event_failed'] = 'Dodatak je spriječio dodavanje novog korisnika. Pogledajte eventualne ostale poruke za više informacija.';

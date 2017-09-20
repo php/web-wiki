@@ -1,4 +1,4 @@
-Do vaší DokuWiki byl nahrán nový dokument. Tady jsou detaily:
+Do DokuWiki byl nahrán nový dokument. Tady jsou detaily:
 
 Soubor : @MEDIA@
 Datum : @DATE@
@@ -8,7 +8,3 @@ Hostitel : @HOSTNAME@
 Velikost : @SIZE@
 MIME typ : @MIME@
 Uživatel : @USER@
-
--- 
-Tento email byl automaticky vygenerován systémem DokuWiki
-@DOKUWIKIURL@

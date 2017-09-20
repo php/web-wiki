@@ -1,12 +1,14 @@
 <?php
+
 /**
- * Turkish language file
- *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * 
  * @author Aydın Coşkuner <aydinweb@gmail.com>
  * @author Cihan Kahveci <kahvecicihan@gmail.com>
  * @author Yavuz Selim <yavuzselim@gmail.com>
  * @author Caleb Maclennan <caleb@alerque.com>
  * @author farukerdemoncel@gmail.com
+ * @author Mete Cuma <mcumax@gmail.com>
  */
 $lang['menu']                  = 'Site Ayarları';
 $lang['error']                 = 'Ayarlar yanlış bir değer girildiği için güncellenemedi. Lütfen değişikliklerinizi gözden geçirin ve tekrar gönderin.
@@ -51,7 +53,7 @@ $lang['breadcrumbs']           = 'Ekmek kırıntıların sayısı';
 $lang['youarehere']            = 'hiyerarşik ekmek kırıntıları';
 $lang['fullpath']              = 'sayfaların tüm patikasını (full path) göster';
 $lang['typography']            = 'Tipografik değiştirmeleri yap';
-$lang['dformat']               = 'Tarih biçimi (PHP\'nin <a href="http://www.php.net/strftime">strftime</a> fonksiyonuna bakın)';
+$lang['dformat']               = 'Tarih biçimi (PHP\'nin <a href="http://php.net/strftime">strftime</a> fonksiyonuna bakın)';
 $lang['signature']             = 'İmza';
 $lang['showuseras']            = 'Bir sayfayı en son düzenleyen kullanıcıya ne gösterilsin';
 $lang['toptoclevel']           = 'İçindekiler için en üst seviye';

@@ -15,6 +15,7 @@ define('HTTP_CHUNK_SIZE',16*1024);
  *
  * @author   Simon Willison <swillison@gmail.com>
  * @link     http://simonwillison.net/2003/Apr/23/conditionalGet/
+ *
  * @param    int $timestamp lastmodified time of the cache file
  * @returns  void or exits with previously header() commands executed
  */
@@ -64,6 +65,7 @@ function http_conditionalRequest($timestamp){
  * Let the webserver send the given file via x-sendfile method
  *
  * @author Chris Smith <chris@jalakai.co.uk>
+ *
  * @param string $file absolute path of file to send
  * @returns  void or exits with previous header() commands executed
  */
@@ -190,8 +192,13 @@ function http_rangeRequest($fh,$size,$mime){
  * (samepath/samefilename.sameext.gz) created after the uncompressed file
  *
  * @author Chris Smith <chris.eureka@jalakai.co.uk>
+ *
+ * @param string $uncompressed_file
+ * @return bool
  */
 function http_gzip_valid($uncompressed_file) {
+    if(!DOKU_HAS_GZIP) return false;
+
     $gzip = $uncompressed_file.'.gz';
     if (filemtime($gzip) < filemtime($uncompressed_file)) {    // filemtime returns false (0) if file doesn't exist
         return copy($uncompressed_file, 'compress.zlib://'.$gzip);
@@ -206,6 +213,9 @@ function http_gzip_valid($uncompressed_file) {
  * This function handles output of cacheable resource files. It ses the needed
  * HTTP headers. If a useable cache is present, it is passed to the web server
  * and the script is terminated.
+ *
+ * @param string $cache cache file name
+ * @param bool   $cache_ok    if cache can be used
  */
 function http_cached($cache, $cache_ok) {
     global $conf;
@@ -235,16 +245,19 @@ function http_cached($cache, $cache_ok) {
 
 /**
  * Cache content and print it
+ *
+ * @param string $file file name
+ * @param string $content
  */
 function http_cached_finish($file, $content) {
     global $conf;
 
     // save cache file
     io_saveFile($file, $content);
-    if(function_exists('gzopen')) io_saveFile("$file.gz",$content);
+    if(DOKU_HAS_GZIP) io_saveFile("$file.gz",$content);
 
     // finally send output
-    if ($conf['gzip_output']) {
+    if ($conf['gzip_output'] && DOKU_HAS_GZIP) {
         header('Vary: Accept-Encoding');
         header('Content-Encoding: gzip');
         print gzencode($content,9,FORCE_GZIP);

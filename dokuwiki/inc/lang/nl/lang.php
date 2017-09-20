@@ -2,7 +2,7 @@
 
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * 
+ *
  * @author François Kooman <fkooman.tuxed.net>
  * @author Jack van Klaren <dokuwiki@afentoe.xs4all.nl>
  * @author Riny Heijdendael <riny@heijdendael.nl>
@@ -24,6 +24,15 @@
  * @author gicalle <gicalle@hotmail.com>
  * @author Rene <wllywlnt@yahoo.com>
  * @author Johan Vervloet <johan.vervloet@gmail.com>
+ * @author Mijndert <mijndert@mijndertstuij.nl>
+ * @author Johan Wijnker <johan@wijnker.eu>
+ * @author Hugo Smet <hugo.smet@scarlet.be>
+ * @author Mark C. Prins <mprins@users.sf.net>
+ * @author Wesley de Weerd <wesleytiel@gmail.com>
+ * @author Sjoerd <sjoerd@sjomar.eu>
+ * @author Joachim David <joa_david@hotmail.com>
+ * @author mark prins <mprins@users.sf.net>
+ * @author stafmans <dokuwiki@stafmans.net>
  */
 $lang['encoding']              = 'utf-8';
 $lang['direction']             = 'ltr';
@@ -33,18 +42,18 @@ $lang['singlequoteopening']    = '‘';
 $lang['singlequoteclosing']    = '’';
 $lang['apostrophe']            = '’';
 $lang['btn_edit']              = 'Pagina aanpassen';
-$lang['btn_source']            = 'Toon broncode';
+$lang['btn_source']            = 'Toon bronpagina';
 $lang['btn_show']              = 'Toon pagina';
 $lang['btn_create']            = 'Maak deze pagina aan';
 $lang['btn_search']            = 'Zoeken';
 $lang['btn_save']              = 'Opslaan';
 $lang['btn_preview']           = 'Voorbeeld';
 $lang['btn_top']               = 'Terug naar boven';
-$lang['btn_newer']             = '<< recenter';
+$lang['btn_newer']             = '<< nieuwer';
 $lang['btn_older']             = 'ouder >>';
 $lang['btn_revs']              = 'Oude revisies';
 $lang['btn_recent']            = 'Recente aanpassingen';
-$lang['btn_upload']            = 'Upload';
+$lang['btn_upload']            = 'Uploaden';
 $lang['btn_cancel']            = 'Annuleren';
 $lang['btn_index']             = 'Index';
 $lang['btn_secedit']           = 'Aanpassen';
@@ -55,7 +64,6 @@ $lang['btn_update']            = 'Bijwerken';
 $lang['btn_delete']            = 'Verwijder';
 $lang['btn_back']              = 'Terug';
 $lang['btn_backlink']          = 'Referenties';
-$lang['btn_backtomedia']       = 'Terug naar Bestandsselectie';
 $lang['btn_subscribe']         = 'Inschrijven wijzigingen';
 $lang['btn_profile']           = 'Profiel aanpassen';
 $lang['btn_reset']             = 'Wissen';
@@ -85,11 +93,12 @@ $lang['badpassconfirm']        = 'Sorry, het wachtwoord was onjuist';
 $lang['minoredit']             = 'Kleine wijziging';
 $lang['draftdate']             = 'Concept automatisch opgeslagen op';
 $lang['nosecedit']             = 'De pagina is tussentijds veranderd, sectie-informatie was verouderd, volledige pagina geladen.';
-$lang['searchcreatepage']      = "Niks gevonden? Maak een nieuwe pagina met als naam je zoekopdracht. Klik hiervoor op ''Maak deze pagina aan''.";
+$lang['searchcreatepage']      = 'Niks gevonden? Maak een nieuwe pagina met als naam je zoekopdracht. Klik hiervoor op \'\'Maak deze pagina aan\'\'.';
 $lang['regmissing']            = 'Vul alle velden in';
 $lang['reguexists']            = 'Er bestaat al een gebruiker met deze loginnaam.';
 $lang['regsuccess']            = 'De gebruiker is aangemaakt. Het wachtwoord is per e-mail verzonden.';
 $lang['regsuccess2']           = 'De gebruiker is aangemaakt.';
+$lang['regfail']               = 'Gebruiker kon niet aangemaakt worden.';
 $lang['regmailfail']           = 'Het lijkt erop dat het sturen van de wachtwoordmail mislukt is. Neem contact op met de beheerder!';
 $lang['regbadmail']            = 'Het opgegeven e-mailadres lijkt ongeldig - als je denkt dat dit niet klopt neem dan contact op met de beheerder.';
 $lang['regbadpass']            = 'De twee ingevoerde wachtwoorden zijn niet identiek. Probeer het nog eens.';
@@ -104,6 +113,7 @@ $lang['profdeleteuser']        = 'Verwijder gebruiker';
 $lang['profdeleted']           = 'Uw gebruikersaccount is verwijderd van deze wiki';
 $lang['profconfdelete']        = 'Ik wil mijn gebruikersaccount verwijderen van deze wiki. <br/> Deze actie kan niet ongedaan gemaakt worden.';
 $lang['profconfdeletemissing'] = 'Bevestigingsvinkje niet gezet';
+$lang['proffail']              = 'Gebruikersprofiel werd niet bijgewerkt.';
 $lang['pwdforget']             = 'Je wachtwoord vergeten? Vraag een nieuw wachtwoord aan';
 $lang['resendna']              = 'Deze wiki ondersteunt het verzenden van wachtwoorden niet';
 $lang['resendpwd']             = 'Nieuw wachtwoord bepalen voor';
@@ -168,7 +178,6 @@ $lang['js']['media_overwrt']   = 'Bestaande bestanden overschrijven';
 $lang['rssfailed']             = 'Er is een fout opgetreden bij het ophalen van de feed: ';
 $lang['nothingfound']          = 'Er werd niets gevonden.';
 $lang['mediaselect']           = 'Bestandsselectie';
-$lang['fileupload']            = 'Bestandsupload';
 $lang['uploadsucc']            = 'Upload geslaagd';
 $lang['uploadfail']            = 'Upload mislukt. Misschien verkeerde permissies?';
 $lang['uploadwrong']           = 'Upload mislukt. Deze bestandsextensie is verboden!';
@@ -259,7 +268,6 @@ $lang['qb_sig']                = 'Handtekening invoegen';
 $lang['qb_smileys']            = 'Smileys';
 $lang['qb_chars']              = 'Speciale tekens';
 $lang['upperns']               = 'Spring naar bovenliggende namespace';
-$lang['admin_register']        = 'Nieuwe gebruiker toevoegen';
 $lang['metaedit']              = 'Metadata wijzigen';
 $lang['metasaveerr']           = 'Schrijven van metadata mislukt';
 $lang['metasaveok']            = 'Metadata bewaard';
@@ -292,7 +300,6 @@ $lang['subscr_style_every']    = 'Email bij iedere wijziging';
 $lang['subscr_style_digest']   = 'Samenvattings-email met wijzigingen per pagina (elke %.2f dagen)';
 $lang['subscr_style_list']     = 'Lijst van veranderde pagina\'s sinds laatste email (elke %.2f dagen)';
 $lang['authtempfail']          = 'Gebruikersauthenticatie is tijdelijk niet beschikbaar. Als deze situatie zich blijft voordoen, informeer dan de wikibeheerder.';
-$lang['authpwdexpire']         = 'Je wachtwoord verloopt in %d dagen, je moet het binnenkort veranderen';
 $lang['i_chooselang']          = 'Kies je taal';
 $lang['i_installer']           = 'DokuWiki Installer';
 $lang['i_wikiname']            = 'Wikinaam';
@@ -302,6 +309,7 @@ $lang['i_problems']            = 'De installer vond problemen, hieronder aangege
 $lang['i_modified']            = 'Uit veiligheidsoverwegingen werkt dit script alleen met nieuwe en onveranderde DokuWiki-installaties. Pak de bestanden opnieuw uit of raadpleeg de <a href="http://dokuwiki.org/install">Dokuwiki installatie-instructies</a>';
 $lang['i_funcna']              = 'PHP functie <code>%s</code> is niet beschikbaar. Wellicht heeft je hosting provider deze uitgeschakeld?';
 $lang['i_phpver']              = 'PHP-versie <code>%s</code> is lager dan de vereiste <code>%s</code>. Upgrade PHP.';
+$lang['i_mbfuncoverload']      = 'Om DokuWiki te draaien moet mbstring.func_overload uitgeschakeld zijn in php.ini.';
 $lang['i_permfail']            = '<code>%s</code> is niet schrijfbaar voor DokuWiki. Pas de permissie-instellingen van deze directory aan.';
 $lang['i_confexists']          = '<code>%s</code> bestaat reeds';
 $lang['i_writeerr']            = 'Niet mogelijk om <code>%s</code> aan te maken. Controleer de directory/bestandspermissies en maak het bestand handmatig aan.';
@@ -316,7 +324,7 @@ $lang['i_pol2']                = 'Besloten wiki (lezen, schrijven en uploaden al
 $lang['i_allowreg']            = 'Toestaan dat gebruikers zichzelf registeren';
 $lang['i_retry']               = 'Opnieuw';
 $lang['i_license']             = 'Kies a.u.b. een licentie die u voor uw inhoud wilt gebruiken:';
-$lang['i_license_none']        = 'Toon geen licentie informatie';
+$lang['i_license_none']        = 'Toon geen licentie-informatie';
 $lang['i_pop_field']           = 'Help ons om je DokuWiki ervaring te verbeteren';
 $lang['i_pop_label']           = 'Stuur eens per maand geanonimiseerde gebruiksstatistieken naar de Dokuwiki ontwikkelaars';
 $lang['recent_global']         = 'Je bekijkt momenteel de wijzigingen binnen de <b>%s</b> namespace. Je kunt ook de <a href="%s">recente wijzigingen van de hele wiki</a> bekijken.';
@@ -351,7 +359,12 @@ $lang['media_perm_read']       = 'Sorry, u heeft niet voldoende rechten om besta
 $lang['media_perm_upload']     = 'Sorry, u heeft niet voldoende rechten om bestanden te uploaden.';
 $lang['media_update']          = 'Upload nieuwe versie';
 $lang['media_restore']         = 'Deze versie terugzetten';
+$lang['media_acl_warning']     = 'De lijst is mogelijk niet compleet door ACL beperkingen en verborgen pagina\'s.';
 $lang['currentns']             = 'Huidige namespace';
 $lang['searchresult']          = 'Zoekresultaat';
 $lang['plainhtml']             = 'Alleen HTML';
 $lang['wikimarkup']            = 'Wiki Opmaak';
+$lang['page_nonexist_rev']     = 'Pagina bestaat niet bij %s. Het is vervolgens aangemaakt bij <a href="%s">%s</a>.';
+$lang['unable_to_parse_date']  = 'Begrijp het niet bij parameter "%s".';
+$lang['email_signature_text']  = 'Deze mail werd gegenereerd door DokuWiki op
+@DOKUWIKIURL@';

@@ -2,7 +2,7 @@
 
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * 
+ *
  * @author James Do <jdo@myrealbox.com>
  */
 $lang['encoding']              = 'utf-8';
@@ -130,7 +130,6 @@ $lang['js']['media_overwrt']   = 'Ghi đè các file trùng';
 $lang['rssfailed']             = 'Nguồn này gặp phải lỗi';
 $lang['nothingfound']          = 'Không tìm được gì';
 $lang['mediaselect']           = 'Xem';
-$lang['fileupload']            = 'Tải lên tệp media';
 $lang['uploadsucc']            = 'Tải lên thành công';
 $lang['uploadfail']            = 'Tải lên thất bại. Có thể vì không đủ quyền?';
 $lang['uploadwrong']           = 'Tải lên bị từ chối. Cấm tải loại tệp này';
@@ -240,3 +239,5 @@ $lang['media_perm_read']       = 'Sorry, bạn không đủ quyền truy cập.'
 $lang['media_perm_upload']     = 'Xin lỗi, bạn không đủ quyền để upload file lên.';
 $lang['media_update']          = 'Tải lên phiên bản mới';
 $lang['media_restore']         = 'Phục hồi phiên bản này';
+$lang['email_signature_text'] = 'Điện thư này tạo bởi DokuWiki ở
+@DOKUWIKIURL@';

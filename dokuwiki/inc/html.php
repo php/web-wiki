@@ -74,7 +74,7 @@ function html_login(){
 function html_denied() {
     print p_locale_xhtml('denied');
 
-    if(!$_SERVER['REMOTE_USER']){
+    if(empty($_SERVER['REMOTE_USER'])){
         html_login();
     }
 }
@@ -83,6 +83,10 @@ function html_denied() {
  * inserts section edit buttons if wanted or removes the markers
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string $text
+ * @param bool   $show show section edit buttons?
+ * @return string
  */
 function html_secedit($text,$show=true){
     global $INFO;
@@ -101,8 +105,11 @@ function html_secedit($text,$show=true){
  * prepares section edit button data for event triggering
  * used as a callback in html_secedit
  *
- * @triggers HTML_SECEDIT_BUTTON
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param array $matches matches with regexp
+ * @return string
+ * @triggers HTML_SECEDIT_BUTTON
  */
 function html_secedit_button($matches){
     $data = array('secid'  => $matches[1],
@@ -121,6 +128,9 @@ function html_secedit_button($matches){
  * used as default action form HTML_SECEDIT_BUTTON
  *
  * @author Adrian Lang <lang@cosmocode.de>
+ *
+ * @param array $data name, section id and target
+ * @return string html
  */
 function html_secedit_get_button($data) {
     global $ID;
@@ -147,6 +157,8 @@ function html_secedit_get_button($data) {
  * Just the back to top button (in its own form)
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @return string html
  */
 function html_topbtn(){
     global $lang;
@@ -161,8 +173,17 @@ function html_topbtn(){
  * If tooltip exists, the access key tooltip is replaced.
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string         $name
+ * @param string         $id
+ * @param string         $akey   access key
+ * @param string[] $params key-value pairs added as hidden inputs
+ * @param string         $method
+ * @param string         $tooltip
+ * @param bool|string    $label  label text, false: lookup btn_$name in localization
+ * @return string
  */
-function html_btn($name,$id,$akey,$params,$method='get',$tooltip='',$label=false){
+function html_btn($name, $id, $akey, $params, $method='get', $tooltip='', $label=false){
     global $conf;
     global $lang;
 
@@ -200,22 +221,33 @@ function html_btn($name,$id,$akey,$params,$method='get',$tooltip='',$label=false
         $tip = htmlspecialchars($label);
     }
 
-    $ret .= '<input type="submit" value="'.hsc($label).'" class="button" ';
+    $ret .= '<button type="submit" ';
     if($akey){
         $tip .= ' ['.strtoupper($akey).']';
         $ret .= 'accesskey="'.$akey.'" ';
     }
-    $ret .= 'title="'.$tip.'" ';
-    $ret .= '/>';
+    $ret .= 'title="'.$tip.'">';
+    $ret .= hsc($label);
+    $ret .= '</button>';
     $ret .= '</div></form>';
 
     return $ret;
 }
+/**
+ * show a revision warning
+ *
+ * @author Szymon Olewniczak <dokuwiki@imz.re>
+ */
+function html_showrev() {
+    print p_locale_xhtml('showrev');
+}
 
 /**
- * show a wiki page
+ * Show a wiki page
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param null|string $txt wiki text or null for showing $ID
  */
 function html_show($txt=null){
     global $ID;
@@ -242,7 +274,10 @@ function html_show($txt=null){
         echo '</div></div>';
 
     }else{
-        if ($REV||$DATE_AT) print p_locale_xhtml('showrev');
+        if ($REV||$DATE_AT){
+            $data = array('rev' => &$REV, 'date_at' => &$DATE_AT);
+            trigger_event('HTML_SHOWREV_OUTPUT', $data, 'html_showrev');
+        }
         $html = p_wiki_xhtml($ID,$REV,true,$DATE_AT);
         $html = html_secedit($html,$secedit);
         if($INFO['prependTOC']) $html = tpl_toc(true).$html;
@@ -282,6 +317,10 @@ function html_draft(){
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  * @author Harry Fuecks <hfuecks@gmail.com>
+ *
+ * @param string $html
+ * @param array|string $phrases
+ * @return string html
  */
 function html_hilight($html,$phrases){
     $phrases = (array) $phrases;
@@ -300,6 +339,9 @@ function html_hilight($html,$phrases){
  * Callback used by html_hilight()
  *
  * @author Harry Fuecks <hfuecks@gmail.com>
+ *
+ * @param array $m matches
+ * @return string html
  */
 function html_hilight_callback($m) {
     $hlight = unslash($m[0]);
@@ -425,6 +467,9 @@ function html_locked(){
  * @author Andreas Gohr <andi@splitbrain.org>
  * @author Ben Coburn <btcoburn@silicodon.net>
  * @author Kate Arzamastseva <pshns@ukr.net>
+ *
+ * @param int $first skip the first n changelog lines
+ * @param bool|string $media_id id of media, or false for current page
  */
 function html_revisions($first=0, $media_id = false){
     global $ID;
@@ -456,28 +501,64 @@ function html_revisions($first=0, $media_id = false){
         array_pop($revisions); // remove extra log entry
     }
 
-    if (!$media_id) $date = dformat($INFO['lastmod']);
-    else $date = dformat(@filemtime(mediaFN($id)));
-
     if (!$media_id) print p_locale_xhtml('revisions');
 
     $params = array('id' => 'page__revisions', 'class' => 'changes');
-    if ($media_id) $params['action'] = media_managerURL(array('image' => $media_id), '&');
+    if($media_id) {
+        $params['action'] = media_managerURL(array('image' => $media_id), '&');
+    }
+
+    if(!$media_id) {
+        $exists = $INFO['exists'];
+        $display_name = useHeading('navigation') ? hsc(p_get_first_heading($id)) : $id;
+        if(!$display_name) {
+            $display_name = $id;
+        }
+    } else {
+        $exists = file_exists(mediaFN($id));
+        $display_name = $id;
+    }
 
     $form = new Doku_Form($params);
     $form->addElement(form_makeOpenTag('ul'));
 
-    if (!$media_id) $exists = $INFO['exists'];
-    else $exists = @file_exists(mediaFN($id));
+    if($exists && $first == 0) {
+        $minor = false;
+        if($media_id) {
+            $date = dformat(@filemtime(mediaFN($id)));
+            $href = media_managerURL(array('image' => $id, 'tab_details' => 'view'), '&');
 
-    $display_name = (!$media_id && useHeading('navigation')) ? hsc(p_get_first_heading($id)) : $id;
-    if (!$display_name) $display_name = $id;
+            $changelog->setChunkSize(1024);
+            $revinfo = $changelog->getRevisionInfo(@filemtime(fullpath(mediaFN($id))));
 
-    if($exists && $first==0){
-        if (!$media_id && isset($INFO['meta']) && isset($INFO['meta']['last_change']) && $INFO['meta']['last_change']['type']===DOKU_CHANGE_TYPE_MINOR_EDIT)
-            $form->addElement(form_makeOpenTag('li', array('class' => 'minor')));
-        else
-            $form->addElement(form_makeOpenTag('li'));
+            $summary = $revinfo['sum'];
+            if($revinfo['user']) {
+                $editor = $revinfo['user'];
+            } else {
+                $editor = $revinfo['ip'];
+            }
+            $sizechange = $revinfo['sizechange'];
+        } else {
+            $date = dformat($INFO['lastmod']);
+            if(isset($INFO['meta']) && isset($INFO['meta']['last_change'])) {
+                if($INFO['meta']['last_change']['type'] === DOKU_CHANGE_TYPE_MINOR_EDIT) {
+                    $minor = true;
+                }
+                if(isset($INFO['meta']['last_change']['sizechange'])) {
+                    $sizechange = $INFO['meta']['last_change']['sizechange'];
+                } else {
+                    $sizechange = null;
+                }
+            }
+            $pagelog = new PageChangeLog($ID);
+            $latestrev = $pagelog->getRevisions(-1, 1);
+            $latestrev = array_pop($latestrev);
+            $href = wl($id,"rev=$latestrev",false,'&');
+            $summary = $INFO['sum'];
+            $editor = $INFO['editor'];
+        }
+
+        $form->addElement(form_makeOpenTag('li', array('class' => ($minor ? 'minor' : ''))));
         $form->addElement(form_makeOpenTag('div', array('class' => 'li')));
         $form->addElement(form_makeTag('input', array(
                         'type' => 'checkbox',
@@ -490,8 +571,6 @@ function html_revisions($first=0, $media_id = false){
 
         $form->addElement('<img src="'.DOKU_BASE.'lib/images/blank.gif" width="15" height="11" alt="" />');
 
-        if (!$media_id) $href = wl($id);
-        else $href = media_managerURL(array('image' => $id, 'tab_details' => 'view'), '&');
         $form->addElement(form_makeOpenTag('a', array(
                         'class' => 'wikilink1',
                         'href'  => $href)));
@@ -500,28 +579,18 @@ function html_revisions($first=0, $media_id = false){
 
         if ($media_id) $form->addElement(form_makeOpenTag('div'));
 
-        if (!$media_id) {
+        if($summary) {
             $form->addElement(form_makeOpenTag('span', array('class' => 'sum')));
-            $form->addElement(' – ');
-            $form->addElement(htmlspecialchars($INFO['sum']));
+            if(!$media_id) $form->addElement(' – ');
+            $form->addElement('<bdi>' . htmlspecialchars($summary) . '</bdi>');
             $form->addElement(form_makeCloseTag('span'));
         }
 
-        $changelog->setChunkSize(1024);
-
         $form->addElement(form_makeOpenTag('span', array('class' => 'user')));
-        if($media_id) {
-            $revinfo = $changelog->getRevisionInfo(@filemtime(fullpath(mediaFN($id))));
-            if($revinfo['user']) {
-                $editor = $revinfo['user'];
-            } else {
-                $editor = $revinfo['ip'];
-            }
-        } else {
-            $editor = $INFO['editor'];
-        }
-        $form->addElement((empty($editor))?('('.$lang['external_edit'].')'):editorinfo($editor));
+        $form->addElement((empty($editor))?('('.$lang['external_edit'].')'):'<bdi>'.editorinfo($editor).'</bdi>');
         $form->addElement(form_makeCloseTag('span'));
+
+        html_sizechange($sizechange, $form);
 
         $form->addElement('('.$lang['current'].')');
 
@@ -531,19 +600,20 @@ function html_revisions($first=0, $media_id = false){
         $form->addElement(form_makeCloseTag('li'));
     }
 
-    foreach($revisions as $rev){
+    foreach($revisions as $rev) {
         $date = dformat($rev);
         $info = $changelog->getRevisionInfo($rev);
         if($media_id) {
-            $exists = @file_exists(mediaFN($id, $rev));
+            $exists = file_exists(mediaFN($id, $rev));
         } else {
             $exists = page_exists($id, $rev);
         }
 
-        if ($info['type']===DOKU_CHANGE_TYPE_MINOR_EDIT)
-            $form->addElement(form_makeOpenTag('li', array('class' => 'minor')));
-        else
-            $form->addElement(form_makeOpenTag('li'));
+        $class = '';
+        if($info['type'] === DOKU_CHANGE_TYPE_MINOR_EDIT) {
+            $class = 'minor';
+        }
+        $form->addElement(form_makeOpenTag('li', array('class' => $class)));
         $form->addElement(form_makeOpenTag('div', array('class' => 'li')));
         if($exists){
             $form->addElement(form_makeTag('input', array(
@@ -559,9 +629,14 @@ function html_revisions($first=0, $media_id = false){
         $form->addElement(form_makeCloseTag('span'));
 
         if($exists){
-            if (!$media_id) $href = wl($id,"rev=$rev,do=diff", false, '&');
-            else $href = media_managerURL(array('image' => $id, 'rev' => $rev, 'mediado' => 'diff'), '&');
-            $form->addElement(form_makeOpenTag('a', array('href' => $href, 'class' => 'diff_link')));
+            if (!$media_id) {
+                $href = wl($id,"rev=$rev,do=diff", false, '&');
+            } else {
+                $href = media_managerURL(array('image' => $id, 'rev' => $rev, 'mediado' => 'diff'), '&');
+            }
+            $form->addElement(form_makeOpenTag('a', array(
+                            'class' => 'diff_link',
+                            'href' => $href)));
             $form->addElement(form_makeTag('img', array(
                             'src'    => DOKU_BASE.'lib/images/diff.png',
                             'width'  => 15,
@@ -569,9 +644,15 @@ function html_revisions($first=0, $media_id = false){
                             'title'  => $lang['diff'],
                             'alt'    => $lang['diff'])));
             $form->addElement(form_makeCloseTag('a'));
-            if (!$media_id) $href = wl($id,"rev=$rev",false,'&');
-            else $href = media_managerURL(array('image' => $id, 'tab_details' => 'view', 'rev' => $rev), '&');
-            $form->addElement(form_makeOpenTag('a', array('href' => $href, 'class' => 'wikilink1')));
+
+            if (!$media_id) {
+                $href = wl($id,"rev=$rev",false,'&');
+            } else {
+                $href = media_managerURL(array('image' => $id, 'tab_details' => 'view', 'rev' => $rev), '&');
+            }
+            $form->addElement(form_makeOpenTag('a', array(
+                            'class' => 'wikilink1',
+                            'href' => $href)));
             $form->addElement($display_name);
             $form->addElement(form_makeCloseTag('a'));
         }else{
@@ -583,7 +664,7 @@ function html_revisions($first=0, $media_id = false){
 
         if ($info['sum']) {
             $form->addElement(form_makeOpenTag('span', array('class' => 'sum')));
-            if (!$media_id) $form->addElement(' – ');
+            if(!$media_id) $form->addElement(' – ');
             $form->addElement('<bdi>'.htmlspecialchars($info['sum']).'</bdi>');
             $form->addElement(form_makeCloseTag('span'));
         }
@@ -598,6 +679,8 @@ function html_revisions($first=0, $media_id = false){
             $form->addElement('<bdo dir="ltr">'.$info['ip'].'</bdo>');
         }
         $form->addElement(form_makeCloseTag('span'));
+
+        html_sizechange($info['sizechange'], $form);
 
         if ($media_id) $form->addElement(form_makeCloseTag('div'));
 
@@ -646,8 +729,11 @@ function html_revisions($first=0, $media_id = false){
  * @author Matthias Grimm <matthiasgrimm@users.sourceforge.net>
  * @author Ben Coburn <btcoburn@silicodon.net>
  * @author Kate Arzamastseva <pshns@ukr.net>
+ *
+ * @param int $first
+ * @param string $show_changes
  */
-function html_recent($first=0, $show_changes='both'){
+function html_recent($first = 0, $show_changes = 'both') {
     global $conf;
     global $lang;
     global $ID;
@@ -656,48 +742,50 @@ function html_recent($first=0, $show_changes='both'){
      * This is the cheapest solution to get this information.
      */
     $flags = 0;
-    if ($show_changes == 'mediafiles' && $conf['mediarevisions']) {
+    if($show_changes == 'mediafiles' && $conf['mediarevisions']) {
         $flags = RECENTS_MEDIA_CHANGES;
-    } elseif ($show_changes == 'pages') {
+    } elseif($show_changes == 'pages') {
         $flags = 0;
-    } elseif ($conf['mediarevisions']) {
+    } elseif($conf['mediarevisions']) {
         $show_changes = 'both';
         $flags = RECENTS_MEDIA_PAGES_MIXED;
     }
 
-    $recents = getRecents($first,$conf['recent'] + 1,getNS($ID),$flags);
-    if(count($recents) == 0 && $first != 0){
-        $first=0;
-        $recents = getRecents($first,$conf['recent'] + 1,getNS($ID),$flags);
+    $recents = getRecents($first, $conf['recent'] + 1, getNS($ID), $flags);
+    if(count($recents) == 0 && $first != 0) {
+        $first = 0;
+        $recents = getRecents($first, $conf['recent'] + 1, getNS($ID), $flags);
     }
     $hasNext = false;
-    if (count($recents)>$conf['recent']) {
+    if(count($recents) > $conf['recent']) {
         $hasNext = true;
         array_pop($recents); // remove extra log entry
     }
 
     print p_locale_xhtml('recent');
 
-    if (getNS($ID) != '')
+    if(getNS($ID) != '') {
         print '<div class="level1"><p>' . sprintf($lang['recent_global'], getNS($ID), wl('', 'do=recent')) . '</p></div>';
+    }
 
     $form = new Doku_Form(array('id' => 'dw__recent', 'method' => 'GET', 'class' => 'changes'));
     $form->addHidden('sectok', null);
     $form->addHidden('do', 'recent');
     $form->addHidden('id', $ID);
 
-    if ($conf['mediarevisions']) {
+    if($conf['mediarevisions']) {
         $form->addElement('<div class="changeType">');
         $form->addElement(form_makeListboxField(
                     'show_changes',
                     array(
                         'pages'      => $lang['pages_changes'],
                         'mediafiles' => $lang['media_changes'],
-                        'both'       => $lang['both_changes']),
+                        'both'       => $lang['both_changes']
+                    ),
                     $show_changes,
                     $lang['changes_type'],
-                    '','',
-                    array('class'=>'quickselect')));
+                    '', '',
+                    array('class' => 'quickselect')));
 
         $form->addElement(form_makeButton('submit', 'recent', $lang['btn_apply']));
         $form->addElement('</div>');
@@ -705,20 +793,21 @@ function html_recent($first=0, $show_changes='both'){
 
     $form->addElement(form_makeOpenTag('ul'));
 
-    foreach($recents as $recent){
+    foreach($recents as $recent) {
         $date = dformat($recent['date']);
-        if ($recent['type']===DOKU_CHANGE_TYPE_MINOR_EDIT)
-            $form->addElement(form_makeOpenTag('li', array('class' => 'minor')));
-        else
-            $form->addElement(form_makeOpenTag('li'));
 
+        $class = '';
+        if($recent['type'] === DOKU_CHANGE_TYPE_MINOR_EDIT) {
+            $class = 'minor';
+        }
+        $form->addElement(form_makeOpenTag('li', array('class' => $class)));
         $form->addElement(form_makeOpenTag('div', array('class' => 'li')));
 
-        if (!empty($recent['media'])) {
+        if(!empty($recent['media'])) {
             $form->addElement(media_printicon($recent['id']));
         } else {
-            $icon = DOKU_BASE.'lib/images/fileicons/file.png';
-            $form->addElement('<img src="'.$icon.'" alt="'.$recent['id'].'" class="icon" />');
+            $icon = DOKU_BASE . 'lib/images/fileicons/file.png';
+            $form->addElement('<img src="' . $icon . '" alt="' . $recent['id'] . '" class="icon" />');
         }
 
         $form->addElement(form_makeOpenTag('span', array('class' => 'date')));
@@ -728,69 +817,80 @@ function html_recent($first=0, $show_changes='both'){
         $diff = false;
         $href = '';
 
-        if (!empty($recent['media'])) {
-            $diff = (count(getRevisions($recent['id'], 0, 1, 8192, true)) && @file_exists(mediaFN($recent['id'])));
-            if ($diff) {
-                $href = media_managerURL(array('tab_details' => 'history',
-                    'mediado' => 'diff', 'image' => $recent['id'], 'ns' => getNS($recent['id'])), '&');
+        if(!empty($recent['media'])) {
+            $changelog = new MediaChangeLog($recent['id']);
+            $revs = $changelog->getRevisions(0, 1);
+            $diff = (count($revs) && file_exists(mediaFN($recent['id'])));
+            if($diff) {
+                $href = media_managerURL(array(
+                                            'tab_details' => 'history',
+                                            'mediado' => 'diff',
+                                            'image' => $recent['id'],
+                                            'ns' => getNS($recent['id'])
+                                        ), '&');
             }
         } else {
-            $href = wl($recent['id'],"do=diff", false, '&');
+            $href = wl($recent['id'], "do=diff", false, '&');
         }
 
-        if (!empty($recent['media']) && !$diff) {
-            $form->addElement('<img src="'.DOKU_BASE.'lib/images/blank.gif" width="15" height="11" alt="" />');
+        if(!empty($recent['media']) && !$diff) {
+            $form->addElement('<img src="' . DOKU_BASE . 'lib/images/blank.gif" width="15" height="11" alt="" />');
         } else {
             $form->addElement(form_makeOpenTag('a', array('class' => 'diff_link', 'href' => $href)));
             $form->addElement(form_makeTag('img', array(
-                            'src'   => DOKU_BASE.'lib/images/diff.png',
-                            'width' => 15,
-                            'height'=> 11,
-                            'title' => $lang['diff'],
-                            'alt'   => $lang['diff']
-                            )));
+                            'src'    => DOKU_BASE . 'lib/images/diff.png',
+                            'width'  => 15,
+                            'height' => 11,
+                            'title'  => $lang['diff'],
+                            'alt'    => $lang['diff']
+                        )));
             $form->addElement(form_makeCloseTag('a'));
         }
 
-        if (!empty($recent['media'])) {
-            $href = media_managerURL(array('tab_details' => 'history',
-                'image' => $recent['id'], 'ns' => getNS($recent['id'])), '&');
+        if(!empty($recent['media'])) {
+            $href = media_managerURL(array('tab_details' => 'history', 'image' => $recent['id'], 'ns' => getNS($recent['id'])), '&');
         } else {
-            $href = wl($recent['id'],"do=revisions",false,'&');
+            $href = wl($recent['id'], "do=revisions", false, '&');
         }
-        $form->addElement(form_makeOpenTag('a', array('class' => 'revisions_link', 'href' => $href)));
+        $form->addElement(form_makeOpenTag('a', array(
+                        'class' => 'revisions_link',
+                        'href'  => $href)));
         $form->addElement(form_makeTag('img', array(
-                        'src'   => DOKU_BASE.'lib/images/history.png',
-                        'width' => 12,
-                        'height'=> 14,
-                        'title' => $lang['btn_revs'],
-                        'alt'   => $lang['btn_revs']
-                        )));
+                        'src'    => DOKU_BASE . 'lib/images/history.png',
+                        'width'  => 12,
+                        'height' => 14,
+                        'title'  => $lang['btn_revs'],
+                        'alt'    => $lang['btn_revs']
+                    )));
         $form->addElement(form_makeCloseTag('a'));
 
-        if (!empty($recent['media'])) {
+        if(!empty($recent['media'])) {
             $href = media_managerURL(array('tab_details' => 'view', 'image' => $recent['id'], 'ns' => getNS($recent['id'])), '&');
-            $class = (file_exists(mediaFN($recent['id']))) ? 'wikilink1' : $class = 'wikilink2';
-            $form->addElement(form_makeOpenTag('a', array('class' => $class, 'href' => $href)));
+            $class = file_exists(mediaFN($recent['id'])) ? 'wikilink1' : 'wikilink2';
+            $form->addElement(form_makeOpenTag('a', array(
+                        'class' => $class,
+                        'href'  => $href)));
             $form->addElement($recent['id']);
             $form->addElement(form_makeCloseTag('a'));
         } else {
-            $form->addElement(html_wikilink(':'.$recent['id'],useHeading('navigation')?null:$recent['id']));
+            $form->addElement(html_wikilink(':' . $recent['id'], useHeading('navigation') ? null : $recent['id']));
         }
         $form->addElement(form_makeOpenTag('span', array('class' => 'sum')));
-        $form->addElement(' – '.htmlspecialchars($recent['sum']));
+        $form->addElement(' – ' . htmlspecialchars($recent['sum']));
         $form->addElement(form_makeCloseTag('span'));
 
         $form->addElement(form_makeOpenTag('span', array('class' => 'user')));
-        if($recent['user']){
-            $form->addElement('<bdi>'.editorinfo($recent['user']).'</bdi>');
-            if(auth_ismanager()){
-                $form->addElement(' <bdo dir="ltr">('.$recent['ip'].')</bdo>');
+        if($recent['user']) {
+            $form->addElement('<bdi>' . editorinfo($recent['user']) . '</bdi>');
+            if(auth_ismanager()) {
+                $form->addElement(' <bdo dir="ltr">(' . $recent['ip'] . ')</bdo>');
             }
-        }else{
-            $form->addElement('<bdo dir="ltr">'.$recent['ip'].'</bdo>');
+        } else {
+            $form->addElement('<bdo dir="ltr">' . $recent['ip'] . '</bdo>');
         }
         $form->addElement(form_makeCloseTag('span'));
+
+        html_sizechange($recent['sizechange'], $form);
 
         $form->addElement(form_makeCloseTag('div'));
         $form->addElement(form_makeCloseTag('li'));
@@ -799,30 +899,32 @@ function html_recent($first=0, $show_changes='both'){
 
     $form->addElement(form_makeOpenTag('div', array('class' => 'pagenav')));
     $last = $first + $conf['recent'];
-    if ($first > 0) {
+    if($first > 0) {
         $first -= $conf['recent'];
-        if ($first < 0) $first = 0;
+        if($first < 0) $first = 0;
         $form->addElement(form_makeOpenTag('div', array('class' => 'pagenav-prev')));
-        $form->addElement(form_makeTag('input', array(
-                    'type'  => 'submit',
-                    'name'  => 'first['.$first.']',
-                    'value' => $lang['btn_newer'],
-                    'accesskey' => 'n',
-                    'title' => $lang['btn_newer'].' [N]',
-                    'class' => 'button show'
+        $form->addElement(form_makeOpenTag('button', array(
+                        'type'      => 'submit',
+                        'name'      => 'first[' . $first . ']',
+                        'accesskey' => 'n',
+                        'title'     => $lang['btn_newer'] . ' [N]',
+                        'class'     => 'button show'
                     )));
+        $form->addElement($lang['btn_newer']);
+        $form->addElement(form_makeCloseTag('button'));
         $form->addElement(form_makeCloseTag('div'));
     }
-    if ($hasNext) {
+    if($hasNext) {
         $form->addElement(form_makeOpenTag('div', array('class' => 'pagenav-next')));
-        $form->addElement(form_makeTag('input', array(
-                        'type'  => 'submit',
-                        'name'  => 'first['.$last.']',
-                        'value' => $lang['btn_older'],
+        $form->addElement(form_makeOpenTag('button', array(
+                        'type'      => 'submit',
+                        'name'      => 'first[' . $last . ']',
                         'accesskey' => 'p',
-                        'title' => $lang['btn_older'].' [P]',
-                        'class' => 'button show'
-                        )));
+                        'title'     => $lang['btn_older'] . ' [P]',
+                        'class'     => 'button show'
+                    )));
+        $form->addElement($lang['btn_older']);
+        $form->addElement(form_makeCloseTag('button'));
         $form->addElement(form_makeCloseTag('div'));
     }
     $form->addElement(form_makeCloseTag('div'));
@@ -833,15 +935,16 @@ function html_recent($first=0, $show_changes='both'){
  * Display page index
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string $ns
  */
 function html_index($ns){
     global $conf;
     global $ID;
     $ns  = cleanID($ns);
-    #fixme use appropriate function
     if(empty($ns)){
-        $ns = dirname(str_replace(':','/',$ID));
-        if($ns == '.') $ns ='';
+        $ns = getNS($ID);
+        if($ns === false) $ns ='';
     }
     $ns  = utf8_encodeFN(str_replace(':','/',$ns));
 
@@ -861,6 +964,9 @@ function html_index($ns){
  * User function for html_buildlist()
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param array $item
+ * @return string
  */
 function html_list_index($item){
     global $ID, $conf;
@@ -891,10 +997,24 @@ function html_list_index($item){
  * it gives different classes to opened or closed "folders"
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param array $item
+ * @return string html
  */
 function html_li_index($item){
+    global $INFO;
+    global $ACT;
+
+    $class = '';
+    $id = '';
+
     if($item['type'] == "f"){
-        return '<li class="level'.$item['level'].'">';
+        // scroll to the current item
+        if($item['id'] == $INFO['id'] && $ACT == 'index') {
+            $id = ' id="scroll__here"';
+            $class = ' bounce';
+        }
+        return '<li class="level'.$item['level'].$class.'" '.$id.'>';
     }elseif($item['open']){
         return '<li class="open">';
     }else{
@@ -906,6 +1026,9 @@ function html_li_index($item){
  * Default List item
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param array $item
+ * @return string html
  */
 function html_li_default($item){
     return '<li class="level'.$item['level'].'">';
@@ -929,9 +1052,9 @@ function html_li_default($item){
  * @param array    $data  array with item arrays
  * @param string   $class class of ul wrapper
  * @param callable $func  callback to print an list item
- * @param string   $lifunc callback to the opening li tag
+ * @param callable $lifunc callback to the opening li tag
  * @param bool     $forcewrapper Trigger building a wrapper ul if the first level is
-                                 0 (we have a root object) or 1 (just the root content)
+ *                               0 (we have a root object) or 1 (just the root content)
  * @return string html of an unordered list
  */
 function html_buildlist($data,$class,$func,$lifunc='html_li_default',$forcewrapper=false){
@@ -1021,12 +1144,13 @@ function html_backlinks(){
 
 /**
  * Get header of diff HTML
+ *
  * @param string $l_rev   Left revisions
  * @param string $r_rev   Right revision
  * @param string $id      Page id, if null $ID is used
  * @param bool   $media   If it is for media files
  * @param bool   $inline  Return the header on a single line
- * @return array HTML snippets for diff header
+ * @return string[] HTML snippets for diff header
  */
 function html_diff_head($l_rev, $r_rev, $id = null, $media = false, $inline = false) {
     global $lang;
@@ -1334,7 +1458,13 @@ function html_diff_navigation($pagelog, $type, $l_rev, $r_rev) {
 
     // last timestamp is not in changelog, retrieve timestamp from metadata
     // note: when page is removed, the metadata timestamp is zero
-    $r_rev = $r_rev ? $r_rev : $INFO['meta']['last_change']['date'];
+    if(!$r_rev) {
+        if(isset($INFO['meta']['last_change']['date'])) {
+            $r_rev = $INFO['meta']['last_change']['date'];
+        } else {
+            $r_rev = 0;
+        }
+    }
 
     //retrieve revisions with additional info
     list($l_revs, $r_revs) = $pagelog->getRevisionsAround($l_rev, $r_rev);
@@ -1482,7 +1612,7 @@ function html_diff_navigationlink($difftype, $linktype, $lrev, $rrev = null) {
 /**
  * Insert soft breaks in diff html
  *
- * @param $diffhtml
+ * @param string $diffhtml
  * @return string
  */
 function html_insert_softbreaks($diffhtml) {
@@ -1521,6 +1651,9 @@ REGEX;
  * show warning on conflict detection
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param string $text
+ * @param string $summary
  */
 function html_conflict($text,$summary){
     global $ID;
@@ -1681,7 +1814,6 @@ function html_edit(){
     global $lang;
     global $conf;
     global $TEXT;
-    global $RANGE;
 
     if ($INPUT->has('changecheck')) {
         $check = $INPUT->str('changecheck');
@@ -1783,6 +1915,7 @@ function html_edit(){
  * Display the default edit form
  *
  * Is the default action for HTML_EDIT_FORMSELECTION.
+ *
  * @param mixed[] $param
  */
 function html_edit_form($param) {
@@ -1802,6 +1935,8 @@ function html_edit_form($param) {
  * Adds a checkbox for minor edits for logged in users
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @return array|bool
  */
 function html_minoredit(){
     global $conf;
@@ -1902,6 +2037,7 @@ function html_debug(){
     print '</pre>';
 
     if (function_exists('apache_get_version')) {
+        $apache = array();
         $apache['version'] = apache_get_version();
 
         if (function_exists('apache_get_modules')) {
@@ -1913,121 +2049,6 @@ function html_debug(){
     }
 
     print '</body></html>';
-}
-
-/**
- * List available Administration Tasks
- *
- * @author Andreas Gohr <andi@splitbrain.org>
- * @author Håkan Sandell <hakan.sandell@home.se>
- */
-function html_admin(){
-    global $ID;
-    global $INFO;
-    global $conf;
-    /** @var DokuWiki_Auth_Plugin $auth */
-    global $auth;
-
-    // build menu of admin functions from the plugins that handle them
-    $pluginlist = plugin_list('admin');
-    $menu = array();
-    foreach ($pluginlist as $p) {
-        /** @var DokuWiki_Admin_Plugin $obj */
-        if(($obj = plugin_load('admin',$p)) === null) continue;
-
-        // check permissions
-        if($obj->forAdminOnly() && !$INFO['isadmin']) continue;
-
-        $menu[$p] = array('plugin' => $p,
-                'prompt' => $obj->getMenuText($conf['lang']),
-                'sort' => $obj->getMenuSort()
-                );
-    }
-
-    // data security check
-    // simple check if the 'savedir' is relative and accessible when appended to DOKU_URL
-    // it verifies either:
-    //   'savedir' has been moved elsewhere, or
-    //   has protection to prevent the webserver serving files from it
-    if (substr($conf['savedir'],0,2) == './'){
-        echo '<a style="border:none; float:right;"
-                href="http://www.dokuwiki.org/security#web_access_security">
-                <img src="'.DOKU_URL.$conf['savedir'].'/security.png" alt="Your data directory seems to be protected properly."
-                onerror="this.parentNode.style.display=\'none\'" /></a>';
-    }
-
-    print p_locale_xhtml('admin');
-
-    // Admin Tasks
-    if($INFO['isadmin']){
-        ptln('<ul class="admin_tasks">');
-
-        if($menu['usermanager'] && $auth && $auth->canDo('getUsers')){
-            ptln('  <li class="admin_usermanager"><div class="li">'.
-                    '<a href="'.wl($ID, array('do' => 'admin','page' => 'usermanager')).'">'.
-                    $menu['usermanager']['prompt'].'</a></div></li>');
-        }
-        unset($menu['usermanager']);
-
-        if($menu['acl']){
-            ptln('  <li class="admin_acl"><div class="li">'.
-                    '<a href="'.wl($ID, array('do' => 'admin','page' => 'acl')).'">'.
-                    $menu['acl']['prompt'].'</a></div></li>');
-        }
-        unset($menu['acl']);
-
-        if($menu['extension']){
-            ptln('  <li class="admin_plugin"><div class="li">'.
-                    '<a href="'.wl($ID, array('do' => 'admin','page' => 'extension')).'">'.
-                    $menu['extension']['prompt'].'</a></div></li>');
-        }
-        unset($menu['extension']);
-
-        if($menu['config']){
-            ptln('  <li class="admin_config"><div class="li">'.
-                    '<a href="'.wl($ID, array('do' => 'admin','page' => 'config')).'">'.
-                    $menu['config']['prompt'].'</a></div></li>');
-        }
-        unset($menu['config']);
-    }
-    ptln('</ul>');
-
-    // Manager Tasks
-    ptln('<ul class="admin_tasks">');
-
-    if($menu['revert']){
-        ptln('  <li class="admin_revert"><div class="li">'.
-                '<a href="'.wl($ID, array('do' => 'admin','page' => 'revert')).'">'.
-                $menu['revert']['prompt'].'</a></div></li>');
-    }
-    unset($menu['revert']);
-
-    if($menu['popularity']){
-        ptln('  <li class="admin_popularity"><div class="li">'.
-                '<a href="'.wl($ID, array('do' => 'admin','page' => 'popularity')).'">'.
-                $menu['popularity']['prompt'].'</a></div></li>');
-    }
-    unset($menu['popularity']);
-
-    // print DokuWiki version:
-    ptln('</ul>');
-    echo '<div id="admin__version">';
-    echo getVersion();
-    echo '</div>';
-
-    // print the rest as sorted list
-    if(count($menu)){
-        usort($menu, 'p_sort_modes');
-        // output the menu
-        ptln('<div class="clearer"></div>');
-        print p_locale_xhtml('adminplugins');
-        ptln('<ul>');
-        foreach ($menu as $item) {
-            if (!$item['prompt']) continue;
-            ptln('  <li><div class="li"><a href="'.wl($ID, 'do=admin&amp;page='.$item['plugin']).'">'.$item['prompt'].'</a></div></li>');
-        }
-        ptln('</ul>');
-    }
 }
 
 /**
@@ -2080,6 +2101,9 @@ function html_resendpwd() {
  * Return the TOC rendered to XHTML
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
+ * @param array $toc
+ * @return string html
  */
 function html_TOC($toc){
     if(!count($toc)) return '';
@@ -2098,6 +2122,9 @@ function html_TOC($toc){
 
 /**
  * Callback for html_buildlist
+ *
+ * @param array $item
+ * @return string html
  */
 function html_list_toc($item){
     if(isset($item['hid'])){
@@ -2132,6 +2159,7 @@ function html_mktocitem($link, $text, $level, $hash='#'){
  * Triggers an event with the form name: HTML_{$name}FORM_OUTPUT
  *
  * @author Tom N Harris <tnharris@whoopdedo.org>
+ *
  * @param string     $name The name of the form
  * @param Doku_Form  $form The form
  */
@@ -2144,6 +2172,7 @@ function html_form($name, &$form) {
 /**
  * Form print function.
  * Just calls printForm() on the data object.
+ *
  * @param Doku_Form $data The form
  */
 function html_form_output($data) {
@@ -2242,6 +2271,7 @@ function html_tabs($tabs, $current_tab = null) {
 
     echo '</ul>'.NL;
 }
+
 /**
  * Prints a single tab
  *
@@ -2266,3 +2296,28 @@ function html_tab($href, $caption, $selected=false) {
     echo $tab;
 }
 
+/**
+ * Display size change
+ *
+ * @param int $sizechange - size of change in Bytes
+ * @param Doku_Form $form - form to add elements to
+ */
+
+function html_sizechange($sizechange, Doku_Form $form) {
+    if(isset($sizechange)) {
+        $class = 'sizechange';
+        $value = filesize_h(abs($sizechange));
+        if($sizechange > 0) {
+            $class .= ' positive';
+            $value = '+' . $value;
+        } elseif($sizechange < 0) {
+            $class .= ' negative';
+            $value = '-' . $value;
+        } else {
+            $value = '±' . $value;
+        }
+        $form->addElement(form_makeOpenTag('span', array('class' => $class)));
+        $form->addElement($value);
+        $form->addElement(form_makeCloseTag('span'));
+    }
+}

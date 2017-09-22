@@ -31,6 +31,32 @@ function hsc($string) {
 }
 
 /**
+ * Checks if the given input is blank
+ *
+ * This is similar to empty() but will return false for "0".
+ *
+ * Please note: when you pass uninitialized variables, they will implicitly be created
+ * with a NULL value without warning.
+ *
+ * To avoid this it's recommended to guard the call with isset like this:
+ *
+ * (isset($foo) && !blank($foo))
+ * (!isset($foo) || blank($foo))
+ *
+ * @param $in
+ * @param bool $trim Consider a string of whitespace to be blank
+ * @return bool
+ */
+function blank(&$in, $trim = false) {
+    if(is_null($in)) return true;
+    if(is_array($in)) return empty($in);
+    if($in === "\0") return true;
+    if($trim && trim($in) === '') return true;
+    if(strlen($in) > 0) return false;
+    return empty($in);
+}
+
+/**
  * print a newline terminated string
  *
  * You can give an indention as optional parameter
@@ -49,7 +75,7 @@ function ptln($string, $indent = 0) {
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  *
- * @param $string string being stripped
+ * @param string $string being stripped
  * @return string
  */
 function stripctl($string) {
@@ -62,12 +88,19 @@ function stripctl($string) {
  * @author  Andreas Gohr <andi@splitbrain.org>
  * @link    http://en.wikipedia.org/wiki/Cross-site_request_forgery
  * @link    http://christ1an.blogspot.com/2007/04/preventing-csrf-efficiently.html
+ *
  * @return  string
  */
 function getSecurityToken() {
     /** @var Input $INPUT */
     global $INPUT;
-    return PassHash::hmac('md5', session_id().$INPUT->server->str('REMOTE_USER'), auth_cookiesalt());
+
+    $user = $INPUT->server->str('REMOTE_USER');
+    $session = session_id();
+
+    // CSRF checks are only for logged in users - do not generate for anonymous
+    if(trim($user) == '' || trim($session) == '') return '';
+    return PassHash::hmac('md5', $session.$user, auth_cookiesalt());
 }
 
 /**
@@ -95,7 +128,7 @@ function checkSecurityToken($token = null) {
  * @author  Andreas Gohr <andi@splitbrain.org>
  *
  * @param bool $print  if true print the field, otherwise html of the field is returned
- * @return void|string html of hidden form field
+ * @return string html of hidden form field
  */
 function formSecurityToken($print = true) {
     $ret = '<div class="no"><input type="hidden" name="sectok" value="'.getSecurityToken().'" /></div>'."\n";
@@ -120,6 +153,7 @@ function basicinfo($id, $htmlClient=true){
     global $INPUT;
 
     // set info about manager/admin status.
+    $info = array();
     $info['isadmin']   = false;
     $info['ismanager'] = false;
     if($INPUT->server->has('REMOTE_USER')) {
@@ -185,8 +219,8 @@ function pageinfo() {
     }
 
     $info['locked']     = checklock($ID);
-    $info['filepath']   = fullpath(wikiFN($ID));
-    $info['exists']     = @file_exists($info['filepath']);
+    $info['filepath']   = wikiFN($ID);
+    $info['exists']     = file_exists($info['filepath']);
     $info['currentrev'] = @filemtime($info['filepath']);
     if($REV) {
         //check if current revision was meant
@@ -199,8 +233,8 @@ function pageinfo() {
             msg($lang['nosecedit'], 0);
         } else {
             //really use old revision
-            $info['filepath'] = fullpath(wikiFN($ID, $REV));
-            $info['exists']   = @file_exists($info['filepath']);
+            $info['filepath'] = wikiFN($ID, $REV);
+            $info['exists']   = file_exists($info['filepath']);
         }
     }
     $info['rev'] = $REV;
@@ -254,7 +288,7 @@ function pageinfo() {
 
     // draft
     $draft = getCacheName($info['client'].$ID, '.draft');
-    if(@file_exists($draft)) {
+    if(file_exists($draft)) {
         if(@filemtime($draft) < @filemtime(wikiFN($ID))) {
             // remove stale draft
             @unlink($draft);
@@ -335,7 +369,7 @@ function buildAttributes($params, $skipempty = false) {
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  *
- * @return array(pageid=>name, ... )
+ * @return string[] with the data: array(pageid=>name, ... )
  */
 function breadcrumbs() {
     // we prepare the breadcrumbs early for quick session closing
@@ -350,7 +384,7 @@ function breadcrumbs() {
     $crumbs = isset($_SESSION[DOKU_COOKIE]['bc']) ? $_SESSION[DOKU_COOKIE]['bc'] : array();
     //we only save on show and existing wiki documents
     $file = wikiFN($ID);
-    if($ACT != 'show' || !@file_exists($file)) {
+    if($ACT != 'show' || !file_exists($file)) {
         $_SESSION[DOKU_COOKIE]['bc'] = $crumbs;
         return $crumbs;
     }
@@ -688,6 +722,7 @@ function checkwordblock($text = '') {
         }
         if(count($re) && preg_match('#('.join('|', $re).')#si', $text, $matches)) {
             // prepare event data
+            $data = array();
             $data['matches']        = $matches;
             $data['userinfo']['ip'] = $INPUT->server->str('REMOTE_ADDR');
             if($INPUT->server->str('REMOTE_USER')) {
@@ -806,6 +841,17 @@ function clientismobile() {
 }
 
 /**
+ * check if a given link is interwiki link
+ *
+ * @param string $link the link, e.g. "wiki>page"
+ * @return bool
+ */
+function link_isinterwiki($link){
+    if (preg_match('/^[a-zA-Z0-9\.]+>/u',$link)) return true;
+    return false;
+}
+
+/**
  * Convert one or more comma separated IPs to hostnames
  *
  * If $conf['dnslookups'] is disabled it simply returns the input string
@@ -850,7 +896,7 @@ function checklock($id) {
     $lock = wikiLockFN($id);
 
     //no lockfile
-    if(!@file_exists($lock)) return false;
+    if(!file_exists($lock)) return false;
 
     //lockfile expired
     if((time() - filemtime($lock)) > $conf['locktime']) {
@@ -904,7 +950,7 @@ function unlock($id) {
     global $INPUT;
 
     $lock = wikiLockFN($id);
-    if(@file_exists($lock)) {
+    if(file_exists($lock)) {
         @list($ip, $session) = explode("\n", io_readFile($lock));
         if($ip == $INPUT->server->str('REMOTE_USER') || $ip == clientIP() || $session == session_id()) {
             @unlink($lock);
@@ -971,7 +1017,7 @@ function rawLocale($id, $ext = 'txt') {
  * @author Andreas Gohr <andi@splitbrain.org>
  *
  * @param string $id   page id
- * @param string $rev  timestamp when a revision of wikitext is desired
+ * @param string|int $rev  timestamp when a revision of wikitext is desired
  * @return string
  */
 function rawWiki($id, $rev = '') {
@@ -1007,13 +1053,13 @@ function pageTemplate($id) {
             // if the before event did not set a template file, try to find one
             if(empty($data['tplfile'])) {
                 $path = dirname(wikiFN($id));
-                if(@file_exists($path.'/_template.txt')) {
+                if(file_exists($path.'/_template.txt')) {
                     $data['tplfile'] = $path.'/_template.txt';
                 } else {
                     // search upper namespaces for templates
                     $len = strlen(rtrim($conf['datadir'], '/'));
                     while(strlen($path) >= $len) {
-                        if(@file_exists($path.'/__template.txt')) {
+                        if(file_exists($path.'/__template.txt')) {
                             $data['tplfile'] = $path.'/__template.txt';
                             break;
                         }
@@ -1111,7 +1157,7 @@ function parsePageTemplate(&$data) {
  * @param string $range in form "from-to"
  * @param string $id    page id
  * @param string $rev   optional, the revision timestamp
- * @return array with three slices
+ * @return string[] with three slices
  */
 function rawWikiSlices($range, $id, $rev = '') {
     $text = io_readWikiPage(wikiFN($id, $rev), $id, $rev);
@@ -1122,6 +1168,7 @@ function rawWikiSlices($range, $id, $rev = '') {
     $from = !$from ? 0 : ($from - 1);
     $to   = !$to ? strlen($text) : ($to - 1);
 
+    $slices = array();
     $slices[0] = substr($text, 0, $from);
     $slices[1] = substr($text, $from, $to - $from);
     $slices[2] = substr($text, $to);
@@ -1161,6 +1208,48 @@ function con($pre, $text, $suf, $pretty = false) {
 }
 
 /**
+ * Checks if the current page version is newer than the last entry in the page's
+ * changelog. If so, we assume it has been an external edit and we create an
+ * attic copy and add a proper changelog line.
+ *
+ * This check is only executed when the page is about to be saved again from the
+ * wiki, triggered in @see saveWikiText()
+ *
+ * @param string $id the page ID
+ */
+function detectExternalEdit($id) {
+    global $lang;
+
+    $fileLastMod = wikiFN($id);
+    $lastMod     = @filemtime($fileLastMod); // from page
+    $pagelog     = new PageChangeLog($id, 1024);
+    $lastRev     = $pagelog->getRevisions(-1, 1); // from changelog
+    $lastRev     = (int) (empty($lastRev) ? 0 : $lastRev[0]);
+
+    if(!file_exists(wikiFN($id, $lastMod)) && file_exists($fileLastMod) && $lastMod >= $lastRev) {
+        // add old revision to the attic if missing
+        saveOldRevision($id);
+        // add a changelog entry if this edit came from outside dokuwiki
+        if($lastMod > $lastRev) {
+            $fileLastRev = wikiFN($id, $lastRev);
+            $revinfo = $pagelog->getRevisionInfo($lastRev);
+            if(empty($lastRev) || !file_exists($fileLastRev) || $revinfo['type'] == DOKU_CHANGE_TYPE_DELETE) {
+                $filesize_old = 0;
+            } else {
+                $filesize_old = io_getSizeFile($fileLastRev);
+            }
+            $filesize_new = filesize($fileLastMod);
+            $sizechange = $filesize_new - $filesize_old;
+
+            addLogEntry($lastMod, $id, DOKU_CHANGE_TYPE_EDIT, $lang['external_edit'], '', array('ExternalEdit'=> true), $sizechange);
+            // remove soon to be stale instructions
+            $cache = new cache_instructions($id, $fileLastMod);
+            $cache->removeCache();
+        }
+    }
+}
+
+/**
  * Saves a wikitext by calling io_writeWikiPage.
  * Also directs changelog and attic updates.
  *
@@ -1185,77 +1274,88 @@ function saveWikiText($id, $text, $summary, $minor = false) {
     /* @var Input $INPUT */
     global $INPUT;
 
-    // ignore if no changes were made
-    if($text == rawWiki($id, '')) {
-        return;
-    }
+    // prepare data for event
+    $svdta = array();
+    $svdta['id']             = $id;
+    $svdta['file']           = wikiFN($id);
+    $svdta['revertFrom']     = $REV;
+    $svdta['oldRevision']    = @filemtime($svdta['file']);
+    $svdta['newRevision']    = 0;
+    $svdta['newContent']     = $text;
+    $svdta['oldContent']     = rawWiki($id);
+    $svdta['summary']        = $summary;
+    $svdta['contentChanged'] = ($svdta['newContent'] != $svdta['oldContent']);
+    $svdta['changeInfo']     = '';
+    $svdta['changeType']     = DOKU_CHANGE_TYPE_EDIT;
+    $svdta['sizechange']     = null;
 
-    $file        = wikiFN($id);
-    $old         = @filemtime($file); // from page
-    $wasRemoved  = (trim($text) == ''); // check for empty or whitespace only
-    $wasCreated  = !@file_exists($file);
-    $wasReverted = ($REV == true);
-    $pagelog     = new PageChangeLog($id, 1024);
-    $newRev      = false;
-    $oldRev      = $pagelog->getRevisions(-1, 1); // from changelog
-    $oldRev      = (int) (empty($oldRev) ? 0 : $oldRev[0]);
-    if(!@file_exists(wikiFN($id, $old)) && @file_exists($file) && $old >= $oldRev) {
-        // add old revision to the attic if missing
-        saveOldRevision($id);
-        // add a changelog entry if this edit came from outside dokuwiki
-        if($old > $oldRev) {
-            addLogEntry($old, $id, DOKU_CHANGE_TYPE_EDIT, $lang['external_edit'], '', array('ExternalEdit'=> true));
-            // remove soon to be stale instructions
-            $cache = new cache_instructions($id, $file);
-            $cache->removeCache();
+    // select changelog line type
+    if($REV) {
+        $svdta['changeType']  = DOKU_CHANGE_TYPE_REVERT;
+        $svdta['changeInfo'] = $REV;
+    } else if(!file_exists($svdta['file'])) {
+        $svdta['changeType'] = DOKU_CHANGE_TYPE_CREATE;
+    } else if(trim($text) == '') {
+        // empty or whitespace only content deletes
+        $svdta['changeType'] = DOKU_CHANGE_TYPE_DELETE;
+        // autoset summary on deletion
+        if(blank($svdta['summary'])) {
+            $svdta['summary'] = $lang['deleted'];
         }
+    } else if($minor && $conf['useacl'] && $INPUT->server->str('REMOTE_USER')) {
+        //minor edits only for logged in users
+        $svdta['changeType'] = DOKU_CHANGE_TYPE_MINOR_EDIT;
     }
 
-    if($wasRemoved) {
+    $event = new Doku_Event('COMMON_WIKIPAGE_SAVE', $svdta);
+    if(!$event->advise_before()) return;
+
+    // if the content has not been changed, no save happens (plugins may override this)
+    if(!$svdta['contentChanged']) return;
+
+    detectExternalEdit($id);
+
+    if(
+        $svdta['changeType'] == DOKU_CHANGE_TYPE_CREATE ||
+        ($svdta['changeType'] == DOKU_CHANGE_TYPE_REVERT && !file_exists($svdta['file']))
+    ) {
+        $filesize_old = 0;
+    } else {
+        $filesize_old = filesize($svdta['file']);
+    }
+    if($svdta['changeType'] == DOKU_CHANGE_TYPE_DELETE) {
         // Send "update" event with empty data, so plugins can react to page deletion
-        $data = array(array($file, '', false), getNS($id), noNS($id), false);
+        $data = array(array($svdta['file'], '', false), getNS($id), noNS($id), false);
         trigger_event('IO_WIKIPAGE_WRITE', $data);
         // pre-save deleted revision
-        @touch($file);
+        @touch($svdta['file']);
         clearstatcache();
-        $newRev = saveOldRevision($id);
+        $svdta['newRevision'] = saveOldRevision($id);
         // remove empty file
-        @unlink($file);
+        @unlink($svdta['file']);
+        $filesize_new = 0;
         // don't remove old meta info as it should be saved, plugins can use IO_WIKIPAGE_WRITE for removing their metadata...
         // purge non-persistant meta data
         p_purge_metadata($id);
-        $del = true;
-        // autoset summary on deletion
-        if(empty($summary)) $summary = $lang['deleted'];
         // remove empty namespaces
         io_sweepNS($id, 'datadir');
         io_sweepNS($id, 'mediadir');
     } else {
         // save file (namespace dir is created in io_writeWikiPage)
-        io_writeWikiPage($file, $text, $id);
+        io_writeWikiPage($svdta['file'], $svdta['newContent'], $id);
         // pre-save the revision, to keep the attic in sync
-        $newRev = saveOldRevision($id);
-        $del    = false;
+        $svdta['newRevision'] = saveOldRevision($id);
+        $filesize_new = filesize($svdta['file']);
     }
+    $svdta['sizechange'] = $filesize_new - $filesize_old;
 
-    // select changelog line type
-    $extra = '';
-    $type  = DOKU_CHANGE_TYPE_EDIT;
-    if($wasReverted) {
-        $type  = DOKU_CHANGE_TYPE_REVERT;
-        $extra = $REV;
-    } else if($wasCreated) {
-        $type = DOKU_CHANGE_TYPE_CREATE;
-    } else if($wasRemoved) {
-        $type = DOKU_CHANGE_TYPE_DELETE;
-    } else if($minor && $conf['useacl'] && $INPUT->server->str('REMOTE_USER')) {
-        $type = DOKU_CHANGE_TYPE_MINOR_EDIT;
-    } //minor edits only for logged in users
+    $event->advise_after();
 
-    addLogEntry($newRev, $id, $type, $summary, $extra);
+    addLogEntry($svdta['newRevision'], $svdta['id'], $svdta['changeType'], $svdta['summary'], $svdta['changeInfo'], null, $svdta['sizechange']);
+
     // send notify mails
-    notify($id, 'admin', $old, $summary, $minor);
-    notify($id, 'subscribers', $old, $summary, $minor);
+    notify($svdta['id'], 'admin', $svdta['oldRevision'], $svdta['summary'], $minor);
+    notify($svdta['id'], 'subscribers', $svdta['oldRevision'], $svdta['summary'], $minor);
 
     // update the purgefile (timestamp of the last time anything within the wiki was changed)
     io_saveFile($conf['cachedir'].'/purgefile', time());
@@ -1281,7 +1381,7 @@ function saveWikiText($id, $text, $summary, $minor = false) {
  */
 function saveOldRevision($id) {
     $oldf = wikiFN($id);
-    if(!@file_exists($oldf)) return '';
+    if(!file_exists($oldf)) return '';
     $date = filemtime($oldf);
     $newf = wikiFN($id, $date);
     io_writeWikiPage($newf, rawWiki($id), $id, $date);
@@ -1296,7 +1396,7 @@ function saveOldRevision($id) {
  * @param int|string $rev Old page revision
  * @param string     $summary  What changed
  * @param boolean    $minor    Is this a minor edit?
- * @param array      $replace  Additional string substitutions, @KEY@ to be replaced by value
+ * @param string[]   $replace  Additional string substitutions, @KEY@ to be replaced by value
  * @return bool
  *
  * @author Andreas Gohr <andi@splitbrain.org>
@@ -1376,8 +1476,8 @@ function getGoogleQuery() {
 /**
  * Return the human readable size of a file
  *
- * @param       int $size A file size
- * @param       int $dec A number of decimal places
+ * @param int $size A file size
+ * @param int $dec A number of decimal places
  * @return string human readable size
  *
  * @author      Martin Benjamin <b.martin@cybernet.ch>
@@ -1394,7 +1494,7 @@ function filesize_h($size, $dec = 1) {
         $i++;
     }
 
-    return round($size, $dec).' '.$sizes[$i];
+    return round($size, $dec)."\xC2\xA0".$sizes[$i]; //non-breaking space
 }
 
 /**
@@ -1458,9 +1558,9 @@ function dformat($dt = null, $format = '') {
  * Formats a timestamp as ISO 8601 date
  *
  * @author <ungu at terong dot com>
- * @link http://www.php.net/manual/en/function.date.php#54072
+ * @link http://php.net/manual/en/function.date.php#54072
  *
- * @param int $int_date: current date in UNIX timestamp
+ * @param int $int_date current date in UNIX timestamp
  * @return string
  */
 function date_iso8601($int_date) {
@@ -1519,7 +1619,7 @@ function unslash($string, $char = "'") {
  * Convert php.ini shorthands to byte
  *
  * @author <gilthans dot NO dot SPAM at gmail dot com>
- * @link   http://de3.php.net/manual/en/ini.core.php#79564
+ * @link   http://php.net/manual/en/ini.core.php#79564
  *
  * @param string $v shorthands
  * @return int|string
@@ -1739,7 +1839,7 @@ function license_img($type) {
         $try[] = 'lib/images/license/'.$type.'/cc.png';
     }
     foreach($try as $src) {
-        if(@file_exists(DOKU_INC.$src)) return $src;
+        if(file_exists(DOKU_INC.$src)) return $src;
     }
     return '';
 }
@@ -1789,6 +1889,8 @@ function is_mem_available($mem, $bytes = 1048576) {
  * @param string $url url being directed to
  */
 function send_redirect($url) {
+    $url = stripctl($url); // defend against HTTP Response Splitting
+
     /* @var Input $INPUT */
     global $INPUT;
 
@@ -1803,17 +1905,6 @@ function send_redirect($url) {
     // always close the session
     session_write_close();
 
-    // work around IE bug
-    // http://www.ianhoar.com/2008/11/16/internet-explorer-6-and-redirected-anchor-links/
-    @list($url, $hash) = explode('#', $url);
-    if($hash) {
-        if(strpos($url, '?')) {
-            $url = $url.'&#'.$hash;
-        } else {
-            $url = $url.'?&#'.$hash;
-        }
-    }
-
     // check if running on IIS < 6 with CGI-PHP
     if($INPUT->server->has('SERVER_SOFTWARE') && $INPUT->server->has('GATEWAY_INTERFACE') &&
         (strpos($INPUT->server->str('GATEWAY_INTERFACE'), 'CGI') !== false) &&
@@ -1824,6 +1915,8 @@ function send_redirect($url) {
     } else {
         header('Location: '.$url);
     }
+
+    if(defined('DOKU_UNITTEST')) return; // no exits during unit tests
     exit;
 }
 
@@ -1865,7 +1958,7 @@ function valid_input_set($param, $valid_values, $array, $exc = '') {
  */
 function get_doku_pref($pref, $default) {
     $enc_pref = urlencode($pref);
-    if(strpos($_COOKIE['DOKU_PREFS'], $enc_pref) !== false) {
+    if(isset($_COOKIE['DOKU_PREFS']) && strpos($_COOKIE['DOKU_PREFS'], $enc_pref) !== false) {
         $parts = explode('#', $_COOKIE['DOKU_PREFS']);
         $cnt   = count($parts);
         for($i = 0; $i < $cnt; $i += 2) {
@@ -1880,6 +1973,7 @@ function get_doku_pref($pref, $default) {
 /**
  * Add a preference to the DokuWiki cookie
  * (remembering $_COOKIE['DOKU_PREFS'] is urlencoded)
+ * Remove it by setting $val to false
  *
  * @param string $pref  preference key
  * @param string $val   preference value
@@ -1896,12 +1990,17 @@ function set_doku_pref($pref, $val) {
         $enc_pref = rawurlencode($pref);
         for($i = 0; $i < $cnt; $i += 2) {
             if($parts[$i] == $enc_pref) {
-                $parts[$i + 1] = rawurlencode($val);
+                if ($val !== false) {
+                    $parts[$i + 1] = rawurlencode($val);
+                } else {
+                    unset($parts[$i]);
+                    unset($parts[$i + 1]);
+                }
                 break;
             }
         }
         $cookieVal = implode('#', $parts);
-    } else if (!$orig) {
+    } else if (!$orig && $val !== false) {
         $cookieVal = ($_COOKIE['DOKU_PREFS'] ? $_COOKIE['DOKU_PREFS'].'#' : '').rawurlencode($pref).'#'.rawurlencode($val);
     }
 
@@ -1914,10 +2013,39 @@ function set_doku_pref($pref, $val) {
 /**
  * Strips source mapping declarations from given text #601
  *
- * @param &string $text reference to the CSS or JavaScript code to clean
+ * @param string &$text reference to the CSS or JavaScript code to clean
  */
 function stripsourcemaps(&$text){
     $text = preg_replace('/^(\/\/|\/\*)[@#]\s+sourceMappingURL=.*?(\*\/)?$/im', '\\1\\2', $text);
+}
+
+/**
+ * Returns the contents of a given SVG file for embedding
+ *
+ * Inlining SVGs saves on HTTP requests and more importantly allows for styling them through
+ * CSS. However it should used with small SVGs only. The $maxsize setting ensures only small
+ * files are embedded.
+ *
+ * This strips unneeded headers, comments and newline. The result is not a vaild standalone SVG!
+ *
+ * @param string $file full path to the SVG file
+ * @param int $maxsize maximum allowed size for the SVG to be embedded
+ * @return string|false the SVG content, false if the file couldn't be loaded
+ */
+function inlineSVG($file, $maxsize = 2048) {
+    $file = trim($file);
+    if($file === '') return false;
+    if(!file_exists($file)) return false;
+    if(filesize($file) > $maxsize) return false;
+    if(!is_readable($file)) return false;
+    $content = file_get_contents($file);
+    $content = preg_replace('/<!--.*?(-->)/s','', $content); // comments
+    $content = preg_replace('/<\?xml .*?\?>/i', '', $content); // xml header
+    $content = preg_replace('/<!DOCTYPE .*?>/i', '', $content); // doc type
+    $content = preg_replace('/>\s+</s', '><', $content); // newlines between tags
+    $content = trim($content);
+    if(substr($content, 0, 5) !== '<svg ') return false;
+    return $content;
 }
 
 //Setup VIM: ex: et ts=2 :

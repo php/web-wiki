@@ -37,7 +37,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
         }
 
         // Add the capabilities to change the password
-        $this->cando['modPass'] = true;
+        $this->cando['modPass'] = $this->getConf('modPass');
     }
 
     /**
@@ -60,7 +60,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
         // indirect user bind
         if($this->getConf('binddn') && $this->getConf('bindpw')) {
             // use superuser credentials
-            if(!@ldap_bind($this->con, $this->getConf('binddn'), $this->getConf('bindpw'))) {
+            if(!@ldap_bind($this->con, $this->getConf('binddn'), conf_decodeString($this->getConf('bindpw')))) {
                 $this->_debug('LDAP bind as superuser: '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
                 return false;
             }
@@ -165,7 +165,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
         // force superuser bind if wanted and not bound as superuser yet
         if($this->getConf('binddn') && $this->getConf('bindpw') && $this->bound < 2) {
             // use superuser credentials
-            if(!@ldap_bind($this->con, $this->getConf('binddn'), $this->getConf('bindpw'))) {
+            if(!@ldap_bind($this->con, $this->getConf('binddn'), conf_decodeString($this->getConf('bindpw')))) {
                 $this->_debug('LDAP bind as superuser: '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
                 return false;
             }
@@ -181,8 +181,13 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
             }
         }
 
+        $info = array();
         $info['user']   = $user;
+		$this->_debug('LDAP user to find: '.htmlspecialchars($info['user']), 0, __LINE__, __FILE__);
+		
         $info['server'] = $this->getConf('server');
+		$this->_debug('LDAP Server: '.htmlspecialchars($info['server']), 0, __LINE__, __FILE__);
+		
 
         //get info for given user
         $base = $this->_makeFilter($this->getConf('usertree'), $info);
@@ -192,16 +197,33 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
             $filter = "(ObjectClass=*)";
         }
 
-        $sr     = $this->_ldapsearch($this->con, $base, $filter, $this->getConf('userscope'));
-        $result = @ldap_get_entries($this->con, $sr);
+		$this->_debug('LDAP Filter: '.htmlspecialchars($filter), 0, __LINE__, __FILE__);
+		
         $this->_debug('LDAP user search: '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
         $this->_debug('LDAP search at: '.htmlspecialchars($base.' '.$filter), 0, __LINE__, __FILE__);
+		$sr     = $this->_ldapsearch($this->con, $base, $filter, $this->getConf('userscope'));
+		
+		$result = @ldap_get_entries($this->con, $sr);
 
-        // Don't accept more or less than one response
-        if(!is_array($result) || $result['count'] != 1) {
-            return false; //user not found
+        // if result is not an array
+        if(!is_array($result)) {
+			// no objects found
+			$this->_debug('LDAP search returned non-array result: '.htmlspecialchars(print($result)), -1, __LINE__, __FILE__);
+            return false; 
         }
-
+		
+		// Don't accept more or less than one response
+		if ($result['count'] != 1)		{
+			$this->_debug('LDAP search returned '.htmlspecialchars($result['count']).' results while it should return 1!', -1, __LINE__, __FILE__);
+			//for($i = 0; $i < $result["count"]; $i++) {
+				//$this->_debug('result: '.htmlspecialchars(print_r($result[$i])), 0, __LINE__, __FILE__);
+			//}
+			return false;
+		}
+		
+		
+		$this->_debug('LDAP search found single result !', 0, __LINE__, __FILE__);
+		
         $user_result = $result[0];
         ldap_free_result($sr);
 
@@ -274,20 +296,24 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
 
     /**
      * Definition of the function modifyUser in order to modify the password
+     *
+     * @param   string $user    nick of the user to be changed
+     * @param   array  $changes array of field/value pairs to be changed (password will be clear text)
+     * @return  bool   true on success, false on error
      */
 
     function modifyUser($user,$changes){
 
         // open the connection to the ldap
         if(!$this->_openLDAP()){
-            msg('LDAP cannot connect: '. htmlspecialchars(ldap_error($this->con)));
+            $this->_debug('LDAP cannot connect: '. htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
             return false;
         }
 
         // find the information about the user, in particular the "dn"
         $info = $this->getUserData($user,true);
         if(empty($info['dn'])) {
-            msg('LDAP cannot find your user dn');
+            $this->_debug('LDAP cannot find your user dn', 0, __LINE__, __FILE__);
             return false;
         }
         $dn = $info['dn'];
@@ -300,13 +326,13 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
 
             // bind with the ldap
             if(!@ldap_bind($this->con, $dn, $pass)){
-                msg('LDAP user bind failed: '. htmlspecialchars($dn) .': '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
+                $this->_debug('LDAP user bind failed: '. htmlspecialchars($dn) .': '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
                 return false;
             }
         } elseif ($this->getConf('binddn') && $this->getConf('bindpw')) {
             // we are changing the password on behalf of the user (eg: forgotten password)
             // bind with the superuser ldap
-            if (!@ldap_bind($this->con, $this->getConf('binddn'), $this->getConf('bindpw'))){
+            if (!@ldap_bind($this->con, $this->getConf('binddn'), conf_decodeString($this->getConf('bindpw')))){
                 $this->_debug('LDAP bind as superuser: '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
                 return false;
             }
@@ -321,7 +347,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
 
         // change the password
         if(!@ldap_mod_replace($this->con, $dn,array('userpassword' => $hash))){
-            msg('LDAP mod replace failed: '. htmlspecialchars($dn) .': '.htmlspecialchars(ldap_error($this->con)));
+            $this->_debug('LDAP mod replace failed: '. htmlspecialchars($dn) .': '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
             return false;
         }
 
@@ -359,8 +385,9 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
             $sr          = ldap_search($this->con, $this->getConf('usertree'), $all_filter);
             $entries     = ldap_get_entries($this->con, $sr);
             $users_array = array();
+            $userkey     = $this->getConf('userkey');
             for($i = 0; $i < $entries["count"]; $i++) {
-                array_push($users_array, $entries[$i]["uid"][0]);
+                array_push($users_array, $entries[$i][$userkey][0]);
             }
             asort($users_array);
             $result = $users_array;
@@ -461,9 +488,12 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
      * @return string
      */
     protected function _filterEscape($string) {
-        return preg_replace(
-            '/([\x00-\x1F\*\(\)\\\\])/e',
-            '"\\\\\".join("",unpack("H2","$1"))',
+        // see https://github.com/adldap/adLDAP/issues/22
+        return preg_replace_callback(
+            '/([\x00-\x1F\*\(\)\\\\])/',
+            function ($matches) {
+                return "\\".join("", unpack("H2", $matches[1]));
+            },
             $string
         );
     }
@@ -476,6 +506,10 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
      */
     protected function _openLDAP() {
         if($this->con) return true; // connection already established
+
+        if($this->getConf('debug')) {
+            ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
+        }
 
         $this->bound = 0;
 
@@ -515,13 +549,13 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
                         }
                     }
                     // needs version 3
-                    if($this->getConf('referrals')) {
+                    if($this->getConf('referrals') > -1) {
                         if(!@ldap_set_option(
                             $this->con, LDAP_OPT_REFERRALS,
                             $this->getConf('referrals')
                         )
                         ) {
-                            msg('Setting LDAP referrals to off failed', -1);
+                            msg('Setting LDAP referrals failed', -1);
                             $this->_debug('LDAP referal set: '.htmlspecialchars(ldap_error($this->con)), 0, __LINE__, __FILE__);
                         }
                     }
@@ -541,7 +575,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
             }
 
             if($this->getConf('binddn') && $this->getConf('bindpw')) {
-                $bound = @ldap_bind($this->con, $this->getConf('binddn'), $this->getConf('bindpw'));
+                $bound = @ldap_bind($this->con, $this->getConf('binddn'), conf_decodeString($this->getConf('bindpw')));
                 $this->bound = 2;
             } else {
                 $bound = @ldap_bind($this->con);
@@ -553,6 +587,7 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
 
         if(!$bound) {
             msg("LDAP: couldn't connect to LDAP server", -1);
+            $this->_debug(ldap_error($this->con), 0, __LINE__, __FILE__);
             return false;
         }
 
@@ -564,15 +599,13 @@ class auth_plugin_authldap extends DokuWiki_Auth_Plugin {
      * Wraps around ldap_search, ldap_list or ldap_read depending on $scope
      *
      * @author Andreas Gohr <andi@splitbrain.org>
-     * @param resource $link_identifier
-     * @param string   $base_dn
-     * @param string   $filter
-     * @param string   $scope can be 'base', 'one' or 'sub'
-     * @param null     $attributes
-     * @param int      $attrsonly
-     * @param int      $sizelimit
-     * @param int      $timelimit
-     * @param int      $deref
+     * @param resource   $link_identifier
+     * @param string     $base_dn
+     * @param string     $filter
+     * @param string     $scope can be 'base', 'one' or 'sub'
+     * @param null|array $attributes
+     * @param int        $attrsonly
+     * @param int        $sizelimit
      * @return resource
      */
     protected function _ldapsearch($link_identifier, $base_dn, $filter, $scope = 'sub', $attributes = null,

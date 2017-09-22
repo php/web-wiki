@@ -51,11 +51,6 @@ function auth_setup() {
         if ($conf['authtype'] === $plugin) {
             $auth = $plugin_controller->load('auth', $plugin);
             break;
-        } elseif ('auth' . $conf['authtype'] === $plugin) {
-            // matches old auth backends (pre-Weatherwax)
-            $auth = $plugin_controller->load('auth', $plugin);
-            msg('Your authtype setting is deprecated. You must set $conf[\'authtype\'] = "auth' . $conf['authtype'] . '"'
-                 . ' in your configuration (see <a href="https://www.dokuwiki.org/auth">Authentication Backends</a>)',-1,'','',MSG_ADMINS_ONLY);
         }
     }
 
@@ -101,10 +96,7 @@ function auth_setup() {
         $INPUT->set('p', stripctl($INPUT->str('p')));
     }
 
-    if($INPUT->str('authtok')) {
-        // when an authentication token is given, trust the session
-        auth_validateToken($INPUT->str('authtok'));
-    } elseif(!is_null($auth) && $auth->canDo('external')) {
+    if(!is_null($auth) && $auth->canDo('external')) {
         // external trust mechanism in place
         $auth->trustExternal($INPUT->str('u'), $INPUT->str('p'), $INPUT->bool('r'));
     } else {
@@ -127,6 +119,7 @@ function auth_setup() {
  * Loads the ACL setup and handle user wildcards
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
  * @return array
  */
 function auth_loadACL() {
@@ -173,7 +166,7 @@ function auth_loadACL() {
 /**
  * Event hook callback for AUTH_LOGIN_CHECK
  *
- * @param $evdata
+ * @param array $evdata
  * @return bool
  */
 function auth_login_wrapper($evdata) {
@@ -274,50 +267,6 @@ function auth_login($user, $pass, $sticky = false, $silent = false) {
 }
 
 /**
- * Checks if a given authentication token was stored in the session
- *
- * Will setup authentication data using data from the session if the
- * token is correct. Will exit with a 401 Status if not.
- *
- * @author Andreas Gohr <andi@splitbrain.org>
- * @param  string $token The authentication token
- * @return boolean true (or will exit on failure)
- */
-function auth_validateToken($token) {
-    if(!$token || $token != $_SESSION[DOKU_COOKIE]['auth']['token']) {
-        // bad token
-        http_status(401);
-        print 'Invalid auth token - maybe the session timed out';
-        unset($_SESSION[DOKU_COOKIE]['auth']['token']); // no second chance
-        exit;
-    }
-    // still here? trust the session data
-    global $USERINFO;
-    /* @var Input $INPUT */
-    global $INPUT;
-
-    $INPUT->server->set('REMOTE_USER',$_SESSION[DOKU_COOKIE]['auth']['user']);
-    $USERINFO               = $_SESSION[DOKU_COOKIE]['auth']['info'];
-    return true;
-}
-
-/**
- * Create an auth token and store it in the session
- *
- * NOTE: this is completely unrelated to the getSecurityToken() function
- *
- * @author Andreas Gohr <andi@splitbrain.org>
- * @return string The auth token
- */
-function auth_createToken() {
-    $token = md5(auth_randombytes(16));
-    @session_start(); // reopen the session if needed
-    $_SESSION[DOKU_COOKIE]['auth']['token'] = $token;
-    session_write_close();
-    return $token;
-}
-
-/**
  * Builds a pseudo UID from browser and IP data
  *
  * This is neither unique nor unfakable - still it adds some
@@ -350,6 +299,7 @@ function auth_browseruid() {
  * and stored in this file.
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @param   bool $addsession if true, the sessionid is added to the salt
  * @param   bool $secure     if security is more important than keeping the old value
  * @return  string
@@ -372,97 +322,28 @@ function auth_cookiesalt($addsession = false, $secure = false) {
 }
 
 /**
- * Return truly (pseudo) random bytes if available, otherwise fall back to mt_rand
+ * Return cryptographically secure random bytes.
  *
- * @author Mark Seecof
- * @author Michael Hamann <michael@content-space.de>
- * @link   http://www.php.net/manual/de/function.mt-rand.php#83655
- * @param int $length number of bytes to get
- * @return string binary random strings
+ * @author Niklas Keller <me@kelunik.com>
+ *
+ * @param int $length number of bytes
+ * @return string cryptographically secure random bytes
  */
 function auth_randombytes($length) {
-    $strong = false;
-    $rbytes = false;
-
-    if (function_exists('openssl_random_pseudo_bytes')
-        && (version_compare(PHP_VERSION, '5.3.4') >= 0
-            || strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
-    ) {
-        $rbytes = openssl_random_pseudo_bytes($length, $strong);
-    }
-
-    if (!$strong && function_exists('mcrypt_create_iv')
-        && (version_compare(PHP_VERSION, '5.3.7') >= 0
-            || strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
-    ) {
-        $rbytes = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
-        if ($rbytes !== false && strlen($rbytes) === $length) {
-            $strong = true;
-        }
-    }
-
-    // If no strong randoms available, try OS the specific ways
-    if(!$strong) {
-        // Unix/Linux platform
-        $fp = @fopen('/dev/urandom', 'rb');
-        if($fp !== false) {
-            $rbytes = fread($fp, $length);
-            fclose($fp);
-        }
-
-        // MS-Windows platform
-        if(class_exists('COM')) {
-            // http://msdn.microsoft.com/en-us/library/aa388176(VS.85).aspx
-            try {
-                $CAPI_Util = new COM('CAPICOM.Utilities.1');
-                $rbytes    = $CAPI_Util->GetRandom($length, 0);
-
-                // if we ask for binary data PHP munges it, so we
-                // request base64 return value.
-                if($rbytes) $rbytes = base64_decode($rbytes);
-            } catch(Exception $ex) {
-                // fail
-            }
-        }
-    }
-    if(strlen($rbytes) < $length) $rbytes = false;
-
-    // still no random bytes available - fall back to mt_rand()
-    if($rbytes === false) {
-        $rbytes = '';
-        for ($i = 0; $i < $length; ++$i) {
-            $rbytes .= chr(mt_rand(0, 255));
-        }
-    }
-
-    return $rbytes;
+    return random_bytes($length);
 }
 
 /**
- * Random number generator using the best available source
+ * Cryptographically secure random number generator.
  *
- * @author Michael Samuel
- * @author Michael Hamann <michael@content-space.de>
+ * @author Niklas Keller <me@kelunik.com>
+ *
  * @param int $min
  * @param int $max
  * @return int
  */
 function auth_random($min, $max) {
-    $abs_max = $max - $min;
-
-    $nbits = 0;
-    for ($n = $abs_max; $n > 0; $n >>= 1) {
-        ++$nbits;
-    }
-
-    $mask = (1 << $nbits) - 1;
-    do {
-        $bytes    = auth_randombytes(PHP_INT_SIZE);
-        $integers = unpack('Inum', $bytes);
-        $integer  = $integers["num"] & $mask;
-    } while ($integer > $abs_max);
-
-    return $min + $integer;
+    return random_int($min, $max);
 }
 
 /**
@@ -477,7 +358,7 @@ function auth_random($min, $max) {
  */
 function auth_encrypt($data, $secret) {
     $iv     = auth_randombytes(16);
-    $cipher = new Crypt_AES();
+    $cipher = new \phpseclib\Crypt\AES();
     $cipher->setPassword($secret);
 
     /*
@@ -500,7 +381,7 @@ function auth_encrypt($data, $secret) {
  */
 function auth_decrypt($ciphertext, $secret) {
     $iv     = substr($ciphertext, 0, 16);
-    $cipher = new Crypt_AES();
+    $cipher = new \phpseclib\Crypt\AES();
     $cipher->setPassword($secret);
     $cipher->setIV($iv);
 
@@ -514,6 +395,7 @@ function auth_decrypt($ciphertext, $secret) {
  * off. It also clears session data.
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @param bool $keepbc - when true, the breadcrumb data is not cleared
  */
 function auth_logoff($keepbc = false) {
@@ -554,6 +436,7 @@ function auth_logoff($keepbc = false) {
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  * @see    auth_isadmin
+ *
  * @param  string $user       Username
  * @param  array  $groups     List of groups the user is in
  * @param  bool   $adminonly  when true checks if user is admin
@@ -598,6 +481,7 @@ function auth_ismanager($user = null, $groups = null, $adminonly = false) {
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  * @see auth_ismanager()
+ *
  * @param  string $user       Username
  * @param  array  $groups     List of groups the user is in
  * @return bool
@@ -612,9 +496,9 @@ function auth_isadmin($user = null, $groups = null) {
  *
  * Note: all input should NOT be nameencoded.
  *
- * @param $memberlist string commaseparated list of allowed users and groups
- * @param $user       string user to match against
- * @param $groups     array  groups the user is member of
+ * @param string $memberlist commaseparated list of allowed users and groups
+ * @param string $user       user to match against
+ * @param array  $groups     groups the user is member of
  * @return bool       true for membership acknowledged
  */
 function auth_isMember($memberlist, $user, array $groups) {
@@ -677,6 +561,7 @@ function auth_quickaclcheck($id) {
  * Returns the maximum rights a user has for the given ID or its namespace
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @triggers AUTH_ACL_CHECK
  * @param  string       $id     page ID (needs to be resolved and cleaned)
  * @param  string       $user   Username
@@ -699,6 +584,7 @@ function auth_aclcheck($id, $user, $groups) {
  * DO NOT CALL DIRECTLY, use auth_aclcheck() instead
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @param  array $data event data
  * @return int   permission level
  */
@@ -728,27 +614,22 @@ function auth_aclcheck_cb($data) {
         $user   = utf8_strtolower($user);
         $groups = array_map('utf8_strtolower', $groups);
     }
-    $user   = $auth->cleanUser($user);
+    $user   = auth_nameencode($auth->cleanUser($user));
     $groups = array_map(array($auth, 'cleanGroup'), (array) $groups);
-    $user   = auth_nameencode($user);
 
     //prepend groups with @ and nameencode
-    $cnt = count($groups);
-    for($i = 0; $i < $cnt; $i++) {
-        $groups[$i] = '@'.auth_nameencode($groups[$i]);
+    foreach($groups as &$group) {
+        $group = '@'.auth_nameencode($group);
     }
 
     $ns   = getNS($id);
     $perm = -1;
 
-    if($user || count($groups)) {
-        //add ALL group
-        $groups[] = '@ALL';
-        //add User
-        if($user) $groups[] = $user;
-    } else {
-        $groups[] = '@ALL';
-    }
+    //add ALL group
+    $groups[] = '@ALL';
+
+    //add User
+    if($user) $groups[] = $user;
 
     //check exact match first
     $matches = preg_grep('/^'.preg_quote($id, '/').'[ \t]+([^ \t]+)[ \t]+/', $AUTH_ACL);
@@ -831,6 +712,10 @@ function auth_aclcheck_cb($data) {
  *
  * @author Andreas Gohr <gohr@cosmocode.de>
  * @see rawurldecode()
+ *
+ * @param string $name
+ * @param bool $skip_group
+ * @return string
  */
 function auth_nameencode($name, $skip_group = false) {
     global $cache_authname;
@@ -912,6 +797,7 @@ function auth_pwgen($foruser = '') {
  * Sends a password to the given user
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @param string $user Login name of the user
  * @param string $password The new password in clear text
  * @return bool  true on success
@@ -947,6 +833,7 @@ function auth_sendPassword($user, $password) {
  * This registers a new user - Data is read directly from $_POST
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @return bool  true on success, false on any error
  */
 function register() {
@@ -989,7 +876,7 @@ function register() {
 
     //okay try to create the user
     if(!$auth->triggerUserMod('create', array($login, $pass, $fullname, $email))) {
-        msg($lang['reguexists'], -1);
+        msg($lang['regfail'], -1);
         return false;
     }
 
@@ -1081,17 +968,25 @@ function updateprofile() {
         }
     }
 
-    if($result = $auth->triggerUserMod('modify', array($INPUT->server->str('REMOTE_USER'), &$changes))) {
-        // update cookie and session with the changed data
-        if($changes['pass']) {
-            list( /*user*/, $sticky, /*pass*/) = auth_getCookie();
-            $pass = auth_encrypt($changes['pass'], auth_cookiesalt(!$sticky, true));
-            auth_setCookie($INPUT->server->str('REMOTE_USER'), $pass, (bool) $sticky);
-        }
-        return true;
+    if(!$auth->triggerUserMod('modify', array($INPUT->server->str('REMOTE_USER'), &$changes))) {
+        msg($lang['proffail'], -1);
+        return false;
     }
 
-    return false;
+    if($changes['pass']) {
+        // update cookie and session with the changed data
+        list( /*user*/, $sticky, /*pass*/) = auth_getCookie();
+        $pass = auth_encrypt($changes['pass'], auth_cookiesalt(!$sticky, true));
+        auth_setCookie($INPUT->server->str('REMOTE_USER'), $pass, (bool) $sticky);
+    } else {
+        // make sure the session is writable
+        @session_start();
+        // invalidate session cache
+        $_SESSION[DOKU_COOKIE]['auth']['time'] = 0;
+        session_write_close();
+    }
+
+    return true;
 }
 
 /**
@@ -1128,6 +1023,7 @@ function auth_deleteprofile(){
         }
     }
 
+    $deleted = array();
     $deleted[] = $INPUT->server->str('REMOTE_USER');
     if($auth->triggerUserMod('delete', array($deleted))) {
         // force and immediate logout including removing the sticky cookie
@@ -1171,7 +1067,7 @@ function act_resendpwd() {
         // we're in token phase - get user info from token
 
         $tfile = $conf['cachedir'].'/'.$token{0}.'/'.$token.'.pwauth';
-        if(!@file_exists($tfile)) {
+        if(!file_exists($tfile)) {
             msg($lang['resendpwdbadauth'], -1);
             $INPUT->remove('pwauth');
             return false;
@@ -1203,7 +1099,7 @@ function act_resendpwd() {
 
             // change it
             if(!$auth->triggerUserMod('modify', array($user, array('pass' => $pass)))) {
-                msg('error modifying user data', -1);
+                msg($lang['proffail'], -1);
                 return false;
             }
 
@@ -1211,7 +1107,7 @@ function act_resendpwd() {
 
             $pass = auth_pwgen($user);
             if(!$auth->triggerUserMod('modify', array($user, array('pass' => $pass)))) {
-                msg('error modifying user data', -1);
+                msg($lang['proffail'], -1);
                 return false;
             }
 
@@ -1278,6 +1174,7 @@ function act_resendpwd() {
  * is chosen.
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
+ *
  * @param string $clear The clear text password
  * @param string $method The hashing method
  * @param string $salt A salt, null for random
@@ -1302,6 +1199,7 @@ function auth_cryptPassword($clear, $method = '', $salt = null) {
  * Verifies a cleartext password against a crypted hash
  *
  * @author Andreas Gohr <andi@splitbrain.org>
+ *
  * @param  string $clear The clear text password
  * @param  string $crypt The hash to compare with
  * @return bool true if both match

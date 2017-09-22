@@ -3,17 +3,29 @@
 /**
  * Increased whenever the API is changed
  */
-define('DOKU_API_VERSION', 9);
+define('DOKU_API_VERSION', 10);
 
+/**
+ * Provides the core methods for the remote API.
+ * The methods are ordered in 'wiki.<method>' and 'dokuwiki.<method>' namespaces
+ */
 class RemoteAPICore {
 
     private $api;
 
+    /**
+     * @param RemoteAPI $api
+     */
     public function __construct(RemoteAPI $api) {
         $this->api = $api;
     }
 
-    function __getRemoteInfo() {
+    /**
+     * Returns details about the core methods
+     *
+     * @return array
+     */
+    public function __getRemoteInfo() {
         return array(
             'dokuwiki.getVersion' => array(
                 'args' => array(),
@@ -92,7 +104,7 @@ class RemoteAPICore {
             ), 'wiki.getPageInfo' => array(
                 'args' => array('string'),
                 'return' => 'array',
-                'doc' => 'Returns a struct with info about the page.',
+                'doc' => 'Returns a struct with info about the page, latest version.',
                 'name' => 'pageInfo'
             ), 'wiki.getPageInfoVersion' => array(
                 'args' => array('string', 'int'),
@@ -121,9 +133,9 @@ class RemoteAPICore {
                 'return' => 'array',
                 'Returns a struct about all recent media changes since given timestamp.'
             ), 'wiki.aclCheck' => array(
-                'args' => array('string'),
+                'args' => array('string', 'string', 'array'),
                 'return' => 'int',
-                'doc' => 'Returns the permissions of a given wiki page.'
+                'doc' => 'Returns the permissions of a given wiki page. By default, for current user/groups'
             ), 'wiki.putAttachment' => array(
                 'args' => array('string', 'file', 'array'),
                 'return' => 'array',
@@ -158,21 +170,29 @@ class RemoteAPICore {
         );
     }
 
-    function getVersion() {
+    /**
+     * @return string
+     */
+    public function getVersion() {
         return getVersion();
     }
 
-    function getTime() {
+    /**
+     * @return int unix timestamp
+     */
+    public function getTime() {
         return time();
     }
 
     /**
      * Return a raw wiki page
+     *
      * @param string $id wiki page id
-     * @param string $rev revision number of the page
-     * @return page text.
+     * @param int|string $rev revision timestamp of the page or empty string
+     * @return string page text.
+     * @throws RemoteAccessDeniedException if no permission for page
      */
-    function rawPage($id,$rev=''){
+    public function rawPage($id,$rev=''){
         $id = $this->resolvePageId($id);
         if(auth_quickaclcheck($id) < AUTH_READ){
             throw new RemoteAccessDeniedException('You are not allowed to read this file', 111);
@@ -189,10 +209,13 @@ class RemoteAPICore {
      * Return a media file
      *
      * @author Gina Haeussge <osd@foosel.net>
+     *
      * @param string $id file id
-     * @return media file
+     * @return mixed media file
+     * @throws RemoteAccessDeniedException no permission for media
+     * @throws RemoteException not exist
      */
-    function getAttachment($id){
+    public function getAttachment($id){
         $id = cleanID($id);
         if (auth_quickaclcheck(getNS($id).':*') < AUTH_READ) {
             throw new RemoteAccessDeniedException('You are not allowed to read this file', 211);
@@ -211,8 +234,11 @@ class RemoteAPICore {
      * Return info about a media file
      *
      * @author Gina Haeussge <osd@foosel.net>
+     *
+     * @param string $id page id
+     * @return array
      */
-    function getAttachmentInfo($id){
+    public function getAttachmentInfo($id){
         $id = cleanID($id);
         $info = array(
             'lastModified' => $this->api->toDate(0),
@@ -220,9 +246,18 @@ class RemoteAPICore {
         );
 
         $file = mediaFN($id);
-        if ((auth_quickaclcheck(getNS($id).':*') >= AUTH_READ) && file_exists($file)){
-            $info['lastModified'] = $this->api->toDate(filemtime($file));
-            $info['size'] = filesize($file);
+        if(auth_quickaclcheck(getNS($id) . ':*') >= AUTH_READ) {
+            if(file_exists($file)) {
+                $info['lastModified'] = $this->api->toDate(filemtime($file));
+                $info['size'] = filesize($file);
+            } else {
+                //Is it deleted media with changelog?
+                $medialog = new MediaChangeLog($id);
+                $revisions = $medialog->getRevisions(0, 1);
+                if(!empty($revisions)) {
+                    $info['lastModified'] = $this->api->toDate($revisions[0]);
+                }
+            }
         }
 
         return $info;
@@ -230,8 +265,13 @@ class RemoteAPICore {
 
     /**
      * Return a wiki page rendered to html
+     *
+     * @param string     $id  page id
+     * @param string|int $rev revision timestamp or empty string
+     * @return null|string html
+     * @throws RemoteAccessDeniedException no access to page
      */
-    function htmlPage($id,$rev=''){
+    public function htmlPage($id,$rev=''){
         $id = $this->resolvePageId($id);
         if(auth_quickaclcheck($id) < AUTH_READ){
             throw new RemoteAccessDeniedException('You are not allowed to read this page', 111);
@@ -241,8 +281,10 @@ class RemoteAPICore {
 
     /**
      * List all pages - we use the indexer list here
+     *
+     * @return array
      */
-    function listPages(){
+    public function listPages(){
         $list  = array();
         $pages = idx_get_indexer()->getPages();
         $pages = array_filter(array_filter($pages,'isVisiblePage'),'page_exists');
@@ -265,8 +307,14 @@ class RemoteAPICore {
 
     /**
      * List all pages in the given namespace (and below)
+     *
+     * @param string $ns
+     * @param array  $opts
+     *    $opts['depth']   recursion level, 0 for all
+     *    $opts['hash']    do md5 sum of content?
+     * @return array
      */
-    function readNamespace($ns,$opts){
+    public function readNamespace($ns,$opts){
         global $conf;
 
         if(!is_array($opts)) $opts=array();
@@ -281,9 +329,12 @@ class RemoteAPICore {
 
     /**
      * List all pages in the given namespace (and below)
+     *
+     * @param string $query
+     * @return array
      */
-    function search($query){
-        $regex = '';
+    public function search($query){
+        $regex = array();
         $data  = ft_pageSearch($query,$regex);
         $pages = array();
 
@@ -314,8 +365,10 @@ class RemoteAPICore {
 
     /**
      * Returns the wiki title.
+     *
+     * @return string
      */
-    function getTitle(){
+    public function getTitle(){
         global $conf;
         return $conf['title'];
     }
@@ -328,8 +381,17 @@ class RemoteAPICore {
      * a regular expression matching their name.
      *
      * @author Gina Haeussge <osd@foosel.net>
+     *
+     * @param string $ns
+     * @param array  $options
+     *   $options['depth']     recursion level, 0 for all
+     *   $options['showmsg']   shows message if invalid media id is used
+     *   $options['pattern']   check given pattern
+     *   $options['hash']      add hashes to result list
+     * @return array
+     * @throws RemoteAccessDeniedException no access to the media files
      */
-    function listAttachments($ns, $options = array()) {
+    public function listAttachments($ns, $options = array()) {
         global $conf;
 
         $ns = cleanID($ns);
@@ -359,6 +421,9 @@ class RemoteAPICore {
 
     /**
      * Return a list of backlinks
+     *
+     * @param string $id page id
+     * @return array
      */
     function listBackLinks($id){
         return ft_backlinks($this->resolvePageId($id));
@@ -366,8 +431,14 @@ class RemoteAPICore {
 
     /**
      * Return some basic data about a page
+     *
+     * @param string     $id page id
+     * @param string|int $rev revision timestamp or empty string
+     * @return array
+     * @throws RemoteAccessDeniedException no access for page
+     * @throws RemoteException page not exist
      */
-    function pageInfo($id,$rev=''){
+    public function pageInfo($id,$rev=''){
         $id = $this->resolvePageId($id);
         if(auth_quickaclcheck($id) < AUTH_READ){
             throw new RemoteAccessDeniedException('You are not allowed to read this page', 111);
@@ -378,14 +449,20 @@ class RemoteAPICore {
             throw new RemoteException('The requested page does not exist', 121);
         }
 
+        // set revision to current version if empty, use revision otherwise
+        // as the timestamps of old files are not necessarily correct
+        if($rev === '') {
+            $rev = $time;
+        }
+
         $pagelog = new PageChangeLog($id, 1024);
-        $info = $pagelog->getRevisionInfo($time);
+        $info = $pagelog->getRevisionInfo($rev);
 
         $data = array(
             'name'         => $id,
-            'lastModified' => $this->api->toDate($time),
+            'lastModified' => $this->api->toDate($rev),
             'author'       => (($info['user']) ? $info['user'] : $info['ip']),
-            'version'      => $time
+            'version'      => $rev
         );
 
         return ($data);
@@ -395,8 +472,15 @@ class RemoteAPICore {
      * Save a wiki page
      *
      * @author Michael Klier <chi@chimeric.de>
+     *
+     * @param string $id page id
+     * @param string $text wiki text
+     * @param array $params parameters: summary, minor edit
+     * @return bool
+     * @throws RemoteAccessDeniedException no write access for page
+     * @throws RemoteException no id, empty new page or locked
      */
-    function putPage($id, $text, $params) {
+    public function putPage($id, $text, $params) {
         global $TEXT;
         global $lang;
 
@@ -451,8 +535,13 @@ class RemoteAPICore {
 
     /**
      * Appends text to a wiki page.
+     *
+     * @param string $id page id
+     * @param string $text wiki text
+     * @param array $params such as summary,minor
+     * @return bool|string
      */
-    function appendPage($id, $text, $params) {
+    public function appendPage($id, $text, $params) {
         $currentpage = $this->rawPage($id);
         if (!is_string($currentpage)) {
             return $currentpage;
@@ -464,8 +553,14 @@ class RemoteAPICore {
      * Uploads a file to the wiki.
      *
      * Michael Klier <chi@chimeric.de>
+     *
+     * @param string $id page id
+     * @param string $file
+     * @param array $params such as overwrite
+     * @return false|string
+     * @throws RemoteException
      */
-    function putAttachment($id, $file, $params) {
+    public function putAttachment($id, $file, $params) {
         $id = cleanID($id);
         $auth = auth_quickaclcheck(getNS($id).':*');
 
@@ -493,8 +588,13 @@ class RemoteAPICore {
      * Deletes a file from the wiki.
      *
      * @author Gina Haeussge <osd@foosel.net>
+     *
+     * @param string $id page id
+     * @return int
+     * @throws RemoteAccessDeniedException no permissions
+     * @throws RemoteException file in use or not deleted
      */
-    function deleteAttachment($id){
+    public function deleteAttachment($id){
         $id = cleanID($id);
         $auth = auth_quickaclcheck(getNS($id).':*');
         $res = media_delete($id, $auth);
@@ -510,19 +610,43 @@ class RemoteAPICore {
     }
 
     /**
-     * Returns the permissions of a given wiki page
+     * Returns the permissions of a given wiki page for the current user or another user
+     *
+     * @param string $id page id
+     * @param string|null $user username
+     * @param array|null $groups array of groups
+     * @return int permission level
      */
-    function aclCheck($id) {
+    public function aclCheck($id, $user = null, $groups = null) {
+        /** @var DokuWiki_Auth_Plugin $auth */
+        global $auth;
+
         $id = $this->resolvePageId($id);
-        return auth_quickaclcheck($id);
+        if($user === null) {
+            return auth_quickaclcheck($id);
+        } else {
+            if($groups === null) {
+                $userinfo = $auth->getUserData($user);
+                if($userinfo === false) {
+                    $groups = array();
+                } else {
+                    $groups = $userinfo['grps'];
+                }
+            }
+            return auth_aclcheck($id, $user, $groups);
+        }
     }
 
     /**
      * Lists all links contained in a wiki page
      *
      * @author Michael Klier <chi@chimeric.de>
+     *
+     * @param string $id page id
+     * @return array
+     * @throws RemoteAccessDeniedException  no read access for page
      */
-    function listLinks($id) {
+    public function listLinks($id) {
         $id = $this->resolvePageId($id);
         if(auth_quickaclcheck($id) < AUTH_READ){
             throw new RemoteAccessDeniedException('You are not allowed to read this page', 111);
@@ -533,7 +657,6 @@ class RemoteAPICore {
         $ins   = p_cached_instructions(wikiFN($id));
 
         // instantiate new Renderer - needed for interwiki links
-        include(DOKU_INC.'inc/parser/xhtml.php');
         $Renderer = new Doku_Renderer_xhtml();
         $Renderer->interwiki = getInterwiki();
 
@@ -571,8 +694,12 @@ class RemoteAPICore {
      *
      * @author Michael Hamann <michael@content-space.de>
      * @author Michael Klier <chi@chimeric.de>
+     *
+     * @param int $timestamp unix timestamp
+     * @return array
+     * @throws RemoteException no valid timestamp
      */
-    function getRecentChanges($timestamp) {
+    public function getRecentChanges($timestamp) {
         if(strlen($timestamp) != 10) {
             throw new RemoteException('The provided value is not a valid timestamp', 311);
         }
@@ -596,7 +723,7 @@ class RemoteAPICore {
             return $changes;
         } else {
             // in case we still have nothing at this point
-            return new RemoteException('There are no changes in the specified timeframe', 321);
+            throw new RemoteException('There are no changes in the specified timeframe', 321);
         }
     }
 
@@ -605,8 +732,12 @@ class RemoteAPICore {
      *
      * @author Michael Hamann <michael@content-space.de>
      * @author Michael Klier <chi@chimeric.de>
+     *
+     * @param int $timestamp unix timestamp
+     * @return array
+     * @throws RemoteException no valid timestamp
      */
-    function getRecentMediaChanges($timestamp) {
+    public function getRecentMediaChanges($timestamp) {
         if(strlen($timestamp) != 10)
             throw new RemoteException('The provided value is not a valid timestamp', 311);
 
@@ -635,10 +766,18 @@ class RemoteAPICore {
 
     /**
      * Returns a list of available revisions of a given wiki page
+     * Number of returned pages is set by $conf['recent']
+     * However not accessible pages are skipped, so less than $conf['recent'] could be returned
      *
      * @author Michael Klier <chi@chimeric.de>
+     *
+     * @param string $id    page id
+     * @param int    $first skip the first n changelog lines (0 = from current(if exists), 1 = from 1st old rev, 2 = from 2nd old rev, etc)
+     * @return array
+     * @throws RemoteAccessDeniedException no read access for page
+     * @throws RemoteException empty id
      */
-    function pageVersions($id, $first) {
+    public function pageVersions($id, $first) {
         $id = $this->resolvePageId($id);
         if(auth_quickaclcheck($id) < AUTH_READ) {
             throw new RemoteAccessDeniedException('You are not allowed to read this page', 111);
@@ -651,23 +790,17 @@ class RemoteAPICore {
             throw new RemoteException('Empty page ID', 131);
         }
 
+        $first = (int) $first;
+        $first_rev = $first - 1;
+        $first_rev = $first_rev < 0 ? 0 : $first_rev;
         $pagelog = new PageChangeLog($id);
-        $revisions = $pagelog->getRevisions($first, $conf['recent']+1);
+        $revisions = $pagelog->getRevisions($first_rev, $conf['recent']);
 
-        if(count($revisions)==0 && $first!=0) {
-            $first=0;
-            $revisions = $pagelog->getRevisions($first, $conf['recent']+1);
-        }
-
-        if(count($revisions)>0 && $first==0) {
+        if($first == 0) {
             array_unshift($revisions, '');  // include current revision
             if ( count($revisions) > $conf['recent'] ){
                 array_pop($revisions);          // remove extra log entry
             }
-        }
-
-        if(count($revisions) > $conf['recent']) {
-            array_pop($revisions); // remove extra log entry
         }
 
         if(!empty($revisions)) {
@@ -679,8 +812,9 @@ class RemoteAPICore {
                 // specified via $conf['recent']
                 if($time){
                     $pagelog->setChunkSize(1024);
-                    $info = $pagelog->getRevisionInfo($time);
+                    $info = $pagelog->getRevisionInfo($rev ? $rev : $time);
                     if(!empty($info)) {
+                        $data = array();
                         $data['user'] = $info['user'];
                         $data['ip']   = $info['ip'];
                         $data['type'] = $info['type'];
@@ -700,7 +834,7 @@ class RemoteAPICore {
     /**
      * The version of Wiki RPC API supported
      */
-    function wiki_RPCVersion(){
+    public function wiki_RPCVersion(){
         return 2;
     }
 
@@ -713,8 +847,11 @@ class RemoteAPICore {
      *
      * Returns an associative array with the keys locked, lockfail, unlocked and
      * unlockfail, each containing lists of pages.
+     *
+     * @param array[] $set list pages with array('lock' => array, 'unlock' => array)
+     * @return array
      */
-    function setLocks($set){
+    public function setLocks($set){
         $locked     = array();
         $lockfail   = array();
         $unlocked   = array();
@@ -747,13 +884,27 @@ class RemoteAPICore {
         );
     }
 
-    function getAPIVersion(){
+    /**
+     * Return API version
+     *
+     * @return int
+     */
+    public function getAPIVersion(){
         return DOKU_API_VERSION;
     }
 
-    function login($user,$pass){
+    /**
+     * Login
+     *
+     * @param string $user
+     * @param string $pass
+     * @return int
+     */
+    public function login($user,$pass){
         global $conf;
+        /** @var DokuWiki_Auth_Plugin $auth */
         global $auth;
+
         if(!$conf['useacl']) return 0;
         if(!$auth) return 0;
 
@@ -774,17 +925,28 @@ class RemoteAPICore {
         return $ok;
     }
 
-    function logoff(){
+    /**
+     * Log off
+     *
+     * @return int
+     */
+    public function logoff(){
         global $conf;
         global $auth;
         if(!$conf['useacl']) return 0;
         if(!$auth) return 0;
-        
+
         auth_logoff();
 
         return 1;
     }
 
+    /**
+     * Resolve page id
+     *
+     * @param string $id page id
+     * @return string
+     */
     private function resolvePageId($id) {
         $id = cleanID($id);
         if(empty($id)) {

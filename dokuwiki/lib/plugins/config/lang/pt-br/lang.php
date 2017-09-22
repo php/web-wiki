@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Portuguese language file
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
  * @author Frederico Gonçalves Guimarães <frederico@teia.bio.br>
  * @author Felipe Castro <fefcas@gmail.com>
@@ -17,6 +18,8 @@
  * @author Isaias Masiero Filho <masiero@masiero.org>
  * @author Balaco Baco <balacobaco@imap.cc>
  * @author Victor Westmann <victor.westmann@gmail.com>
+ * @author Guilherme Cardoso <guicardoso@gmail.com>
+ * @author Viliam Dias <viliamjr@gmail.com>
  */
 $lang['menu']                  = 'Configurações do DokuWiki';
 $lang['error']                 = 'As configurações não foram atualizadas devido a um valor inválido. Por favor, reveja suas alterações e reenvie-as.<br />O(s) valor(es) incorreto(s) serão exibidos contornados por uma borda vermelha.';
@@ -67,7 +70,7 @@ $lang['breadcrumbs']           = 'Número de elementos na trilha de páginas vis
 $lang['youarehere']            = 'Trilha hierárquica';
 $lang['fullpath']              = 'Indica o caminho completo das páginas no rodapé';
 $lang['typography']            = 'Efetuar modificações tipográficas';
-$lang['dformat']               = 'Formato da data (veja a função <a href="http://www.php.net/strftime">strftime</a> do PHP)';
+$lang['dformat']               = 'Formato da data (veja a função <a href="http://php.net/strftime">strftime</a> do PHP)';
 $lang['signature']             = 'Assinatura';
 $lang['showuseras']            = 'O que exibir quando mostrar o usuário que editou a página pela última vez';
 $lang['toptoclevel']           = 'Nível mais alto para a tabela de conteúdos';
@@ -92,7 +95,9 @@ $lang['disableactions']        = 'Desabilitar as ações do DokuWiki';
 $lang['disableactions_check']  = 'Verificação';
 $lang['disableactions_subscription'] = 'Monitoramento';
 $lang['disableactions_wikicode'] = 'Ver a fonte/Exportar sem processamento';
+$lang['disableactions_profile_delete'] = 'Excluir a própria conta';
 $lang['disableactions_other']  = 'Outras ações (separadas por vírgula)';
+$lang['disableactions_rss']    = 'Sindicância XML (RSS)';
 $lang['auth_security_timeout'] = 'Tempo limite de segurança para autenticações (seg)';
 $lang['securecookie']          = 'Os cookies definidos via HTTPS devem ser enviados para o navegador somente via HTTPS? Desabilite essa opção quando somente a autenticação do seu wiki for realizada de maneira segura via SSL e a navegação, de maneira insegura.';
 $lang['remote']                = 'Habilitar o sistema de API remota. Isso permite que outras aplicações acessem o wiki via XML-RPC ou outros mecanismos.';
@@ -197,6 +202,7 @@ $lang['xsendfile_o_2']         = 'cabeçalho "X-Sendfile" padrão';
 $lang['xsendfile_o_3']         = 'cabeçalho proprietário "Nginx X-Accel-Redirect"';
 $lang['showuseras_o_loginname'] = 'nome de usuário';
 $lang['showuseras_o_username'] = 'nome completo do usuário';
+$lang['showuseras_o_username_link'] = 'Nome completo do usuário como um link de usuário interwiki';
 $lang['showuseras_o_email']    = 'endereço de e-mail do usuário (obscurecido segundo a definição anterior)';
 $lang['showuseras_o_email_link'] = 'endereço de e-mail de usuário como um link "mailto:"';
 $lang['useheading_o_0']        = 'nunca';

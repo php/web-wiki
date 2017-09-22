@@ -25,13 +25,7 @@ var dw_editor = {
             return;
         }
 
-        // in Firefox, keypress doesn't send the correct keycodes,
-        // in Opera, the default of keydown can't be prevented
-        if (jQuery.browser.opera) {
-            $editor.keypress(dw_editor.keyHandler);
-        } else {
-            $editor.keydown(dw_editor.keyHandler);
-        }
+        $editor.keydown(dw_editor.keyHandler);
 
     },
 
@@ -63,7 +57,7 @@ var dw_editor = {
             ['smaller', function(){dw_editor.sizeCtl(editor,-100);}],
             ['wrap', function(){dw_editor.toggleWrap(editor);}]
         ], function (_, img) {
-            jQuery(document.createElement('IMG'))
+            jQuery(document.createElement('img'))
                 .attr('src', DOKU_BASE+'lib/images/' + img[0] + '.gif')
                 .attr('alt', '')
                 .click(img[1])
@@ -124,14 +118,15 @@ var dw_editor = {
      * Listens to all key inputs and handle indentions
      * of lists and code blocks
      *
-     * Currently handles space, backspce and enter presses
+     * Currently handles space, backspace, enter and
+     * ctrl-enter presses
      *
      * @author Andreas Gohr <andi@splitbrain.org>
      * @fixme handle tabs
      * @param event e - the key press event object
      */
     keyHandler: function(e){
-        if(jQuery.inArray(e.keyCode,[8, 13, 32]) === -1) {
+        if(jQuery.inArray(e.keyCode,[8, 10, 13, 32]) === -1) {
             return;
         }
         var selection = DWgetSelection(this);
@@ -143,7 +138,12 @@ var dw_editor = {
                                  search.lastIndexOf("\r")); //IE workaround
         search = search.substr(linestart);
 
-        if(e.keyCode == 13){ // Enter
+        if((e.keyCode == 13 || e.keyCode == 10) && e.ctrlKey) { // Ctrl-Enter (With Chrome workaround)
+            // Submit current edit
+            jQuery('#edbtn__save').click();
+            e.preventDefault(); // prevent enter key
+            return false;
+        }else if(e.keyCode == 13){ // Enter
             // keep current indention for lists and code
             var match = search.match(/(\n  +([\*-] ?)?)/);
             if(match){

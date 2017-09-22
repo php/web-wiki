@@ -28,6 +28,11 @@ function search(&$data,$base,$func,$opts,$dir='',$lvl=1,$sort='natural'){
     $files  = array();
     $filepaths = array();
 
+    // safeguard against runaways #1452
+    if($base == '' || $base == '/') {
+        throw new RuntimeException('No valid $base passed to search() - possible misconfiguration or bug');
+    }
+
     //read in directories and files
     $dh = @opendir($base.'/'.$dir);
     if(!$dh) return;
@@ -134,6 +139,11 @@ function search_namespaces(&$data,$base,$file,$type,$lvl,$opts){
 
 /**
  * List all mediafiles in a namespace
+ *   $opts['depth']     recursion level, 0 for all
+ *   $opts['showmsg']   shows message if invalid media id is used
+ *   $opts['skipacl']   skip acl checking
+ *   $opts['pattern']   check given pattern
+ *   $opts['hash']      add hashes to result list
  *
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
@@ -258,6 +268,7 @@ function search_allpages(&$data,$base,$file,$type,$lvl,$opts){
     //only search txt files
     if(substr($file,-4) != '.txt') return true;
 
+    $item = array();
     $item['id']   = pathID($file);
     if(!$opts['skipacl'] && auth_quickaclcheck($item['id']) < AUTH_READ){
         return false;

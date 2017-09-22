@@ -72,7 +72,7 @@ $lang['breadcrumbs'] = 'Number of "trace" breadcrumbs. Set to 0 to disable.';
 $lang['youarehere']  = 'Use hierarchical breadcrumbs (you probably want to disable the above option then)';
 $lang['fullpath']    = 'Reveal full path of pages in the footer';
 $lang['typography']  = 'Do typographical replacements';
-$lang['dformat']     = 'Date format (see PHP\'s <a href="http://www.php.net/strftime">strftime</a> function)';
+$lang['dformat']     = 'Date format (see PHP\'s <a href="http://php.net/strftime">strftime</a> function)';
 $lang['signature']   = 'What to insert with the signature button in the editor';
 $lang['showuseras']  = 'What to display when showing the user that last edited a page';
 $lang['toptoclevel'] = 'Top level for table of contents';
@@ -165,7 +165,7 @@ $lang['autoplural']  = 'Check for plural forms in links';
 $lang['compression'] = 'Compression method for attic files';
 $lang['gzip_output'] = 'Use gzip Content-Encoding for xhtml';
 $lang['compress']    = 'Compact CSS and javascript output';
-$lang['cssdatauri']  = 'Size in bytes up to which images referenced in CSS files should be embedded right into the stylesheet to reduce HTTP request header overhead. This technique won\'t work in IE 7 and below! <code>400</code> to <code>600</code> bytes is a good value. Set <code>0</code> to disable.';
+$lang['cssdatauri']  = 'Size in bytes up to which images referenced in CSS files should be embedded right into the stylesheet to reduce HTTP request header overhead. <code>400</code> to <code>600</code> bytes is a good value. Set <code>0</code> to disable.';
 $lang['send404']     = 'Send "HTTP 404/Page Not Found" for non existing pages';
 $lang['broken_iua']  = 'Is the ignore_user_abort function broken on your system? This could cause a non working search index. IIS+PHP/CGI is known to be broken. See <a href="http://bugs.dokuwiki.org/?do=details&amp;task_id=852">Bug 852</a> for more info.';
 $lang['xsendfile']   = 'Use the X-Sendfile header to let the webserver deliver static files? Your webserver needs to support this.';
@@ -175,6 +175,12 @@ $lang['renderer__plugin'] = '%s (plugin)';
 
 /* Network Options */
 $lang['dnslookups'] = 'DokuWiki will lookup hostnames for remote IP addresses of users editing pages. If you have a slow or non working DNS server or don\'t want this feature, disable this option';
+$lang['jquerycdn'] = 'Should the jQuery and jQuery UI script files be loaded from a CDN? This adds additional HTTP requests, but files may load faster and users may have them cached already.';
+
+/* jQuery CDN options */
+$lang['jquerycdn_o_0'] = 'No CDN, local delivery only';
+$lang['jquerycdn_o_jquery'] = 'CDN at code.jquery.com';
+$lang['jquerycdn_o_cdnjs'] = 'CDN at cdnjs.com';
 
 /* Proxy Options */
 $lang['proxy____host']    = 'Proxy servername';

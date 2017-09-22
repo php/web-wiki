@@ -1,8 +1,8 @@
 <?php
+
 /**
- * japanese language file
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
  * @author Yuji Takenaka <webmaster@davilin.com>
  * @author Christopher Smith <chris@jalakai.co.uk>
  * @author Ikuo Obataya <i.obataya@gmail.com>
@@ -10,6 +10,7 @@
  * @author Kazutaka Miyasaka <kazmiya@gmail.com>
  * @author Taisuke Shimamoto <dentostar@gmail.com>
  * @author Satoshi Sahara <sahara.satoshi@gmail.com>
+ * @author Hideaki SAWADA <chuno@live.jp>
  */
 $lang['menu']                  = 'サイト設定';
 $lang['error']                 = '不正な値が存在するため、設定は更新されませんでした。入力値を確認してから、再度更新してください。
@@ -60,7 +61,7 @@ $lang['breadcrumbs']           = 'トレース（パンくず）表示数';
 $lang['youarehere']            = '現在位置を表示';
 $lang['fullpath']              = 'ページのフッターに絶対パスを表示';
 $lang['typography']            = 'タイポグラフィー変換';
-$lang['dformat']               = '日付フォーマット（PHPの<a href="http://www.php.net/strftime">strftime</a>関数を参照）';
+$lang['dformat']               = '日付フォーマット（PHPの<a href="http://php.net/strftime">strftime</a>関数を参照）';
 $lang['signature']             = '署名';
 $lang['showuseras']            = '最終編集者の情報として表示する内容';
 $lang['toptoclevel']           = '目次 トップレベル見出し';
@@ -68,7 +69,7 @@ $lang['tocminheads']           = '目次を生成するための最小見出し�
 $lang['maxtoclevel']           = '目次 表示限度見出し';
 $lang['maxseclevel']           = '編集可能見出し';
 $lang['camelcase']             = 'キャメルケースリンク';
-$lang['deaccent']              = 'ページ名アクセント';
+$lang['deaccent']              = 'ページ名の変換方法';
 $lang['useheading']            = '最初の見出しをページ名とする';
 $lang['sneaky_index']          = 'デフォルトでは索引にすべての名前空間を表示しますが、この機能はユーザーに閲覧権限のない名前空間を非表示にします。ただし、閲覧が可能な副名前空間まで表示されなくなるため、ACLの設定が適正でない場合は索引機能が使えなくなる場合があります。';
 $lang['hidepages']             = '検索、サイトマップ、その他の自動インデックスの結果に表示しないページ（Regex）';
@@ -83,9 +84,11 @@ $lang['profileconfirm']        = 'プロフィール変更時に現在のパス�
 $lang['rememberme']            = 'ログイン用クッキーを永久に保持することを許可（ログインを保持）';
 $lang['disableactions']        = 'DokuWiki の動作を無効にする';
 $lang['disableactions_check']  = 'チェック';
-$lang['disableactions_subscription'] = '登録 / 解除';
+$lang['disableactions_subscription'] = '変更履歴配信の登録・解除';
 $lang['disableactions_wikicode'] = 'ソース閲覧 / 生データ出力';
+$lang['disableactions_profile_delete'] = '自分のアカウントの抹消';
 $lang['disableactions_other']  = 'その他の動作（カンマ区切り）';
+$lang['disableactions_rss']    = 'XML 配信（RSS）';
 $lang['auth_security_timeout'] = '認証タイムアウト設定（秒）';
 $lang['securecookie']          = 'クッキーをHTTPSにてセットする場合は、ブラウザよりHTTPS経由で送信された場合にみに制限しますか？ログインのみをSSLで行う場合は、この機能を無効にしてください。';
 $lang['remote']                = 'リモートAPIを有効化します。有効化するとXML-RPCまたは他の手段でwikiにアプリケーションがアクセスすることを許可します。';
@@ -135,7 +138,7 @@ $lang['autoplural']            = '自動複数形処理';
 $lang['compression']           = 'アーカイブファイルの圧縮方法';
 $lang['gzip_output']           = 'xhtmlに対するコンテンツ圧縮（gzip）を使用';
 $lang['compress']              = 'CSSとJavaScriptを圧縮';
-$lang['cssdatauri']            = 'HTTP リクエスト数によるオーバーヘッドを減らすため、CSS ファイルから参照される画像ファイルのサイズがここで指定するバイト数以内の場合は CSS ファイル内に Data URI として埋め込みます。このテクニックは IE7 以下では動作しません! <code>400</code> から <code>600</code> バイトがちょうどよい値です。<code>0</code> を指定すると埋め込み処理は行われません。';
+$lang['cssdatauri']            = 'HTTP リクエスト数によるオーバーヘッドを減らすため、CSS ファイルから参照される画像ファイルのサイズがここで指定するバイト数以内の場合は CSS ファイル内に Data URI として埋め込みます。 <code>400</code> から <code>600</code> バイトがちょうどよい値です。<code>0</code> を指定すると埋め込み処理は行われません。';
 $lang['send404']               = '文書が存在しないページに"HTTP404/Page Not Found"を使用';
 $lang['broken_iua']            = 'ignore_user_abort関数が破損している恐れがあります。そのため、検索インデックスが動作しない可能性があります。IIS+PHP/CGIの組み合わせで破損することが判明しています。詳しくは<a href="http://bugs.splitbrain.org/?do=details&amp;task_id=852">Bug 852</a>を参照してください。';
 $lang['xsendfile']             = 'ウェブサーバーが静的ファイルを生成するために X-Sendfile ヘッダーを使用しますか？なお、この機能をウェブサーバーがサポートしている必要があります。';
@@ -143,6 +146,10 @@ $lang['renderer_xhtml']        = 'Wikiの出力（xhtml）にレンダラーを�
 $lang['renderer__core']        = '%s （Dokuwikiコア）';
 $lang['renderer__plugin']      = '%s （プラグイン）';
 $lang['dnslookups']            = 'ページを編集しているユーザーのIPアドレスからホスト名を逆引きする。利用できるDNSサーバーがない、あるいはこの機能が不要な場合にはオフにします。';
+$lang['jquerycdn']             = 'コンテンツ・デリバリー・ネットワーク (CDN) の選択：jQuery と jQuery UI スクリプトを CDN からロードさせる場合には、追加的な HTTP リクエストが発生しますが、ブラウザキャッシュが使用されるため、表示速度の向上が期待できます。';
+$lang['jquerycdn_o_0']         = 'CDN を使用しない（または利用できない）';
+$lang['jquerycdn_o_jquery']    = 'CDN: code.jquery.com を使用';
+$lang['jquerycdn_o_cdnjs']     = 'CDN: cdnjs.com を使用';
 $lang['proxy____host']         = 'プロキシ - サーバー名';
 $lang['proxy____port']         = 'プロキシ - ポート';
 $lang['proxy____user']         = 'プロキシ - ユーザー名';
@@ -162,9 +169,9 @@ $lang['typography_o_2']        = 'すべての引用符（動作しない場合�
 $lang['userewrite_o_0']        = '使用しない';
 $lang['userewrite_o_1']        = '.htaccess';
 $lang['userewrite_o_2']        = 'DokuWikiによる設定';
-$lang['deaccent_o_0']          = '指定しない';
-$lang['deaccent_o_1']          = 'アクセントを除去';
-$lang['deaccent_o_2']          = 'ローマナイズ';
+$lang['deaccent_o_0']          = '変換しない';
+$lang['deaccent_o_1']          = 'アクセント付きの文字を変換する';
+$lang['deaccent_o_2']          = 'ローマ字化';
 $lang['gdlib_o_0']             = 'GDを利用できません';
 $lang['gdlib_o_1']             = 'バージョン 1.x';
 $lang['gdlib_o_2']             = '自動検出';
@@ -190,6 +197,7 @@ $lang['xsendfile_o_2']         = '標準 X-Sendfile ヘッダー';
 $lang['xsendfile_o_3']         = 'Nginx X-Accel-Redirect ヘッダー';
 $lang['showuseras_o_loginname'] = 'ログイン名';
 $lang['showuseras_o_username'] = 'ユーザーのフルネーム';
+$lang['showuseras_o_username_link'] = 'user という InterWiki リンクになったユーザーのフルネーム';
 $lang['showuseras_o_email']    = 'ユーザーのメールアドレス（メールガード設定による難読化）';
 $lang['showuseras_o_email_link'] = 'ユーザーのメールアドレスをリンクにする';
 $lang['useheading_o_0']        = '使用しない';

@@ -4,4 +4,4 @@
  *
  */
 
-$conf['addStyling'] = 0;
+$conf['addStyling'] = 1;

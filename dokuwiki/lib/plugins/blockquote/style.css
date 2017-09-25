@@ -1,10 +1,15 @@
 
 /* blockquote */
 .dokuwiki blockquote.blockquote-plugin {
-    margin: 1em 3em 1em 3em;
     border: 1px dotted __border__;
     background: __background_alt__ url(images/blockquote.gif) no-repeat 0.3em 0.3em;
     padding: 1em;
+    /* prevent plugin to interfere with expanded ToC when there's one */
+    overflow: hidden;
+    /* Fix placement with the rule above (original margins were: 1em 3em 1em 3em */
+    margin: 1em auto 1em auto;
+    /* Get closer to initial design when there's enough space (ie. 3em left and right margins) */
+    max-width: 90%;
 }
 
 /* cite */
@@ -25,4 +30,6 @@
 .dokuwiki q.blockquote-plugin {
     border: 1px dotted __border__;
     background: __background_alt__;
+    /* CSS quotes property quotation mark entity numbers can be customized */
+    quotes: "\0022" "\0022" "\0027" "\0027";
 }

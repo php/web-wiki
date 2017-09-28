@@ -312,10 +312,10 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 // the javascript source of these functions is in script.js
                 $this->template['doodleData']["$fullname"]['editLinks'] = 
                    '<a href="javascript:editEntry(\''.$formId.'\',\''.$fullname.'\')">'.
-                   '  <img src="'.DOKU_BASE.'lib/images/pencil.png" alt="edit entry" style="float:left">'.
+                   '  <b title="edit entry">&#9998;</b>'.
                    '</a>'.
                    '<a href="javascript:deleteEntry(\''.$formId.'\',\''.$fullname.'\')">'.
-                   '  <img src="'.DOKU_BASE.'lib/images/del.png" alt="delete entry" style="float:left">'.
+                   '  <b title="delete entry">&#128465;</b>'.
                    '</a>';
             }
         }

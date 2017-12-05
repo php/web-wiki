@@ -1,0 +1,7 @@
+base   smtp
+author Andreas Gohr
+email  andi@splitbrain.org
+date   2017-08-03
+name   smtp plugin
+desc   Send mails via a configured SMTP server
+url    https://www.dokuwiki.org/plugin:smtp

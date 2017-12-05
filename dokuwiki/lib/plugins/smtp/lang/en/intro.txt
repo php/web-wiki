@@ -1,0 +1,5 @@
+====== SMTP Testing ======
+
+This page allows you to trigger sending a test mail in DokuWiki. You can use it to check if you configured the SMTP plugin correctly.
+
+Give recipient's email addresses in the form below.

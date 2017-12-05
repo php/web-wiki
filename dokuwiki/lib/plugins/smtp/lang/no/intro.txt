@@ -1,0 +1,5 @@
+====== SMTP-testing ======
+
+På denne siden kan du sende ut en test-e-post fra DokuWiki. Bruk denne for å sjekke om du har installert din SMTP-utvidelse riktig.
+
+Sett inn mottakers e-postadresse i skjemaet nedenfor.

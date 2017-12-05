@@ -1,0 +1,5 @@
+====== SMTP Test ======
+
+Denne side tillader dig at udløse sending af en test-mail i DokuWiki. Du kan bruge den til at kontrollere om du har konfigureret SMTP plugin korrekt.
+
+Angiv modtagers email-adresse i formularen herunder.

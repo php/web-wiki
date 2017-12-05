@@ -1,0 +1,5 @@
+====== Testi SMTP ======
+
+Tiu paĝo eksendas test-retpoŝton en DokuWiki. Tiel vi povas testi, ĉu la kromaĵo SMTP ĝuste agordiĝis.
+
+Indiku la retpoŝtadreson de ricevanto(j) en la formularo.

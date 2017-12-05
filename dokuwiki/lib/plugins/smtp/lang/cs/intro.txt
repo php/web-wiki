@@ -1,0 +1,5 @@
+====== Zkouška SMTP ======
+
+Na této stránce můžete vyzkoušet posílání e-mailu v DokuWiki. Můžete ji využít pro ověření správnosti nastavení rozšíření SMTP.
+
+Do formuláře níže zadejte e-mailové adresy adresátů.

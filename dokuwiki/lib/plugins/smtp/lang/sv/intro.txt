@@ -1,0 +1,5 @@
+====== Test av SMTP ======
+
+Denna sida tillåter dig att skicka ett test-e-brev via DokuWiki. Du kan använda sidan för att kontrollera om du konfigurerat SMTP korrekt.
+
+Fyll i mottagarens e-postadress i formuläret nedan.

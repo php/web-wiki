@@ -1,0 +1,5 @@
+====== Test de SMTP ======
+
+Cette page vous permet de déclencher l'envoi d'un courriel de test depuis DokuWiki. Vous pouvez l'utiliser pour vérifier si SMTP est correctement configuré.
+
+Indiquez l'adresse email du destinataire dans le formulaire ci dessous.

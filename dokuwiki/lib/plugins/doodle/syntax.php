@@ -193,7 +193,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
      * add new vote if user just submitted one and
      * create output xHTML from template
      */
-    function render($mode, &$renderer, $data) {
+    function render($mode, Doku_Renderer $renderer, $data) {
         if ($mode != 'xhtml') return false;
         
         //debout("render: $mode");        

@@ -139,7 +139,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
      *
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    function getUserData($user){
+    function getUserData($user, $requireGroups = true){
       $cvs_reply = $this->_checkCVSPass($user);
       if ($cvs_reply === 2) {
         $this->_setCVSUser($user);

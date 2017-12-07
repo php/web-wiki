@@ -87,7 +87,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
      * Handle the match, parse parameters & choices
      * and prepare everything for the render() method.
      */
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         $match = substr($match, 8, -9);              // strip markup (including space after "<doodle ")
         list($parameterStr, $choiceStr) = preg_split('/>/u', $match, 2);
 

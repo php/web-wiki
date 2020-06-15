@@ -1,4 +1,21 @@
-====== Register as new user ======
+====== Register as a new wiki user ======
+ 
+Welcome and thank you for desiring a PHP.net wiki account!
+ 
+**Be aware**: wiki account does not give you voting privileges, according to our [[https://wiki.php.net/rfc/voting#who_can_vote|rules]].
 
-Fill in all the information below to create a new account in this wiki. Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address. The login name should be a valid [[doku>pagename|pagename]].
+**Note**: wiki account does not give you edit privileges.
+To get authorization you must send a quick introduction to the [[internals@lists.php.net|internals]] mailing list.
+Mention your wiki username and say what you're planning to do.
+This email lets us know you're a human (and not a robot) and what you'll be working on.
 
+Approval may take several hours or days.
+
+To create a new wiki account, please fill out all of the information below.
+Make sure you supply a **valid e-mail address** - if you are not asked to enter a password here, a new one will be sent to that address.
+The login name should be a valid [[doku>wiki:pagename|pagename]].
+
+**Note**: If you find a minor problem with the wiki (like a typo or invalid grammar) then please email the [[internals@lists.php.net|internals]] mailing list with the URL, and suggested change.
+
+**Note**: All information here is readable without registering. Write access is controlled however. All users with a php.net vcs account have full write access to the wiki, and may simply l
+ogin with their VCS credentials.

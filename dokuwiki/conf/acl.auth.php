@@ -24,3 +24,5 @@ licenses:*	@phpcvs		16
 doc:*	@doc	8
 doc	@doc	8
 phpng-upgrading	@php7upgrading	8
+oauth:*	@ALL		0
+oauth:*	@phpcvs		16

@@ -42,7 +42,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
     }
 
     /**
-     * Set a user read via master.php.net
+     * Set a user read via main.php.net
      *
      * Checks if the given user exists and the given
      * plaintext password is correct
@@ -62,7 +62,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
     }
 
     /**
-     * Check user+password against master.php.net [required auth function]
+     * Check user+password against main.php.net [required auth function]
      *
      * Checks if the given user exists and the given
      * plaintext password is correct
@@ -86,7 +86,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
 
       $ctx = stream_context_create(array("http" => $opts));
 
-      $s = file_get_contents("https://master.php.net/fetch/cvsauth.php", false, $ctx);
+      $s = file_get_contents("https://main.php.net/fetch/cvsauth.php", false, $ctx);
 
       $a = unserialize($s);
       /*

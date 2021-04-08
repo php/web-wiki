@@ -73,7 +73,7 @@ class Message extends \Tx\Mailer\Message {
      */
     public function toString() {
         // we need to remove the BCC header here
-        $lines = explode("\n", $this->body);
+        $lines = preg_split('/\r?\n/', $this->body);
         $count = count($lines);
         for($i=0; $i<$count; $i++) {
             if(trim($lines[$i]) === '') break; // end of headers, we're done
@@ -85,7 +85,7 @@ class Message extends \Tx\Mailer\Message {
                 break; // header removed, we're done
             }
         }
-        $body = join("\n", $lines);
+        $body = join($this->CRLF, $lines);
 
         return $body . $this->CRLF . $this->CRLF . "." . $this->CRLF;
     }

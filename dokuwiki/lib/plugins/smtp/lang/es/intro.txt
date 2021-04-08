@@ -1,0 +1,5 @@
+====== Probando SMTP ======
+
+Esta página permite iniciar el envío de un correo de prueba en DokuWiki.  Puedes usarlo para verificar que el módulo de programa SMTP esté configurado correctamente.
+
+Anota las direcciones de correo electrónico de recepción en la forma siguiente.

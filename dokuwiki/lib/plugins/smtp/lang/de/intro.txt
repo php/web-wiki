@@ -1,5 +1,5 @@
 ====== SMTP Test ======
 
-Auf dieser Seite kannst du eine Testmail von DokuWiki versenden. Diese kannst du verwenden um deine SMTP Konfiguration zu überprüfen.
+Auf dieser Seite können Sie eine Testmail über DokuWiki versenden, um die aktuelle SMTP Konfiguration zu überprüfen.
 
-Füge die E-Mailaddressen der Empfänger in das Formular ein.
+Bitte geben Sie die entsprechenden E-Mail-Adressen der Empfänger in das Formular ein.

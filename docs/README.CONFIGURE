@@ -14,3 +14,9 @@ http://wiki.splitbrain.org/wiki:rewrite
 There is no data in cvs. The data is only available on the server and backup many
 times daily. If you need sample data using the production documents, please contact
 the php webmaster list.
+
+## Local testing
+
+```
+docker run -ti --rm -e dokuwikitoken='...' -v "$PWD/dokuwiki":/var/www/html/ -v "$PWD/httpd.conf":/etc/apache2/sites-available/000-default.conf --name php-wiki -p 8080:80 --user 1000 --sysctl net.ipv4.ip_unprivileged_port_start=0 php-wiki
+```

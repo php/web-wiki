@@ -50,7 +50,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
      * @return  bool true or int error code
      */
     function _setCVSUser($user){
-      $this->_loadUserData();
+      $this->loadUserData();
       $this->users[$user]['pass'] = null;
       $this->users[$user]['name'] = $user;
       $this->users[$user]['mail'] = $user.'@php.net';
@@ -145,7 +145,7 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
         $this->_setCVSUser($user);
       }
 
-      if($this->users === null) $this->_loadUserData();
+      if($this->users === null) $this->loadUserData();
       return isset($this->users[$user]) ? $this->users[$user] : false;
     }
 

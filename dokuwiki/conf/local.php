@@ -25,5 +25,7 @@ $conf['send404'] = 1;
 $conf['breadcrumbs'] = 0;
 $conf['youarehere'] = 1;
 $conf['baseurl'] = 'https://wiki.php.net';
+$conf['plugin']['smtp']['smtp_host'] = 'mailout.php.net';
+$conf['plugin']['smtp']['smtp_ssl'] = 'tls';
 
 // end auto-generated content

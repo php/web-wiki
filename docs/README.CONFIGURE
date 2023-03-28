@@ -3,20 +3,20 @@ in "dw/conf/users.auth.php". A normal dokuwiki install will generate one using t
 credentials you used during the installation.
 
 To use the CVS authentication module, an environment variable is required, its
-name is "dokuwikitoken". See the sample lighttpd.conf for an example (or use
-SetEnv in Apache). Ask Hannes (bjori@php.net) for the current valid plain text
-token.
+name is "dokuwikitoken".
 
 Apache users might prefer setting up the mod_rewrite via a .htaccess file. See
 the dokuwiki documentation for a sample .htaccess file:
-http://wiki.splitbrain.org/wiki:rewrite
 
-There is no data in cvs. The data is only available on the server and backup many
-times daily. If you need sample data using the production documents, please contact
-the php webmaster list.
+https://www.dokuwiki.org/install:apache
+
+There is no data in cvs. The data is only available on the server and backup daily.
+If you need sample data using the production documents, please contact the php
+webmaster list.
 
 ## Local testing
 
 ```
+docker build -t php-wiki .
 docker run -ti --rm -e dokuwikitoken='...' -v "$PWD/dokuwiki":/var/www/html/ -v "$PWD/httpd.conf":/etc/apache2/sites-available/000-default.conf --name php-wiki -p 8080:80 --user 1000 --sysctl net.ipv4.ip_unprivileged_port_start=0 php-wiki
 ```

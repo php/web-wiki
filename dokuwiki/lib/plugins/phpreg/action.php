@@ -8,6 +8,8 @@
  */
 
 // must be run within Dokuwiki
+use dokuwiki\Form\InputElement;
+
 if(!defined('DOKU_INC')) die();
 
 /**
@@ -27,7 +29,7 @@ class action_plugin_phpreg extends DokuWiki_Action_Plugin
     public function register(Doku_Event_Handler $controller)
     {
         $controller->register_hook(
-            'HTML_REGISTERFORM_OUTPUT',
+            'FORM_REGISTER_OUTPUT',
             'BEFORE',
             $this,
             'handle_registerform_output'
@@ -52,15 +54,17 @@ class action_plugin_phpreg extends DokuWiki_Action_Plugin
      */
     public function handle_registerform_output(Doku_Event &$event, $param)
     {
-        $pos = $event->data->findElementByAttribute('type', 'submit');
+        $pos = $event->data->findPositionByType('button');
+
         if (!$pos) return;
-        $spam = isset($_POST['spam']) ? $_POST['spam'] : '';
-        $out = form_makeTextField(
-            'spam', $spam,
-            'To which email address do you have to send an email to now?',
-            '', 'block', array('size' => '50')
+        $spam = $_POST['spam'] ?? '';
+        $element = new InputElement(
+            'text',
+            'spam',
+            'To which email address do you have to send an email to now?'
         );
-        $event->data->insertElement($pos, $out);
+        $element->val($spam);
+        $event->data->addElement($element, $pos);
     }
 
     /**

@@ -106,6 +106,7 @@ $lang['disableactions_other'] = 'Other actions (comma separated)';
 $lang['disableactions_rss'] = 'XML Syndication (RSS)';
 $lang['auth_security_timeout'] = 'Authentication Security Timeout (seconds)';
 $lang['securecookie'] = 'Should cookies set via HTTPS only be sent via HTTPS by the browser? Disable this option when only the login of your wiki is secured with SSL but browsing the wiki is done unsecured.';
+$lang['samesitecookie'] = 'The samesite cookie attribute to use. Leaving it empty will let the browser decide on the samesite policy.';
 $lang['remote']      = 'Enable the remote API system. This allows other applications to access the wiki via XML-RPC or other mechanisms.';
 $lang['remoteuser']  = 'Restrict remote API access to the comma separated groups or users given here. Leave empty to give access to everyone.';
 $lang['remotecors']  = 'Enable Cross-Origin Resource Sharing (CORS) for the remote interfaces. Asterisk (*) to allow all origins. Leave empty to deny CORS.';
@@ -119,8 +120,6 @@ $lang['iexssprotect']= 'Check uploaded files for possibly malicious JavaScript o
 
 /* Editing Settings */
 $lang['usedraft']    = 'Automatically save a draft while editing';
-$lang['htmlok']      = 'Allow embedded HTML';
-$lang['phpok']       = 'Allow embedded PHP';
 $lang['locktime']    = 'Maximum age for lock files (sec)';
 $lang['cachetime']   = 'Maximum age for cache (sec)';
 
@@ -149,6 +148,7 @@ $lang['mailreturnpath']    = 'Recipient email address for non delivery notificat
 $lang['mailprefix']  = 'Email subject prefix to use for automatic mails. Leave blank to use the wiki title';
 $lang['htmlmail']    = 'Send better looking, but larger in size HTML multipart emails. Disable for plain text only mails.';
 $lang['dontlog'] = 'Disable logging for these types of logs.';
+$lang['logretain'] = 'How many days of logs to keep.';
 
 /* Syndication Settings */
 $lang['sitemap']           = 'Generate Google sitemap this often (in days). 0 to disable';
@@ -192,6 +192,7 @@ $lang['trustedproxy'] = 'Trust forwarding proxies matching this regular expressi
 
 $lang['_feature_flags'] = 'Feature Flags';
 $lang['defer_js'] = 'Defer javascript to be execute after the page\'s HTML has been parsed. Improves perceived page speed but could break a small number of plugins.';
+$lang['hidewarnings'] = 'Do not display any warnings issued by PHP. This may ease the transisition to PHP8+. Warnings will still be logged in the error log and should be reported.';
 
 /* Network Options */
 $lang['dnslookups'] = 'DokuWiki will lookup hostnames for remote IP addresses of users editing pages. If you have a slow or non working DNS server or don\'t want this feature, disable this option';

@@ -7,7 +7,6 @@ namespace dokuwiki\File;
  */
 class PageResolver extends Resolver
 {
-
     /**
      * Resolves a given ID to be absolute
      *
@@ -17,10 +16,11 @@ class PageResolver extends Resolver
     public function resolveId($id, $rev = '', $isDateAt = false)
     {
         global $conf;
+        $id = (string) $id;
 
         // pages may have a hash attached, we separate it on resolving
         if (strpos($id, '#') !== false) {
-            list($id, $hash) = explode('#', $id, 2);
+            [$id, $hash] = sexplode('#', $id, 2);
             $hash = cleanID($hash);
         } else {
             $hash = '';
@@ -54,7 +54,7 @@ class PageResolver extends Resolver
     {
         global $conf;
 
-        if ($id[-1] !== ':') return $id;
+        if ($id === '' || $id[-1] !== ':') return $id;
 
         if (page_exists($id . $conf['start'], $rev, true, $isDateAt)) {
             // start page inside namespace
@@ -94,5 +94,4 @@ class PageResolver extends Resolver
         }
         return $id;
     }
-
 }

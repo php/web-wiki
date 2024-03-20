@@ -3,9 +3,9 @@
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
+ * @author Andreas Gohr <andi@splitbrain.org>
  * @author Markus Glaser <glaser@hallowelt.com>
  * @author Axel Schwarzer <SchwarzerA@gmail.com>
- * @author Andreas Gohr <andi@splitbrain.org>
  * @author Eric Haberstroh <ehaberstroh@gmail.com>
  * @author C!own77 <clown77@posteo.de>
  * @author Alex Beck <alex@4becks.com>
@@ -108,6 +108,7 @@ $lang['disableactions_other']  = 'Andere Aktionen (durch Komma getrennt)';
 $lang['disableactions_rss']    = 'XML-Syndikation (RSS)';
 $lang['auth_security_timeout'] = 'Authentifikations-Timeout (Sekunden)';
 $lang['securecookie']          = 'Sollen Cookies, die via HTTPS gesetzt wurden nur per HTTPS versendet werden? Deaktivieren Sie diese Option, wenn nur der Login Ihres Wikis mit SSL gesichert ist, aber das Betrachten des Wikis ungesichert geschieht.';
+$lang['samesitecookie']        = 'Das samesite Cookie Attribut. Wenn es leer gelassen wird, entscheidet der Browser über die verwendete Richtlinie.';
 $lang['remote']                = 'Aktiviert den externen API-Zugang. Diese Option erlaubt es externen Anwendungen von außen auf die XML-RPC-Schnittstelle oder anderweitigen Schnittstellen zu zugreifen.';
 $lang['remoteuser']            = 'Zugriff auf die externen Schnittstellen durch kommaseparierte Angabe von Benutzern oder Gruppen einschränken. Ein leeres Feld erlaubt Zugriff für jeden.';
 $lang['remotecors']            = 'Erlaubt externen Clients API-Zugriff per Cross-Origin Resource Sharing (CORS). Asterisk (*), um alle Quellen zu erlauben. Leer lassen, um CORS zu deaktivieren.';
@@ -117,8 +118,6 @@ $lang['indexdelay']            = 'Zeit bevor Suchmaschinenindexierung erlaubt is
 $lang['mailguard']             = 'E-Mail-Adressen schützen';
 $lang['iexssprotect']          = 'Hochgeladene Dateien auf bösartigen JavaScript- und HTML-Code untersuchen';
 $lang['usedraft']              = 'Während des Bearbeitens automatisch Zwischenentwürfe speichern';
-$lang['htmlok']                = 'HTML erlauben';
-$lang['phpok']                 = 'PHP erlauben';
 $lang['locktime']              = 'Maximales Alter für Seitensperren (Sekunden)';
 $lang['cachetime']             = 'Maximale Cachespeicherung (Sekunden)';
 $lang['target____wiki']        = 'Zielfenster für interne Links (target Attribut)';
@@ -178,6 +177,7 @@ $lang['search_fragment_o_contains'] = 'enthält';
 $lang['trustedproxy']          = 'Vertrauen Sie Weiterleitungs-Proxys, welche dem regulärem Ausdruck entsprechen, hinsichtlich der angegebenen Client-ID. Der Standardwert entspricht dem lokalem Netzwerk. Leer lassen um jedem Proxy zu vertrauen.';
 $lang['_feature_flags']        = 'Feature-Flags';
 $lang['defer_js']              = 'JavaScript-Ausführung verzögern bis das HTML der gesamten Seite verarbeitet wurde. Erhöht die gefühlte Geschwindigkeit des Seitenaufbaus, kann aber mit einigen wenigen Plugins inkompatibel sein.';
+$lang['hidewarnings']          = 'Keine PHP Warnungen anzeigen. Diese Einstellung kann den Umstieg auf PHP8+ erleichtern. Warnungen werden weiterhin im Fehlerlog gespeichert und sollten gemeldet werden.';
 $lang['dnslookups']            = 'DokuWiki löst die IP-Adressen von Benutzern zu deren Hostnamen auf. Wenn Sie einen langsamen oder unzuverlässigen DNS-Server verwenden oder die Funktion nicht benötigen, dann sollte diese Option deaktiviert sein.';
 $lang['jquerycdn']             = 'Sollen jQuery und jQuery UI Skriptdateien von einem CDN (Content Delivery Network) geladen werden? Dadurch entstehen zusätzliche HTTP-Anfragen, aber die Daten werden voraussichtlich schneller geladen und eventuell sind sie auch schon beim Benutzer im Cache.';
 $lang['jquerycdn_o_0']         = 'Kein CDN, ausschließlich lokale Auslieferung';

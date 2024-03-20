@@ -4,7 +4,9 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
  * @author Schplurtz le Déboulonné <schplurtz@laposte.net>
+ * @author Jérémy Just <jeremy@jejust.fr>
  * @author Olivier Humbert <trebmuh@tuxfamily.org>
+ * @author Philippe Verbeke <ph.verbeke@gmail.com>
  * @author Nicolas Friedli <nicolas@theologique.ch>
  * @author Pierre Henriot <pierre.henriot@gmail.com>
  * @author PaliPalo <palipalo@hotmail.fr>
@@ -110,16 +112,16 @@ $lang['disableactions_other']  = 'Autres actions (séparées par des virgules)';
 $lang['disableactions_rss']    = 'Syndication XML (RSS)';
 $lang['auth_security_timeout'] = 'Délai d\'expiration de sécurité (secondes)';
 $lang['securecookie']          = 'Les cookies définis via HTTPS doivent-ils n\'être envoyé par le navigateur que via HTTPS ? Désactivez cette option lorsque seule la connexion à votre wiki est sécurisée avec SSL et que la navigation sur le wiki est effectuée de manière non sécurisée.';
+$lang['samesitecookie']        = 'Valeur de l\'attribut samesite des cookies. Vide pour laisser les navigateurs décider de leur politique samesite.';
 $lang['remote']                = 'Active l\'API système distante. Ceci permet à d\'autres applications d\'accéder au wiki via XML-RPC ou d\'autres mécanismes.';
 $lang['remoteuser']            = 'Restreindre l\'accès à l\'API à une liste de groupes ou d\'utilisateurs (séparés par une virgule). Laisser vide pour donner l\'accès tout le monde.';
+$lang['remotecors']            = 'Active le partage de ressources entre origines multiples (CORS) pour les interfaces distantes. Utiliser un astérisque (*) pour autoriser toutes les origines. Laisser vide pour interdire le CORS.';
 $lang['usewordblock']          = 'Bloquer le spam selon les mots utilisés';
 $lang['relnofollow']           = 'Utiliser l\'attribut « rel="nofollow" » sur les liens extérieurs';
 $lang['indexdelay']            = 'Délai avant l\'indexation (secondes)';
 $lang['mailguard']             = 'Cacher les adresses de courriel';
 $lang['iexssprotect']          = 'Vérifier, dans les fichiers envoyés, la présence de code JavaScript ou HTML malveillant';
 $lang['usedraft']              = 'Enregistrer automatiquement un brouillon pendant l\'édition';
-$lang['htmlok']                = 'Permettre l\'utilisation de code HTML dans les pages';
-$lang['phpok']                 = 'Permettre l\'utilisation de code PHP dans les pages';
 $lang['locktime']              = 'Âge maximum des fichiers de blocage (secondes)';
 $lang['cachetime']             = 'Âge maximum d\'un fichier en cache (secondes)';
 $lang['target____wiki']        = 'Cible pour liens internes';
@@ -142,6 +144,7 @@ $lang['mailreturnpath']        = 'Adresse de courriel du destinataire pour les n
 $lang['mailprefix']            = 'Préfixe à utiliser dans les objets des courriels automatiques. Laisser vide pour utiliser le titre du wiki';
 $lang['htmlmail']              = 'Envoyer des courriels multipart HTML (visuellement plus agréable, mais plus lourd). Désactiver pour utiliser uniquement des courriel en texte seul.';
 $lang['dontlog']               = 'Désactiver l\'enregistrement pour ces types de journaux.';
+$lang['logretain']             = 'Nombre de jours à garder dans le journal.';
 $lang['sitemap']               = 'Fréquence de génération du sitemap Google (jours). 0 pour désactiver';
 $lang['rss_type']              = 'Type de flux XML (RSS)';
 $lang['rss_linkto']            = 'Lien du flux XML vers';
@@ -180,6 +183,7 @@ $lang['search_fragment_o_contains'] = 'contient';
 $lang['trustedproxy']          = 'Faire confiance aux mandataires qui correspondent à cette expression régulière pour l\'adresse IP réelle des clients qu\'ils rapportent. La valeur par défaut correspond aux réseaux locaux. Laisser vide pour ne faire confiance à aucun mandataire.';
 $lang['_feature_flags']        = 'Fonctionnalités expérimentales';
 $lang['defer_js']              = 'Attendre que le code HTML des pages soit analysé avant d\'exécuter le javascript. Améliore la vitesse de chargement perçue, mais pourrait casser un petit nombre de greffons.';
+$lang['hidewarnings']          = 'Ne montrer aucun avertissement émis par PHP. Cela peut faciliter la transition vers PHP 8+. Les avertissements seront toujours enregistrés dans le journal des erreurs et devraient être rapportés.';
 $lang['dnslookups']            = 'DokuWiki effectuera une résolution du nom d\'hôte sur les adresses IP des utilisateurs modifiant des pages. Si vous ne possédez pas de serveur DNS, que ce dernier est lent ou que vous ne souhaitez pas utiliser cette fonctionnalité : désactivez-la.';
 $lang['jquerycdn']             = 'Faut-il distribuer les scripts JQuery et JQuery UI depuis un CDN ? Cela ajoute une requête HTTP, mais les fichiers peuvent se charger plus vite et les internautes les ont peut-être déjà en cache.';
 $lang['jquerycdn_o_0']         = 'Non : utilisation de votre serveur.';

@@ -1,0 +1,7 @@
+base   doodle
+author Francois Merciol
+email  dokuplugin@merciol.fr
+date   2021-03-21
+name   Doodle Plugin
+desc   helps to schedule meetings
+url    http://www.dokuwiki.org/plugin:doodle

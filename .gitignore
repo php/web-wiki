@@ -1,2 +1,5 @@
 /dokuwiki/data/
+*~
+*.bak
+/.duplicacy
 /dokuwiki/conf/users.auth.php

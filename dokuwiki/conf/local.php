@@ -27,5 +27,6 @@ $conf['youarehere'] = 1;
 $conf['baseurl'] = getenv('web-wiki-development-setup-baseurl') ?: 'https://wiki.php.net';
 $conf['plugin']['smtp']['smtp_host'] = 'mailout.php.net';
 $conf['plugin']['smtp']['smtp_ssl'] = 'tls';
+$conf['plugin']['htmlok']['htmlok'] = 1;
 
 // end auto-generated content

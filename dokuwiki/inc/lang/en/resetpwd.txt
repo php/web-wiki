@@ -1,3 +1,7 @@
 ====== Set new password ======
 
 Please enter a new password for your account in this wiki.
+
+You can only do this for **wiki** accounts.
+
+If you have a php.net VSC account, then you need to reset your password on [[https://main.php.net/forgot.php|main.php.net]].

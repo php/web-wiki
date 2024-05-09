@@ -40,7 +40,7 @@
     <tr>
         <td class="rightalign">
           <?php $fullname = '<a href="//people.php.net/' . $fullname.'">' .$fullname. '</a>';?>
-          <?php echo $userData['editLinks'].$fullname.$userData['username'] ?>
+          <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $fullname.$userData['username'] ?>
         </td>
         <?php for ($col = 0; $col < $c; $col++) {
             echo $userData['choice'][$col];

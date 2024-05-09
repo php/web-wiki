@@ -223,12 +223,12 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         //FIXME: count($choices) may be different from number of choices in $doodle data!
 
         $can_vote = false;
-        if ($INFO["userinfo"] && count(array_intersect(array('admin', 'phpcvs', 'voting'), $INFO['userinfo']['grps'])) > 0) {
+        if (array_key_exists("userinfo", $INFO) && $INFO["userinfo"] && count(array_intersect(array('admin', 'phpcvs', 'voting'), $INFO['userinfo']['grps'])) > 0) {
             $can_vote = true;
         }
         // ----- FORM ACTIONS (only allowed when showing the most recent version of the page, not when editing) -----
         $formId =  'doodle__form__'.cleanID($this->params['title']);
-        if ($ACT == 'show' && $_REQUEST['formId'] == $formId && $REV == false && $can_vote) {
+        if ($ACT == 'show' && array_key_exists('formId', $_REQUEST) && $_REQUEST['formId'] == $formId && $REV == false && $can_vote) {
             // ---- cast new vote
             if (!empty($_REQUEST['cast__vote'])) {
                 $this->castVote();
@@ -567,7 +567,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             }
         }
         
-        if (strcmp($this->params['sort'], 'time') == 0) {
+        if (array_key_exists('sort', $this->params) && strcmp($this->params['sort'], 'time') == 0) {
             debout("sorting by time");
             uasort($doodle, 'cmpEntryByTime');
         } else {

@@ -9,6 +9,7 @@ Upgrades
 - Instead of unpacking on the server, unpack in your local Git directory
 - Restore ``register.txt`` via ``git restore -- dokuwiki/inc/lang/en/register.txt``
 - Restore ``resetpwd.txt`` via ``git restore -- dokuwiki/inc/lang/en/resetpwd.txt``
+- Restore ``entities.conf`` via ``git restore -- dokuwiki/conf/entities.conf``
 - Review the changes (not every detail in larger upgrades of course)
 - Commit and push
 - Pull on the server (``cd /srv/web-wiki && sudo -u kelunik git pull``)

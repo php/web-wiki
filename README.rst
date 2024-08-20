@@ -4,7 +4,7 @@ wiki.php.net
 Upgrades
 --------
 
-- Make a backup: ``cd /srv && tar cvzf wiki-`date +"%Y-%m-%d"`.tar.gz``
+- Make a backup: ``cd /srv && tar cvzf wiki-`date +"%Y-%m-%d"`.tar.gz web-wiki``
 - Follow https://www.dokuwiki.org/install:upgrade
 - Instead of unpacking on the server, unpack in your local Git directory
 - Restore ``register.txt`` via ``git restore -- dokuwiki/inc/lang/en/register.txt``

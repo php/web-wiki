@@ -91,7 +91,7 @@ final class DWRenderer implements ChildNodeRendererInterface
                 return $result;
             }
         }
-return "";
+
         throw new \RuntimeException('Unable to find corresponding renderer for node type ' . \get_class($node));
 
     }

@@ -1,6 +1,17 @@
 wiki.php.net
 ============
 
+Docker
+------
+
+Building::
+
+	docker build -t php-wiki .
+
+Running::
+
+	docker run -ti --rm -e dokuwikitoken="$DOKUWIKITOKEN" -v "$PWD/dokuwiki":/var/www/html/ -v "$PWD/httpd.conf":/etc/apache2/sites-available/000-default.conf --name php-wiki -p 8080:80 --user 1000 --sysctl net.ipv4.ip_unprivileged_port_start=0 php-wiki
+
 Upgrades
 --------
 

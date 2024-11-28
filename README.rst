@@ -23,4 +23,4 @@ Upgrades
 - Restore ``entities.conf`` via ``git restore -- dokuwiki/conf/entities.conf``
 - Review the changes (not every detail in larger upgrades of course)
 - Commit and push
-- Pull on the server (``cd /srv/web-wiki && sudo -u kelunik git pull``)
+- Pull on the server (``cd /srv/web-wiki && sudo -u www-data git pull``)

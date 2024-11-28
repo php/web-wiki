@@ -19,7 +19,17 @@ class helper_plugin_smtp extends DokuWiki_Plugin {
      */
     static public function getEHLO($ehlo='') {
         if(empty($ehlo)) {
-            $ehlo = !empty($_SERVER["SERVER_ADDR"]) ? "[" . $_SERVER["SERVER_ADDR"] . "]" : "localhost.localdomain";
+            $ip = $_SERVER["SERVER_ADDR"];
+            if (empty($ip))
+              return "localhost.localdomain";
+
+            // Indicate IPv6 address according to RFC 2821, if applicable.
+            $colonPos = strpos($ip, ':');
+            if ($colonPos !== false) {
+                $ip = 'IPv6:'.$ip;
+            }
+
+            return "[" . $ip . "]";
         }
         return $ehlo;
     }

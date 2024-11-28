@@ -80,7 +80,7 @@ class Message extends \Tx\Mailer\Message {
             if(substr($lines[$i],0, 4) == 'Bcc:') {
                 unset($lines[$i]); // we found the Bcc: header and remove it
                 while(substr($lines[++$i],0, 1) === ' ') {
-                    unset($lines[$i]); // indented lines are header continuiation
+                    unset($lines[$i]); // indented lines are header continuation
                 }
                 break; // header removed, we're done
             }

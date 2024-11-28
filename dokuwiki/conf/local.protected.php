@@ -17,6 +17,5 @@ $conf['auth']['phpcvs'] = array('admins' => array(
     'philip',
     'pollita',
     'scottmac',
-    'tyrael',
 ));
 

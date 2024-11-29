@@ -1,0 +1,33 @@
+{
+    "name": "clockoon/dokuwiki-commonmark-plugin",
+    "type": "dokuwiki-plugin",
+    "version": "1.2.1",
+    "description": "DokuWiki Commonmark Plugin",
+    "keywords": [
+        "dokuwiki",
+        "plugin",
+        "markdown"
+    ],
+    "license": [
+        "Apache-2.0",
+        "GPL-2.0-or-later"
+    ],
+    "authors": [
+        {
+            "name": "Sungbin Jeon",
+            "email": "clockoon@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Dokuwiki\\": "src/Dokuwiki"
+        }
+    },
+    "require": {
+        "league/commonmark": "2.5.*",
+        "symfony/yaml": "4.*"
+    },
+    "config": {
+        "discard-changes": true
+    }
+}

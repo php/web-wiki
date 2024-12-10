@@ -24,7 +24,7 @@
         }
     },
     "require": {
-        "league/commonmark": "2.5.*",
+        "league/commonmark": "2.6.*",
         "symfony/yaml": "4.*"
     },
     "config": {

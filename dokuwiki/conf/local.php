@@ -25,6 +25,8 @@ $conf['send404'] = 1;
 $conf['breadcrumbs'] = 0;
 $conf['youarehere'] = 1;
 $conf['baseurl'] = getenv('web-wiki-development-setup-baseurl') ?: 'https://wiki.php.net';
+$conf['savedir'] = getenv('WIKI_DATA_DIR') ?: './data';
+
 $conf['plugin']['smtp']['smtp_host'] = 'mailout.php.net';
 $conf['plugin']['smtp']['smtp_ssl'] = 'tls';
 $conf['plugin']['htmlok']['htmlok'] = 1;

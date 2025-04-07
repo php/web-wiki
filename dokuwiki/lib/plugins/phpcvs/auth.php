@@ -69,41 +69,49 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
      *
      * @return  bool true or int error code
      */
-    function _checkCVSPass($user,$pass = ''){
-      $post = http_build_query(
-        array(
-          "token" => getenv("dokuwikitoken"),
-          "username" => $user,
-          "password" => $pass,
-        ), '', '&'
-      );
+    function _checkCVSPass($user, $pass = '')
+    {
+        static $userCache = [];
 
-      $opts = array(
-        "method"  => "POST",
-        "header"  => "Content-type: application/x-www-form-urlencoded",
-        "content" => $post,
-      );
+        if (!array_key_exists($user, $userCache)) {
+            $post = http_build_query(
+                array(
+                    "token" => getenv("dokuwikitoken"),
+                    "username" => $user,
+                    "password" => $pass,
+                ), '', '&'
+            );
 
-      $ctx = stream_context_create(array("http" => $opts));
+            $opts = array(
+                "method" => "POST",
+                "header" => "Content-type: application/x-www-form-urlencoded",
+                "content" => $post,
+            );
 
-      $s = file_get_contents("https://main.php.net/fetch/cvsauth.php", false, $ctx);
+            $ctx = stream_context_create(array("http" => $opts));
 
-      $a = unserialize($s);
-      /*
-      define("E_UNKNOWN", 0);
-      define("E_USERNAME", 1);
-      define("E_PASSWORD", 2);
-      */
-      if (!is_array($a)) {
-        return 0;
-      }
-      if (isset($a["errno"])) {
-        return (int)$a["errno"];
-      }
+            $s = file_get_contents("https://main.php.net/fetch/cvsauth.php", false, $ctx);
 
-      $this->_setCVSUser($user);
+            $a = unserialize($s);
+            $userCache[$user] = $a;
+        } else {
+            $a = $userCache[$user];
+        }
+        /*
+        define("E_UNKNOWN", 0);
+        define("E_USERNAME", 1);
+        define("E_PASSWORD", 2);
+        */
+        if (!is_array($a)) {
+            return 0;
+        }
+        if (isset($a["errno"])) {
+            return (int)$a["errno"];
+        }
 
-      return true;
+        $this->_setCVSUser($user);
+
+        return true;
     }
 
     /**

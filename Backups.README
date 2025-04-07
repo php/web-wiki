@@ -1,8 +1,0 @@
-This directory is backed up on b2 via Restic.
-See /etc/restic and /etc/cron.daily/restic
-
-To see a list of backed up snapshots:
-source /etc/restic/cred
-restic snapshots
-
-To restore follow the docs at https://restic.readthedocs.io/en/stable/

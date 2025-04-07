@@ -15,7 +15,6 @@ Running::
 Upgrades
 --------
 
-- Make a backup: ``cd /srv && tar cvzf wiki-`date +"%Y-%m-%d"`.tar.gz web-wiki``
 - Follow https://www.dokuwiki.org/install:upgrade
 - Instead of unpacking on the server, unpack in your local Git directory
 - Restore ``register.txt`` via ``git restore -- dokuwiki/inc/lang/en/register.txt``
@@ -23,4 +22,5 @@ Upgrades
 - Restore ``entities.conf`` via ``git restore -- dokuwiki/conf/entities.conf``
 - Review the changes (not every detail in larger upgrades of course)
 - Commit and push
-- Pull on the server (``cd /srv/web-wiki && sudo -u www-data git pull``)
+- The wiki server will pull the new GIT content through rsync automatically
+  once an hour

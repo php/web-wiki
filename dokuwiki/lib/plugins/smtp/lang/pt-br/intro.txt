@@ -1,0 +1,3 @@
+====== Teste de SMTP ====== 
+
+Esta página permite acionar o envio de um e-mail de teste no DokuWiki. Você pode usá-lo para verificar se configurou o plug-in SMTP corretamente. Forneça os endereços de e-mail do destinatário no formulário abaixo.

@@ -1,0 +1,5 @@
+====== Testowanie SMTP ======
+
+Ta strona umożliwia wysyłanie testowej wiadomości e-mail w DokuWiki. Możesz go użyć do sprawdzenia, czy poprawnie skonfigurowałeś wtyczkę SMTP.
+
+Podaj adresy e-mail odbiorcy w poniższym formularzu.

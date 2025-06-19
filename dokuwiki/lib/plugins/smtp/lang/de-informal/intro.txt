@@ -1,0 +1,5 @@
+====== SMTP Test ======
+
+Auf dieser Seite kannst Du eine Testmail über DokuWiki versenden, um die aktuelle SMTP Konfiguration zu überprüfen.
+
+Bitte gebe die entsprechenden E-Mail-Adressen der Empfänger in das Formular ein.

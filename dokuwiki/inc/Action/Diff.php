@@ -17,7 +17,7 @@ class Diff extends AbstractAction
     /** @inheritdoc */
     public function minimumPermission()
     {
-        return AUTH_EDIT;
+        return AUTH_READ;
     }
 
     /** @inheritdoc */

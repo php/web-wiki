@@ -290,7 +290,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             $this->template['count'][$col] = 0;
             foreach ($this->doodle as $fullname => $userData) {
                 if (!empty($userData['username'])) {
-                  $this->template['doodleData']["$fullname"]['username'] = '&nbsp;('.$userData['username'].')';
+                  $this->template['doodleData']["$fullname"]['username'] = $userData['username'];
                 }
                 if (in_array($col, $userData['choices'])) {
                     $timeLoc = strftime($conf['dformat'], $userData['time']);  // localized time of vote
@@ -507,7 +507,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $TR .= '<td class="rightalign">';
         if ($fullname) {
             if ($editMode) $TR .= $this->getLang('edit').':&nbsp;';
-            $TR .= $fullname.'&nbsp;('.$_SERVER['REMOTE_USER'].')';
+            $TR .= $_SERVER['REMOTE_USER'];
             $TR .= '<input type="hidden" name="fullname" value="'.$fullname.'">';
         } else {
             $TR .= '<input type="text" name="fullname" value="">';

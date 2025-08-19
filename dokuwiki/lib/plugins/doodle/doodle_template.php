@@ -39,8 +39,8 @@
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
     <tr>
         <td class="rightalign">
-          <?php $fullname = '<a href="//people.php.net/' . $fullname.'">' .$fullname. '</a>';?>
-          <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $fullname.$userData['username'] ?>
+          <?php $link = '<a href="https://people.php.net/' . htmlspecialchars($userData['username']) . '">' . htmlspecialchars($userData['username']) . '</a>';?>
+          <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $link; ?>
         </td>
         <?php for ($col = 0; $col < $c; $col++) {
             echo $userData['choice'][$col];

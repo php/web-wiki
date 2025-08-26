@@ -17,7 +17,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
 /**
  * Displays a table where users can vote for some predefined choices
  * Syntax:
- * 
+ *
  * <pre>
  * <doodle
  *   title="What do you like best?"
@@ -26,7 +26,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  *   adminGroups="group1|group2"
  *   voteType="default|multi"
  *   closed="true|false" >
- *     * Option 1 
+ *     * Option 1
  *     * Option 2 **some wikimarkup** \\ is __allowed__!
  *     * Option 3
  * </doodle>
@@ -49,10 +49,10 @@ require_once(DOKU_PLUGIN.'syntax.php');
  *
  * If closed=="true", then no one can vote anymore. The result will still be shown on the page.
  *
- * The doodle's data is saved in '<dokuwiki>/data/meta/title_of_vote.doodle'. The filename is the (masked) title. 
+ * The doodle's data is saved in '<dokuwiki>/data/meta/title_of_vote.doodle'. The filename is the (masked) title.
  * This has the advantage that you can move your doodle to another page, without loosing the data.
  */
-class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin 
+class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
 {
     const AUTH_NONE = 0;
     const AUTH_IP   = 1;
@@ -102,7 +102,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             'closed'         => FALSE
         );
 
-        //----- parse parameteres into name="value" pairs  
+        //----- parse parameteres into name="value" pairs
         preg_match_all("/(\w+?)=\"(.*?)\"/", $parameterStr, $regexMatches, PREG_SET_ORDER);
         //debout($parameterStr);
         //debout($regexMatches);
@@ -113,9 +113,9 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 $params['title'] = hsc(trim($value));
             } else
             if (strcmp($name, "AUTH") == 0) {
-               if (strcasecmp($value, 'IP') == 0) {  
+               if (strcasecmp($value, 'IP') == 0) {
                    $params['auth'] = self::AUTH_IP;
-               } else 
+               } else
                if (strcasecmp($value, 'USER') == 0) {
                    $params['auth'] = self::AUTH_USER;
                }
@@ -131,15 +131,15 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 if (preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,5})$/', $value)) {
                     $params['adminMail'] = $value;
                 }
-            } else 
+            } else
             if (strcmp($name, "VOTETYPE") == 0) {
                 if (preg_match('/default|multi/', $value)) {
                     $params['voteType'] = $value;
                 }
-            } else 
+            } else
             if ((strcmp($name, "CLOSEON") == 0) &&
                 (($timestamp = strtotime($value)) !== false) &&
-                (time() > $timestamp)   ) 
+                (time() > $timestamp)   )
             {
                 $params['closed'] = 1;
             } else
@@ -153,7 +153,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
 
         // (If there are no choices inside the <doodle> tag, then doodle's data will be reset.)
         $choices = $this->parseChoices($choiceStr);
-        
+
         $result = array('params' => $params, 'choices' => $choices);
         //debout('handle returns', $result);
         return $result;
@@ -195,14 +195,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
      */
     function render($mode, Doku_Renderer $renderer, $data) {
         if ($mode != 'xhtml') return false;
-        
-        //debout("render: $mode");        
+
+        //debout("render: $mode");
         global $lang;
         global $auth;
-        global $conf; 
+        global $conf;
         global $INFO; // needed for users real name
         global $ACT;  // action from $_REQUEST['do']
-        global $REV;  // to not allow any action if it's an old page        
+        global $REV;  // to not allow any action if it's an old page
         global $ID;   // name of current page
 
         //debout('data in render', $data);
@@ -211,7 +211,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $this->choices   = $data['choices'];
         $this->doodle    = array();
         $this->template  = array();
-        
+
         // prevent caching to ensure the poll results are fresh
         $renderer->info['cache'] = false;
 
@@ -232,7 +232,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             // ---- cast new vote
             if (!empty($_REQUEST['cast__vote'])) {
                 $this->castVote();
-            } else        
+            } else
             // ---- start editing an entry
             if (!empty($_REQUEST['edit__entry']) ) {
                 $this->startEditEntry();
@@ -246,7 +246,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 $this->deleteEntry();
             }
         }
-        
+
         /******** Format of the $doodle array ***********
          * The $doodle array maps fullnames (with html special characters masked) to an array of userData for this vote.
          * Each sub array contains:
@@ -254,8 +254,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
          *   'choices'  is an (variable length!) array of column indexes where user has voted
          *   'ip'       ip of voting machine
          *   'time'     unix timestamp when vote was casted
-         
-        
+
+
         $doodle = array(
           'Robert' => array(
             'username'  => 'doogie'
@@ -275,7 +275,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
           ),
         );
         */
-        
+
         // ---- fill $this->template variable for doodle_template.php (column by column)
         $this->template['title']      = hsc($this->params['title']);
         $this->template['choices']    = $this->choices;
@@ -285,7 +285,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         if ($this->params['closed']) {
             $this->template['msg'] = $this->getLang('poll_closed');
         }
-        
+
         for($col = 0; $col < count($this->choices); $col++) {
             $this->template['count'][$col] = 0;
             foreach ($this->doodle as $fullname => $userData) {
@@ -303,14 +303,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 }                
             }
         }
-        
+
         // ---- add edit link to editable entries
         foreach($this->doodle as $fullname => $userData) {
             if ($ACT == 'show' && $REV == false &&
-                $this->isAllowedToEditEntry($fullname)) 
+                $this->isAllowedToEditEntry($fullname))
             {
                 // the javascript source of these functions is in script.js
-                $this->template['doodleData']["$fullname"]['editLinks'] = 
+                $this->template['doodleData']["$fullname"]['editLinks'] =
                    '<a href="javascript:editEntry(\''.$formId.'\',\''.$fullname.'\')">'.
                    '  <b title="edit entry">&#9998;</b>'.
                    '</a>'.
@@ -322,7 +322,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
 
         // ---- calculates if user is allowed to vote
         $this->template['inputTR'] = ($can_vote?$this->getInputTR():'');
-        
+
         // ----- I am using PHP as a templating engine here.
         //debout("Template", $this->template);
         ob_start();
@@ -333,13 +333,13 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
     }
 
     // --------------- FORM ACTIONS -----------
-    /** 
-     * ACTION: cast a new vote 
+    /**
+     * ACTION: cast a new vote
      * or save a changed vote
      * (If user is allowed to.)
      */
     function castVote() {
-        $fullname          = hsc(trim($_REQUEST['fullname'])); 
+        $fullname          = hsc(trim($_REQUEST['fullname']));
         $selected_indexes  = $_REQUEST['selected_indexes'];  // may not be set when all checkboxes are deseleted.
 
         if (empty($fullname)) {
@@ -354,15 +354,15 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 return;
             }
         }
-        
+
         //---- check if user is allowed to vote, according to 'auth' parameter
-        
+
         //if AUTH_USER, then user must be logged in
         if ($this->params['auth'] == self::AUTH_USER  && !$this->isLoggedIn()) {
             $this->template['msg'] = $this->getLang('must_be_logged_in');
             return;
         }
-        
+
         //if AUTH_IP, then prevent duplicate votes by IP.
         //Exception: If user is logged in he is always allowed to change the vote with his fullname, even if he is on another IP.
         if ($this->params['auth'] == self::AUTH_IP && !$this->isLoggedIn() && !isset($_REQUEST['change__vote']) ) {
@@ -379,10 +379,10 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             $this->template['msg'] = $this->getLang('you_voted_already');
             return;
         }
-        
+
         //check if change__vote is allowed
         if (!empty($_REQUEST['change__vote']) &&
-            !$this->isAllowedToEditEntry($fullname)) 
+            !$this->isAllowedToEditEntry($fullname))
         {
             $this->template['msg'] = $this->getLang('not_allowed_to_change');
             return;
@@ -396,7 +396,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $this->doodle["$fullname"]['ip']      = $_SERVER['REMOTE_ADDR'];
         $this->writeDoodleDataToFile();
         $this->template['msg'] = $this->getLang('vote_saved');
-        
+
         //send mail if  $params['adminMail'] is filled
         if (!empty($this->params['adminMail'])) {
             $subj = "[DoodlePlugin] Vote casted by $fullname (".$this->doodle["$fullname"]['username'].')';
@@ -404,15 +404,15 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             mail_send($this->params['adminMail'], $subj, $body, $conf['mailfrom']);
         }
     }
-    
-    /** 
-     * ACTION: start editing an entry 
+
+    /**
+     * ACTION: start editing an entry
      * expects fullname of voter in request param edit__entry
      */
     function startEditEntry() {
         $fullname = hsc(trim($_REQUEST['edit__entry']));
         if (!$this->isAllowedToEditEntry($fullname)) return;
-            
+
         $this->template['editEntry']['fullname']         = $fullname;
         $this->template['editEntry']['selected_indexes'] = $this->doodle["$fullname"]['choices'];
         // $fullname will be shown in the input row
@@ -427,7 +427,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $this->writeDoodleDataToFile();
         $this->template['msg'] = $this->getLang('vote_deleted');
     }
-    
+
     // ---------- HELPER METHODS -----------
 
     /**
@@ -450,45 +450,45 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             $usersGroups = $INFO['userinfo']['grps'];  // array of groups that the user is in
             if (count(array_intersect($adminGroups, $usersGroups)) > 0) return true;
         }
-        
+
         //check adminUsers
         if (!empty($this->params['adminUsers'])) {
             $adminUsers = explode('|', $this->params['adminUsers']);
             return in_array($_SERVER['REMOTE_USER'], $adminUsers);
         }
-        
+
         //check own entry
         return strcasecmp(hsc($INFO['userinfo']['name']), $entryFullname) == 0;  // compare real name
     }
-    
-    /** 
+
+    /**
      * return true if the user is currently logged in
      */
     function isLoggedIn() {
         // see http://www.dokuwiki.org/devel:environment
         global $INFO;
-        return isset($INFO['userinfo']); 
+        return isset($INFO['userinfo']);
     }
-    
+
     /**
      * calculate the input table row:
      * @return   complete <TR> tags for input row and information message
      * May return empty string, if user is not allowed to vote
      *
      * If user is logged in he is always allowed edit his own entry. ("change his mind")
-     * If user is logged in and has already voted, empty string will be returned. 
+     * If user is logged in and has already voted, empty string will be returned.
      * If user is not logged in but login is required (auth="user"), then also return '';
      */
     function getInputTR() {
         global $ACT;
-        global $INFO;        
+        global $INFO;
         if ($ACT != 'show') return '';
         if ($this->params['closed']) return '';
-        
+
         $fullname = '';
         $editMode = false;
         if ($this->isLoggedIn()) {
-            $fullname = $INFO['userinfo']['name']; 
+            $fullname = $INFO['userinfo']['name'];
             if (isset($this->template['editEntry'])) {
                 $fullname = $this->template['editEntry']['fullname'];
                 $editMode = true;
@@ -545,8 +545,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         
         return $TR;
     }
-    
-    
+
+
     /**
      * Loads the serialized doodle data from the file in the metadata directory.
      * If the file does not exist yet, an empty array is returned.
@@ -566,7 +566,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 $doodle["$fullname"]['choices'] = array();
             }
         }
-        
+
         if (array_key_exists('sort', $this->params) && strcmp($this->params['sort'], 'time') == 0) {
             debout("sorting by time");
             uasort($doodle, 'cmpEntryByTime');
@@ -576,7 +576,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         //debout("read from $dfile", $doodle);
         return $doodle;
     }
-    
+
     /**
      * serialize the doodles data to a file
      */
@@ -588,7 +588,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         //debout("written to $dfile", $doodle);
         return $dfile;
     }
-    
+
     /**
      * create unique filename for this doodle from its title.
      * (replaces space with underscore etc.)
@@ -600,7 +600,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
         $dID       = hsc(trim($this->params['title']));
         $dfile     = metaFN($dID, '.doodle');       // serialized doodle data file in meta directory
-        return $dfile;        
+        return $dfile;
     }
 
 
@@ -620,7 +620,7 @@ function debout() {
     } else if (func_num_args() == 2) {
         msg('<h2>'.func_get_arg(0).'</h2><pre>'.hsc(print_r(func_get_arg(1), true)).'</pre>');
     }
-    
+
 }
 
 ?>

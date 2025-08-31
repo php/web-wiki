@@ -22,45 +22,55 @@
 <input type="hidden" name="edit__entry"   value="">
 <input type="hidden" name="delete__entry" value="">
 
-<div class="doodle__results">
-    <div class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-      <div class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
+<table class="inline">
+  <tbody>
+    <tr class="row0">
+      <th class="centeralign" colspan="<?php echo ($c+1) ?>">
         <?php echo $template['title'] ?>
-      </div>
-    </div>
-    <div class="fields_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="fields_caption"><?php echo $lang['fullname'] ?></div>
+      </th>
+    </tr>
+    <tr class="row1">
+        <th class="col0"><?php echo $lang['fullname'] ?></th>
 <?php foreach ($template['choices'] as $choice) {  ?>
-        <div class="fields_data"><?php echo $choice ?></div>
+        <td class="centeralign"><?php echo $choice ?></td>
 <?php } ?>
-    </div>
+    </tr>
 
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
-    <div class="data_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="data_caption">
+    <tr>
+        <td class="rightalign">
           <?php $link = '<a href="https://people.php.net/' . htmlspecialchars($userData['username']) . '">' . htmlspecialchars($userData['username']) . '</a>';?>
           <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $link; ?>
-        </div>
+        </td>
         <?php for ($col = 0; $col < $c; $col++) {
             echo $userData['choice'][$col];
-        } ?>
-    </div>
+        } ?>        
+    </tr>
 <?php } ?>
-
+ 
     <!-- Results / sum per column -->
-    <div class="results_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="results_caption"><?php echo $template['result'] ?></div>
+    <tr>
+        <th class="rightalign"><b><?php echo $template['result'] ?></b></th>
 <?php for ($col = 0; $col < $c; $col++) { ?>
-        <div class="results_data"><?php echo $template['count'][$col] ?></div>
+        <th class="centeralign"><b><?php echo $template['count'][$col] ?></b></th>
 <?php } ?>
-    </div>
+    </tr>
 
 <?php
     /* Input fields, if allowed. */
-    echo $template['inputTR']
+	echo $template['inputTR'] 
 ?>
 
-</div>
+<?php if (!empty($template['msg'])) { ?>    
+    <tr>
+      <td colspan="<?php echo $c+1 ?>">
+        <?php echo $template['msg'] ?>
+      </td>
+    </tr>
+<?php } ?>
+
+  </tbody>
+</table>
 
 </form>
 

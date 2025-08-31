@@ -294,13 +294,13 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 }
                 if (in_array($col, $userData['choices'])) {
                     $timeLoc = strftime($conf['dformat'], $userData['time']);  // localized time of vote
-                    $this->template['doodleData']["$fullname"]['choice'][$col] =
-                        '<div class="data_data" style="background-color:#AFA"><img src="'.DOKU_BASE.'lib/images/success.png" title="'.$timeLoc.'"></div>';
+                    $this->template['doodleData']["$fullname"]['choice'][$col] = 
+                        '<td  class="centeralign" style="background-color:#AFA"><img src="'.DOKU_BASE.'lib/images/success.png" title="'.$timeLoc.'"></td>';
                     $this->template['count']["$col"]++;
                 } else {
-                    $this->template['doodleData']["$fullname"]['choice'][$col] =
-                        '<div class="data_data" style="background-color:#FCC">&nbsp;</div>';
-                }
+                    $this->template['doodleData']["$fullname"]['choice'][$col] = 
+                        '<td  class="centeralign" style="background-color:#FCC">&nbsp;</td>';
+                }                
             }
         }
 
@@ -503,8 +503,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $c = count($this->choices);
         $TR  = '';
         //$TR .= '<tr style="height:3px"><th colspan="'.($c+1).'"></th></tr>';
-        $TR .= '<div class="input_row" style="grid-template-columns: 2fr repeat('. $c . ', 1fr)">';
-        $TR .= '<div class="input_caption">';
+        $TR .= '<tr>';
+        $TR .= '<td class="rightalign">';
         if ($fullname) {
             if ($editMode) $TR .= $this->getLang('edit').':&nbsp;';
             $TR .= $_SERVER['REMOTE_USER'];
@@ -512,15 +512,15 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         } else {
             $TR .= '<input type="text" name="fullname" value="">';
         }
-        $TR .='</div>';
-
+        $TR .='</td>';
+       
         for($col = 0; $col < $c; $col++) {
             $selected = '';
             if ($editMode && in_array($col, $this->template['editEntry']['selected_indexes']) ) {
                 $selected = 'checked="checked"';
             }
-            $TR .= '<div class="input_data">';
-
+            $TR .= '<td class="centeralign">';
+            
             if ($this->params['voteType'] == 'multi') {
                 $inputType = "checkbox";
             } else {
@@ -528,21 +528,21 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             }
             $TR .= '<input type="'.$inputType.'" name="selected_indexes[]" value="'.$col.'"';
             $TR .= $selected.">";
-            $TR .= '</div>';
+            $TR .= '</TD>';
         }
 
-        $TR .= '</div>';
-        $TR .= '<div class="input_row">';
-        $TR .= '  <div class="input_caption" style="grid-column: 1 / '.($c+2).'" class="centeralign">';
-
+        $TR .= '</tr>';
+        $TR .= '<tr>';
+        $TR .= '  <td colspan="'.($c+1).'" class="centeralign">';
+        
         if ($editMode) {
             $TR .= '    <input type="submit" id="voteButton" value=" '.$this->getLang('btn_change').' " name="change__vote" class="button">';
         } else {
             $TR .= '    <input type="submit" id="voteButton" value=" '.$this->getLang('btn_vote').' " name="cast__vote" class="button">';
         }
-        $TR .= '  </div>';
-        $TR .= '</div>';
-
+        $TR .= '  </td>';
+        $TR .= '</tr>';
+        
         return $TR;
     }
 

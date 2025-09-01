@@ -60,6 +60,14 @@
     echo $template['inputTR']
 ?>
 
+<?php if (!empty($template['msg'])) { ?>
+    <div class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+      <div class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
+        <?php echo $template['msg'] ?>
+      </div>
+    </div>
+<?php } ?>
+
 </div>
 
 </form>

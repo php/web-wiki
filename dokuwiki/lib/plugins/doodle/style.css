@@ -28,50 +28,55 @@ div.dokuwiki table.inline td.notokay {
   color: rgba(0, 0, 0, 0);
 }
 
-.doodle__results .title_row, .doodle__results .fields_row, .doodle__results .data_row, .doodle__results .results_row, .doodle__results .input_row {
+table.doodle__results tbody tr, table.doodle__results thead tr {
 	display: grid;
 	width: 100%;
 }
 
-.doodle__results .fields_row div, .doodle__results .results_row div {
+table.doodle__results .results_row td {
 	background-color: lightblue;
 	text-align: center;
 	padding: 0.25em;
 }
 
-.doodle__results .title_row .title_caption, .doodle__results .input_row .input_caption {
+table.doodle__results .title_row .title_caption, table.doodle__results .input_row .input_caption {
 	text-align: center;
 	background-color: #bbd;
 	width: 100%;
 }
 
-.doodle__results .title_row .title_caption {
+table.doodle__results .title_row .title_caption {
 	font-weight: bold;
 }
 
-.doodle__results .input_row {
+table.doodle__results .input_row {
 	background-color: #bbd;
 }
 
-.doodle__results .title_caption, .doodle__results .fields_caption, .doodle__results .data_caption, .doodle__results .results_caption {
+table.doodle__results .title_caption, table.doodle__results .fields_caption, table.doodle__results .data_caption, table.doodle__results .results_caption {
 }
 
-.doodle__results .title_caption a, .doodle__results .fields_caption a, .doodle__results .data_caption a, .doodle__results .results_caption a {
+table.doodle__results .title_caption a, table.doodle__results .fields_caption a, table.doodle__results .data_caption a, table.doodle__results .results_caption a {
 	margin: 0.25em;
 }
 
-.doodle__results .fields_row .fields_options, .doodle__results .data_row .data_options,  .doodle__results .results_row .results_options {
+table.doodle__results .title_caption {
+	padding-left: 0;
+	padding-right: 0;
 }
 
-.doodle__results .title_data, .doodle__results .fields_data, .doodle__results .data_data, .doodle__results .results_data, .doodle__results .input_data {
+table.doodle__results .fields_row .fields_options, table.doodle__results .data_row .data_options,  table.doodle__results .results_row .results_options {
+}
+
+table.doodle__results .title_data, table.doodle__results .fields_data, table.doodle__results .data_data, table.doodle__results .results_data, table.doodle__results .input_data {
 	text-align: center;
 	padding: 0.25em;
 }
 
-.doodle__results .data_row:nth-child(odd) {
+table.doodle__results .data_row:nth-child(odd) {
 	background-color: #bbd;
 }
 
-.doodle__results .data_row:nth-child(even) {
+table.doodle__results .data_row:nth-child(even) {
 	background-color: #E2E4EF;
 }

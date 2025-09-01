@@ -22,38 +22,41 @@
 <input type="hidden" name="edit__entry"   value="">
 <input type="hidden" name="delete__entry" value="">
 
-<div class="doodle__results">
-    <div class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-      <div class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
-        <?php echo $template['title'] ?>
-      </div>
-    </div>
-    <div class="fields_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="fields_caption"><?php echo $lang['fullname'] ?></div>
+<table class="doodle__results">
+	<thead>
+	<tr class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+	  <th class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
+		<?php echo $template['title'] ?>
+	  </th>
+	</tr>
+	<tr class="fields_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+		<th class="fields_caption"><?php echo $lang['fullname'] ?></th>
 <?php foreach ($template['choices'] as $choice) {  ?>
-        <div class="fields_data"><?php echo $choice ?></div>
+		<th class="fields_data"><?php echo $choice ?></th>
 <?php } ?>
-    </div>
+	</tr>
+	</thead>
 
+	<tbody>
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
-    <div class="data_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="data_caption">
+    <tr class="data_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+        <td class="data_caption">
           <?php $link = '<a href="https://people.php.net/' . htmlspecialchars($userData['username']) . '">' . htmlspecialchars($userData['username']) . '</a>';?>
           <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $link; ?>
-        </div>
+        </td>
         <?php for ($col = 0; $col < $c; $col++) {
             echo $userData['choice'][$col];
         } ?>
-    </div>
+    </tr>
 <?php } ?>
 
     <!-- Results / sum per column -->
-    <div class="results_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-        <div class="results_caption"><?php echo $template['result'] ?></div>
+    <tr class="results_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+        <td class="results_caption"><?php echo $template['result'] ?></td>
 <?php for ($col = 0; $col < $c; $col++) { ?>
-        <div class="results_data"><?php echo $template['count'][$col] ?></div>
+        <td class="results_data"><?php echo $template['count'][$col] ?></td>
 <?php } ?>
-    </div>
+    </tr>
 
 <?php
     /* Input fields, if allowed. */
@@ -61,14 +64,14 @@
 ?>
 
 <?php if (!empty($template['msg'])) { ?>
-    <div class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
-      <div class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
+    <tr class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+      <td class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
         <?php echo $template['msg'] ?>
-      </div>
-    </div>
+      </td>
+    </tr>
 <?php } ?>
-
-</div>
+	</tbody>
+</table>
 
 </form>
 

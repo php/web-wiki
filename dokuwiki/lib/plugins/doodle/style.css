@@ -42,7 +42,6 @@ table.doodle__results .results_row td {
 table.doodle__results .title_row .title_caption, table.doodle__results .input_row .input_caption {
 	text-align: center;
 	background-color: #bbd;
-	width: 100%;
 }
 
 table.doodle__results .title_row .title_caption {

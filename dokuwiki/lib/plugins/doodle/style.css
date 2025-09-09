@@ -55,6 +55,12 @@ table.doodle__results .input_row {
 table.doodle__results .title_caption, table.doodle__results .fields_caption, table.doodle__results .data_caption, table.doodle__results .results_caption {
 }
 
+table.doodle__results td.data_caption {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 table.doodle__results .title_caption a, table.doodle__results .fields_caption a, table.doodle__results .data_caption a, table.doodle__results .results_caption a {
 	margin: 0.25em;
 }
@@ -78,4 +84,8 @@ table.doodle__results .data_row:nth-child(odd) {
 
 table.doodle__results .data_row:nth-child(even) {
 	background-color: #E2E4EF;
+}
+
+a.poll_action {
+	margin-right: 0 !important;
 }

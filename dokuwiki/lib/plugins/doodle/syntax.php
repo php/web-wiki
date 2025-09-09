@@ -311,10 +311,10 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             {
                 // the javascript source of these functions is in script.js
                 $this->template['doodleData']["$fullname"]['editLinks'] =
-                   '<a href="javascript:editEntry(\''.$formId.'\',\''.$fullname.'\')">'.
+                   '<a class="poll_action" href="javascript:editEntry(\''.$formId.'\',\''.$fullname.'\')">'.
                    '  <b title="edit entry">&#9998;</b>'.
                    '</a>'.
-                   '<a href="javascript:deleteEntry(\''.$formId.'\',\''.$fullname.'\')">'.
+                   '<a class="poll_action" href="javascript:deleteEntry(\''.$formId.'\',\''.$fullname.'\')">'.
                    '  <b title="delete entry">&#128465;</b>'.
                    '</a>';
             }
@@ -503,7 +503,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $c = count($this->choices);
         $TR  = '';
         //$TR .= '<tr style="height:3px"><th colspan="'.($c+1).'"></th></tr>';
-        $TR .= '<tr class="input_row" style="grid-template-columns: 2fr repeat('. $c . ', 1fr)">';
+        $TR .= '<tr class="input_row" style="grid-template-columns: minmax(0, 2fr) repeat('. $c . ', 1fr)">';
         $TR .= '<td class="input_caption">';
         if ($fullname) {
             if ($editMode) $TR .= $this->getLang('edit').':&nbsp;';

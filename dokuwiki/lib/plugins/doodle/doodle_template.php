@@ -24,12 +24,12 @@
 
 <table class="doodle__results">
 	<thead>
-	<tr class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+	<tr class="title_row" style="grid-template-columns: minmax(0, 2fr) repeat(<?php echo $c; ?>, 1fr)">
 	  <th class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
 		<?php echo $template['title'] ?>
 	  </th>
 	</tr>
-	<tr class="fields_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+	<tr class="fields_row" style="grid-template-columns: minmax(0, 2fr) repeat(<?php echo $c; ?>, 1fr)">
 		<th class="fields_caption"><?php echo $lang['fullname'] ?></th>
 <?php foreach ($template['choices'] as $choice) {  ?>
 		<th class="fields_data"><?php echo $choice ?></th>
@@ -39,7 +39,7 @@
 
 	<tbody>
 <?php foreach ($template['doodleData'] as $fullname => $userData) { ?>
-    <tr class="data_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+    <tr class="data_row" style="grid-template-columns: minmax(0, 2fr) repeat(<?php echo $c; ?>, 1fr)">
         <td class="data_caption">
           <?php $link = '<a href="https://people.php.net/' . htmlspecialchars($userData['username']) . '">' . htmlspecialchars($userData['username']) . '</a>';?>
           <?php echo (array_key_exists('editLinks', $userData) ? $userData['editLinks'] : '') . $link; ?>
@@ -51,7 +51,7 @@
 <?php } ?>
 
     <!-- Results / sum per column -->
-    <tr class="results_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+    <tr class="results_row" style="grid-template-columns: minmax(0, 2fr) repeat(<?php echo $c; ?>, 1fr)">
         <td class="results_caption"><?php echo $template['result'] ?></td>
 <?php for ($col = 0; $col < $c; $col++) { ?>
         <td class="results_data"><?php echo $template['count'][$col] ?></td>
@@ -64,7 +64,7 @@
 ?>
 
 <?php if (!empty($template['msg'])) { ?>
-    <tr class="title_row" style="grid-template-columns: 2fr repeat(<?php echo $c; ?>, 1fr)">
+    <tr class="title_row" style="grid-template-columns: minmax(0, 2fr) repeat(<?php echo $c; ?>, 1fr)">
       <td class="title_caption" style="grid-column: 1 / <?php echo ($c+2) ?>">
         <?php echo $template['msg'] ?>
       </td>

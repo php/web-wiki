@@ -9,6 +9,7 @@ $lang['edit']             = 'edit';
 
 // info messages
 $lang['poll_closed']           = 'This poll has been closed.';
+$lang['poll_close_time']       = 'This poll will close on %s.';
 $lang['vote_saved']            = 'Vote has been saved.';
 $lang['vote_deleted']          = 'Vote has been deleted.';
 

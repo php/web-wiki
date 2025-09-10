@@ -99,7 +99,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             'adminGroups'    => '',
             'adminMail'      => null,
             'voteType'       => 'default',
-            'closed'         => FALSE
+            'closed'         => FALSE,
+            'close_on_ts'    => FALSE,
         );
 
         //----- parse parameteres into name="value" pairs
@@ -137,11 +138,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                     $params['voteType'] = $value;
                 }
             } else
-            if ((strcmp($name, "CLOSEON") == 0) &&
-                (($timestamp = strtotime($value)) !== false) &&
-                (time() > $timestamp)   )
-            {
-                $params['closed'] = 1;
+            if (strcmp($name, "CLOSEON") == 0) {
+                if (($timestamp = strtotime($value)) !== false) {
+                    $params['close_on_ts'] = $timestamp;
+
+                    if (time() > $timestamp) {
+                        $params['closed'] = 1;
+                    }
+                }
             } else
             if (strcmp($name, "CLOSED") == 0) {
                 $params['closed'] = strcasecmp($value, "TRUE") == 0;
@@ -284,6 +288,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $this->template['formId']     = $formId;
         if ($this->params['closed']) {
             $this->template['msg'] = $this->getLang('poll_closed');
+        } else if ($this->params['close_on_ts']) {
+            $this->template['msg'] = sprintf($this->getLang('poll_close_time'), date('Y-m-d H:i:s e', $this->params['close_on_ts']));
         }
 
         for($col = 0; $col < count($this->choices); $col++) {

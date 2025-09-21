@@ -141,10 +141,6 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
             if (strcmp($name, "CLOSEON") == 0) {
                 if (($timestamp = strtotime($value)) !== false) {
                     $params['close_on_ts'] = $timestamp;
-
-                    if (time() > $timestamp) {
-                        $params['closed'] = 1;
-                    }
                 }
             } else
             if (strcmp($name, "CLOSED") == 0) {
@@ -210,6 +206,14 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         global $ID;   // name of current page
 
         //debout('data in render', $data);
+
+        // The auto-closer logic depends on the current time() and thus needs
+        // to happen in render(), since the result of handle() is cached.
+        if (isset($data['params']['close_on_ts'])) {
+            if (time() > $data['params']['close_on_ts']) {
+                $data['params']['closed'] = 1;
+            }
+        }
 
         $this->params    = $data['params'];
         $this->choices   = $data['choices'];

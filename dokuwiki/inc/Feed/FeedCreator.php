@@ -46,12 +46,6 @@ class FeedCreator
             case 'recent':
                 $items = $this->fetchItemsFromRecentChanges();
                 break;
-            case 'rfc-only':
-                $items = $this->fetchItemsFromRFC();
-                break;
-            case 'non-rfc':
-                $items = $this->fetchItemsFromNonRFC();
-                break;
             default:
                 $items = $this->fetchItemsFromPlugin();
         }
@@ -92,41 +86,15 @@ class FeedCreator
             $proc = new FeedPageProcessor($data);
         }
 
-        // Use RFC-specific processor for RFC items if enhancements are enabled
-        if ($this->options->get('rfc_enhanced') && $this->isRFCItem($data)) {
-            $rfcProcessor = new RFCFeedItemProcessor($data);
-            $data = $rfcProcessor->processRFCItem($data);
-        }
-
         $item = new \FeedItem();
-
-        // Use enhanced RFC title if available
-        if (isset($data['enhanced_title'])) {
-            $item->title = $data['enhanced_title'];
-        } else {
-            $item->title = $proc->getTitle();
-            if ($this->options->get('show_summary') && $proc->getSummary()) {
-                $item->title .= ' - ' . $proc->getSummary();
-            }
+        $item->title = $proc->getTitle();
+        if ($this->options->get('show_summary') && $proc->getSummary()) {
+            $item->title .= ' - ' . $proc->getSummary();
         }
-
         $item->date = $proc->getRev();
         [$item->authorEmail, $item->author] = $proc->getAuthor();
         $item->link = $proc->getURL($this->options->get('link_to'));
-
-        // Use enhanced RFC description if available
-        if (isset($data['enhanced_description'])) {
-            $item->description = $data['enhanced_description'];
-        } else {
-            $item->description = $proc->getBody($this->options->get('item_content'));
-        }
-
-        // Add RFC categories if available
-        if (isset($data['categories'])) {
-            foreach ($data['categories'] as $category) {
-                $item->addCategory($category);
-            }
-        }
+        $item->description = $proc->getBody($this->options->get('item_content'));
 
         $evdata = [
             'item' => $item,
@@ -231,89 +199,6 @@ class FeedCreator
         $event->advise_after();
 
         return $eventData['data'];
-    }
-
-    /**
-     * RFC-only recent changes feed
-     *
-     * @return array
-     */
-    protected function fetchItemsFromRFC()
-    {
-        $allItems = $this->fetchItemsFromRecentChanges();
-        return array_filter($allItems, [$this, 'isRFCItem']);
-    }
-
-    /**
-     * Non-RFC recent changes feed
-     *
-     * @return array
-     */
-    protected function fetchItemsFromNonRFC()
-    {
-        $allItems = $this->fetchItemsFromRecentChanges();
-        return array_filter($allItems, function ($item) {
-            return !$this->isRFCItem($item);
-        });
-    }
-
-    /**
-     * Check if an item belongs to an RFC page
-     *
-     * @param array $item Recent changes item
-     * @return bool True if item is RFC-related
-     */
-    protected function isRFCItem($item)
-    {
-        $pageId = $item['id'] ?? '';
-
-        // Method 1: Namespace-based detection
-        if (strpos($pageId, 'rfc:') === 0) {
-            return true;
-        }
-
-        // Method 2: ACL-based detection for RFC namespace access
-        if (function_exists('auth_aclcheck')) {
-            // Check if user has RFC permissions or if page is in RFC area
-            $aclCheck = auth_aclcheck($pageId, '', ['@rfc']);
-            if ($aclCheck >= AUTH_READ && strpos($pageId, 'rfc') !== false) {
-                return true;
-            }
-        }
-
-        // Method 3: Discussion page tracking for RFCs
-        if ($this->options->get('rfc_discussion_tracking')) {
-            if ($this->isRFCDiscussionPage($pageId)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if a page is an RFC discussion page
-     *
-     * @param string $pageId Page identifier
-     * @return bool True if page is RFC discussion
-     */
-    protected function isRFCDiscussionPage($pageId)
-    {
-        // Common RFC discussion page patterns
-        $patterns = [
-            '/^rfc:.+_talk$/',           // rfc:some_rfc_talk
-            '/^rfc:.+:discussion$/',     // rfc:some_rfc:discussion
-            '/^discussion:rfc:/',        // discussion:rfc:some_rfc
-            '/^talk:rfc:/',              // talk:rfc:some_rfc
-        ];
-
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $pageId)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

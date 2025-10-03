@@ -3,18 +3,6 @@
 /**
  * XML feed export
  *
- * Supports multiple feed modes via URL parameters:
- * - ?mode=recent (all changes - default)
- * - ?mode=rfc-only (RFC changes only)
- * - ?mode=non-rfc (non-RFC changes only)
- * - ?mode=list (namespace listing)
- * - ?mode=search (search results)
- *
- * Additional RFC-specific parameters:
- * - ?rfc_enhanced=1 (enable RFC enhancements - default)
- * - ?rfc_status=1 (enable RFC status detection - default)
- * - ?rfc_discussions=1 (track RFC discussion pages - default)
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Andreas Gohr <andi@splitbrain.org>
  *

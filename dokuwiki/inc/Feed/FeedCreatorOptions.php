@@ -50,9 +50,6 @@ class FeedCreatorOptions
         'content_type' => 'pages',
         'guardmail' => 'none',
         'title' => '',
-        'rfc_enhanced' => true,
-        'rfc_status_detection' => true,
-        'rfc_discussion_tracking' => true,
     ];
 
     /**
@@ -71,7 +68,7 @@ class FeedCreatorOptions
             array_keys($this->types),
             $conf['rss_type']
         );
-        // we support 'list', 'search', 'recent', 'rfc-only', 'non-rfc' but accept anything so plugins can take over
+        // we only support 'list', 'search', 'recent' but accept anything so plugins can take over
         $this->options['feed_mode'] = $INPUT->str('mode', 'recent');
         $this->options['link_to'] = $INPUT->valid(
             'linkto',
@@ -106,18 +103,6 @@ class FeedCreatorOptions
             $this->options['title'] .= ' - ' . $this->options['namespace'];
         }
         $this->options['subtitle'] = $conf['tagline'];
-
-        // RFC enhancement options
-        $this->options['rfc_enhanced'] = $INPUT->bool('rfc_enhanced', true);
-        $this->options['rfc_status_detection'] = $INPUT->bool('rfc_status', true);
-        $this->options['rfc_discussion_tracking'] = $INPUT->bool('rfc_discussions', true);
-
-        // Adjust title based on feed mode
-        if ($this->options['feed_mode'] === 'rfc-only') {
-            $this->options['title'] .= ' - RFC Changes';
-        } elseif ($this->options['feed_mode'] === 'non-rfc') {
-            $this->options['title'] .= ' - Non-RFC Changes';
-        }
 
         $this->options = array_merge($this->options, $options);
 

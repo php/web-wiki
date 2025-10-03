@@ -1,0 +1,7 @@
+base   rfcfeed
+author Christopher Miller
+email  christophercarlmiller@outlook.com
+date   2025-10-03
+name   RFC Feed Plugin
+desc   Enhanced RSS feeds with RFC-specific features including RFC-only feeds, non-RFC feeds, status change detection, and rich metadata extraction
+url    https://github.com/php/web-wiki

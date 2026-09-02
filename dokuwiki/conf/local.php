@@ -31,4 +31,6 @@ $conf['plugin']['smtp']['smtp_host'] = 'mailout.php.net';
 $conf['plugin']['smtp']['smtp_ssl'] = 'tls';
 $conf['plugin']['htmlok']['htmlok'] = 1;
 
+$conf['usedraft'] = 0;
+
 // end auto-generated content

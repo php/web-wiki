@@ -157,10 +157,10 @@ class RevisionInfo
         if ($this->val('user')) {
             $html = '<bdi>' . editorinfo($this->val('user')) . '</bdi>';
             if (auth_ismanager()) {
-                $html .= ' <bdo dir="ltr">(' . $this->val('ip') . ')</bdo>';
+                $html .= ' <bdo dir="ltr">(' . hsc($this->val('ip')) . ')</bdo>';
             }
         } else {
-            $html = '<bdo dir="ltr">' . $this->val('ip') . '</bdo>';
+            $html = '<bdo dir="ltr">' . hsc($this->val('ip')) . '</bdo>';
         }
         return '<span class="user">' . $html . '</span>';
     }
@@ -261,6 +261,11 @@ class RevisionInfo
     public function showIconCompareWithPrevious()
     {
         global $lang;
+
+        if (!actionOK('diff')) {
+            return '<img src="' . DOKU_BASE . 'lib/images/blank.gif" width="15" height="11" alt="" />';
+        }
+
         $id = $this->val('id');
 
         $href = '';
@@ -303,6 +308,11 @@ class RevisionInfo
     public function showIconCompareWithCurrent()
     {
         global $lang;
+
+        if (!actionOK('diff')) {
+            return '<img src="' . DOKU_BASE . 'lib/images/blank.gif" width="15" height="11" alt="" />';
+        }
+
         $id = $this->val('id');
         $rev = $this->isCurrent() ? '' : $this->val('date');
 

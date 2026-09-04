@@ -68,17 +68,13 @@ if (isset($_FILES['Filedata'])) {
 
 // give info on PHP caught upload errors
 if (!empty($_FILES['upload']['error'])) {
-    switch ($_FILES['upload']['error']) {
-        case 1:
-        case 2:
-            msg(sprintf(
-                $lang['uploadsize'],
-                filesize_h(php_to_byte(ini_get('upload_max_filesize')))
-            ), -1);
-            break;
-        default:
-            msg($lang['uploadfail'] . ' (' . $_FILES['upload']['error'] . ')', -1);
-    }
+    match ($_FILES['upload']['error']) {
+        1, 2 => msg(sprintf(
+            $lang['uploadsize'],
+            filesize_h(php_to_byte(ini_get('upload_max_filesize')))
+        ), -1),
+        default => msg($lang['uploadfail'] . ' (' . $_FILES['upload']['error'] . ')', -1),
+    };
     unset($_FILES['upload']);
 }
 
@@ -90,17 +86,17 @@ if (!empty($_FILES['upload']['tmp_name'])) {
 
 // handle meta saving
 if ($IMG && @array_key_exists('save', $INPUT->arr('do'))) {
-    $JUMPTO = media_metasave($IMG, $AUTH, $INPUT->arr('meta'));
+    $JUMPTO = media_metasave($IMG, $INPUT->arr('meta'));
 }
 
 if ($IMG && ($INPUT->str('mediado') == 'save' || @array_key_exists('save', $INPUT->arr('mediado')))) {
-    $JUMPTO = media_metasave($IMG, $AUTH, $INPUT->arr('meta'));
+    $JUMPTO = media_metasave($IMG, $INPUT->arr('meta'));
 }
 
 if ($INPUT->int('rev') && $conf['mediarevisions']) $REV = $INPUT->int('rev');
 
 if ($INPUT->str('mediado') == 'restore' && $conf['mediarevisions'] && checkSecurityToken()) {
-    $JUMPTO = media_restore($INPUT->str('image'), $REV, $AUTH);
+    $JUMPTO = media_restore($INPUT->str('image'), $REV);
 }
 
 // handle deletion

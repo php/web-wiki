@@ -68,7 +68,10 @@ class auth_plugin_authplain extends AuthPlugin
     public function checkPass($user, $pass)
     {
         $userinfo = $this->getUserData($user);
-        if ($userinfo === false) return false;
+        if ($userinfo === false) {
+            auth_cryptPassword('dummy'); // run a crypt op to prevent timing attacks
+            return false;
+        }
 
         return auth_verifyPassword($pass, $this->users[$user]['pass']);
     }
@@ -90,6 +93,7 @@ class auth_plugin_authplain extends AuthPlugin
      */
     public function getUserData($user, $requireGroups = true)
     {
+        if (!is_string($user)) return false;
         if ($this->users === null) $this->loadUserData();
         return $this->users[$user] ?? false;
     }
@@ -215,7 +219,14 @@ class auth_plugin_authplain extends AuthPlugin
             $userinfo['grps']
         );
 
-        if (!io_replaceInFile($config_cascade['plainauth.users']['default'], '/^' . $user . ':/', $userline, true)) {
+        if (
+            !io_replaceInFile(
+                $config_cascade['plainauth.users']['default'],
+                '/^' . preg_quote($user, '/') . ':/',
+                $userline,
+                true
+            )
+        ) {
             msg('There was an error modifying your user data. You may need to register again.', -1);
             // FIXME, io functions should be fail-safe so existing data isn't lost
             $ACT = 'register';

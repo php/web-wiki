@@ -3,6 +3,7 @@
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
+ * @author MCnnyy2 <2160673970@qq.com>
  * @author Zhenzhe Huang <1991419264@qq.com>
  * @author 林晓东 <lin_xd@126.com>
  * @author alair <Mail@alair.top>
@@ -150,6 +151,12 @@ $lang['js']['media_drop']      = '拖拽文件到此处来上传';
 $lang['js']['media_cancel']    = '删除';
 $lang['js']['media_overwrt']   = '覆盖已存在的文件';
 $lang['js']['data_insecure']   = '警告： 看起来你的数据集不太安全。 请参考以下链接<a href="https://www.dokuwiki.org/security#web_access_security">Web Access Security in DokuWiki</a>。';
+$lang['js']['size_larger']     = '增大输入框尺寸';
+$lang['js']['size_smaller']    = '减小输入框尺寸';
+$lang['js']['size_wrap']       = '缺换自动换行';
+$lang['js']['clipboard_button'] = '复制';
+$lang['js']['clipboard_success'] = '已复制！';
+$lang['js']['clipboard_error'] = '复制失败';
 $lang['search_exact_match']    = '精确匹配';
 $lang['search_starts_with']    = '开始于';
 $lang['search_ends_with']      = '结束于';
@@ -343,7 +350,6 @@ $lang['i_funcna']              = 'PHP 功能 <code>%s</code> 无法使用。也�
 $lang['i_disabled']            = '它已经被您的服务商禁用';
 $lang['i_funcnmail']           = '<b>注意：</b> PHP邮件功能不可用。%s 如果仍然不可用，则可以安装<a href="https://www.dokuwiki.org/plugin:smtp">SMTP 插件</a>。';
 $lang['i_phpver']              = '您的 PHP 版本 <code>%s</code> 低于最低要求的 <code>%s</code>。您需要升级您的 PHP 版本。';
-$lang['i_mbfuncoverload']      = '为了运行DokuWiki，您必须在php.ini中禁用mbstring.func_overload。';
 $lang['i_urandom']             = 'DokuWiki 无法为 Cookie 创建密码安全的数字。您可能需要检查 php.ini 中的 open_basedir 设置，以获取正确的<code>/dev/urandom</code>访问权限。';
 $lang['i_permfail']            = 'DokuWiki 无法写入 <code>%s</code>。您需要修改该路径的权限设定！';
 $lang['i_confexists']          = '<code>%s</code> 已经存在';

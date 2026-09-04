@@ -62,6 +62,7 @@ class Repository
         // ping the API
         $httpclient = new DokuHTTPClient();
         $httpclient->timeout = 5;
+
         $data = $httpclient->get(self::EXTENSION_REPOSITORY_API . '?cmd=ping');
         if ($data === false) {
             $this->hasAccess = false;
@@ -303,7 +304,7 @@ class Repository
     {
         $cache = new Cache(self::CACHE_PREFIX . $id, self::CACHE_SUFFIX);
         if ($cache->useCache(['age' => self::CACHE_TIME])) {
-            return unserialize($cache->retrieveCache(false));
+            return unserialize($cache->retrieveCache(false), ['allowed_classes' => false]);
         }
         return null;
     }

@@ -98,28 +98,7 @@ include __DIR__ . "/../../../shared/templates/header.inc";
                 <h3 class="a11y"><?php echo $lang['page_tools']; ?></h3>
                 <div class="tools">
                     <ul>
-                        <?php
-                            $data = array(
-                                'view'  => 'main',
-                                'items' => array(
-                                    'edit'      => tpl_action('edit',      1, 'li', 1, '<span>', '</span>'),
-                                    'revert'    => tpl_action('revert',    1, 'li', 1, '<span>', '</span>'),
-                                    'revisions' => tpl_action('revisions', 1, 'li', 1, '<span>', '</span>'),
-                                    'backlink'  => tpl_action('backlink',  1, 'li', 1, '<span>', '</span>'),
-                                    'subscribe' => tpl_action('subscribe', 1, 'li', 1, '<span>', '</span>'),
-                                    'top'       => tpl_action('top',       1, 'li', 1, '<span>', '</span>')
-                                )
-                            );
-
-                            // the page tools can be amended through a custom plugin hook
-                            $evt = new Doku_Event('TEMPLATE_PAGETOOLS_DISPLAY', $data);
-                            if($evt->advise_before()){
-                                foreach($evt->data['items'] as $k => $html) echo $html;
-                            }
-                            $evt->advise_after();
-                            unset($data);
-                            unset($evt);
-                        ?>
+                        <?php echo (new \dokuwiki\Menu\PageMenu())->getListItems(); ?>
                     </ul>
                 </div>
             </div>

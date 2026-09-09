@@ -23,7 +23,7 @@ class Search extends AbstractAction
     /** @inheritdoc */
     public function minimumPermission()
     {
-        return AUTH_NONE;
+        return AUTH_EDIT;
     }
 
     /**

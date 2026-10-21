@@ -158,6 +158,18 @@ class auth_plugin_phpcvs extends auth_plugin_authplain {
     }
 
     /**
+     * Refuse password changes for VCS accounts, which only authenticate against main.php.net
+     */
+    function modifyUser($user, $changes) {
+      if (isset($changes['pass']) && $this->_checkCVSPass($user) === 2) {
+        msg('This is a php.net VCS account. Reset your password at https://main.php.net/forgot.php instead.', -1);
+        return false;
+      }
+
+      return parent::modifyUser($user, $changes);
+    }
+
+    /**
      *  Remove one or more users from the list of registered users
      *
      *  @author  Christopher Smith <chris@jalakai.co.uk>

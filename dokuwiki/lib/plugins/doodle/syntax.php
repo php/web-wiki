@@ -349,6 +349,11 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
      * (If user is allowed to.)
      */
     function castVote() {
+        if ($this->params['closed']) {
+            $this->template['msg'] = $this->getLang('poll_closed');
+            return;
+        }
+
         $fullname          = hsc(trim($_REQUEST['fullname']));
         $selected_indexes  = $_REQUEST['selected_indexes'];  // may not be set when all checkboxes are deseleted.
 

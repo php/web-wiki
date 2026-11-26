@@ -209,7 +209,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
 
         // The auto-closer logic depends on the current time() and thus needs
         // to happen in render(), since the result of handle() is cached.
-        if (isset($data['params']['close_on_ts'])) {
+        if (!empty($data['params']['close_on_ts'])) {
             if (time() > $data['params']['close_on_ts']) {
                 $data['params']['closed'] = 1;
             }

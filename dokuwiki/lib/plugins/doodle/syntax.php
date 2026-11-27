@@ -209,7 +209,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
 
         // The auto-closer logic depends on the current time() and thus needs
         // to happen in render(), since the result of handle() is cached.
-        if (isset($data['params']['close_on_ts'])) {
+        if (!empty($data['params']['close_on_ts'])) {
             if (time() > $data['params']['close_on_ts']) {
                 $data['params']['closed'] = 1;
             }
@@ -236,7 +236,8 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
         // ----- FORM ACTIONS (only allowed when showing the most recent version of the page, not when editing) -----
         $formId =  'doodle__form__'.cleanID($this->params['title']);
-        if ($ACT == 'show' && array_key_exists('formId', $_REQUEST) && $_REQUEST['formId'] == $formId && $REV == false && $can_vote) {
+        if ($ACT == 'show' && array_key_exists('formId', $_REQUEST) && $_REQUEST['formId'] == $formId && $REV == false && $can_vote
+            && $_SERVER['REQUEST_METHOD'] === 'POST' && checkSecurityToken()) {
             // ---- cast new vote
             if (!empty($_REQUEST['cast__vote'])) {
                 $this->castVote();
@@ -349,7 +350,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
      * (If user is allowed to.)
      */
     function castVote() {
-        $fullname          = hsc(trim($_REQUEST['fullname']));
+        $fullname          = $_SERVER['REMOTE_USER'];
         $selected_indexes  = $_REQUEST['selected_indexes'];  // may not be set when all checkboxes are deseleted.
 
         if (empty($fullname)) {
@@ -363,6 +364,10 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
                 $this->template['msg'] = $this->getLang('select_one_option');
                 return;
             }
+        }
+        if (!is_array($selected_indexes) || ($this->params['voteType'] != 'multi' && count($selected_indexes) != 1)) {
+            $this->template['msg'] = $this->getLang('select_one_option');
+            return;
         }
 
         //---- check if user is allowed to vote, according to 'auth' parameter
@@ -468,7 +473,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         }
 
         //check own entry
-        return strcasecmp(hsc($INFO['userinfo']['name']), $entryFullname) == 0;  // compare real name
+        return $_SERVER['REMOTE_USER'] === (string) $entryFullname;
     }
 
     /**
@@ -498,7 +503,7 @@ class syntax_plugin_doodle extends DokuWiki_Syntax_Plugin
         $fullname = '';
         $editMode = false;
         if ($this->isLoggedIn()) {
-            $fullname = $INFO['userinfo']['name'];
+            $fullname = $_SERVER['REMOTE_USER'];
             if (isset($this->template['editEntry'])) {
                 $fullname = $this->template['editEntry']['fullname'];
                 $editMode = true;
